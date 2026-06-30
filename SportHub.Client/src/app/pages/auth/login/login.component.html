@@ -11,7 +11,12 @@
 
       <label>
         Password
-        <input type="password" name="password" [(ngModel)]="password">
+        <span class="password-field">
+          <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="password">
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </span>
       </label>
 
       @if (error()) {

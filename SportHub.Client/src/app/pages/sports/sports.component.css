@@ -1,39 +1,44 @@
 .page {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 30px 20px 52px;
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .page-header h1 {
-  margin: 0 0 8px;
-  color: #153655;
+  margin: 0 0 6px;
+  color: white;
+  font-size: 38px;
 }
 
 .page-header p {
   margin: 0;
-  color: #5c6b78;
+  color: #dbeafe;
 }
 
 .sports-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .sport-card {
-  border: 1px solid #dfe7ef;
-  border-radius: 8px;
-  background: white;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 420px;
   overflow: hidden;
+  border: 2px solid rgba(20, 184, 166, 0.68);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  box-shadow: var(--shadow), 0 0 18px rgba(20, 184, 166, 0.14);
 }
 
 .sport-card img {
   width: 100%;
-  height: 150px;
+  aspect-ratio: 16 / 10.5;
   object-fit: cover;
   display: block;
 }
@@ -41,40 +46,67 @@
 .sport-card h2,
 .sport-card p,
 .sport-card a {
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: 18px;
+  margin-right: 18px;
 }
 
 .sport-card h2 {
   margin-top: 18px;
-  margin-bottom: 8px;
-  color: #153655;
+  margin-bottom: 10px;
+  color: white;
+  font-size: clamp(25px, 2.5vw, 32px);
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
 }
 
 .sport-card p {
-  color: #5c6b78;
-  min-height: 52px;
+  min-height: 70px;
+  margin-top: 0;
+  color: #f1f5f9;
+  font-size: 17px;
+  line-height: 1.3;
 }
 
 .sport-card a,
 .message button {
-  display: inline-block;
+  display: block;
   border: 0;
-  border-radius: 6px;
-  background: #153655;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
   color: white;
-  padding: 9px 12px;
+  padding: 13px 18px;
+  text-align: center;
   text-decoration: none;
-  font-weight: 700;
+  text-transform: uppercase;
+  font-weight: 900;
   cursor: pointer;
 }
 
 .sport-card a {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .message {
-  border: 1px solid #dfe7ef;
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(17, 24, 39, 0.86);
+  color: var(--muted);
   padding: 18px;
+}
+
+@media (max-width: 980px) {
+  .sports-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .sports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sport-card {
+    min-height: 0;
+  }
 }

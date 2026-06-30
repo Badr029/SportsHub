@@ -57,9 +57,9 @@
             <div class="booking-content">
               <div class="booking-title-row">
                 <h2>#{{ booking.id }} {{ booking.bookingType }}</h2>
-                <span class="status-badge">{{ booking.status }}</span>
+                <span class="status-badge" [class.pending]="booking.status === 'Pending'" [class.confirmed]="booking.status === 'Confirmed'" [class.cancelled]="booking.status === 'Cancelled'" [class.completed]="booking.status === 'Completed'">{{ booking.status }}</span>
                 @if (booking.rentalStatus) {
-                  <span class="status-badge rental">{{ booking.rentalStatus }}</span>
+                  <span class="status-badge rental" [class.pending]="booking.rentalStatus === 'PendingPickup'" [class.confirmed]="booking.rentalStatus === 'Active'" [class.completed]="booking.rentalStatus === 'Returned'">{{ booking.rentalStatus }}</span>
                 }
               </div>
 
@@ -113,6 +113,8 @@
                 @if (canCancel(booking)) {
                   <button type="button" class="danger" (click)="cancelBooking(booking.id)">Cancel</button>
                 }
+              } @else if (booking.status === 'Cancelled') {
+                <p class="closed-note">No further actions available for cancelled orders.</p>
               }
             </div>
           </article>

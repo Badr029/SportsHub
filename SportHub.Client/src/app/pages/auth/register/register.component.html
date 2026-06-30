@@ -16,17 +16,27 @@
 
       <label>
         Phone number
-        <input type="tel" name="phoneNumber" [(ngModel)]="phoneNumber">
+        <input type="tel" name="phoneNumber" [(ngModel)]="phoneNumber" placeholder="Example: 01012345678">
       </label>
 
       <label>
         Password
-        <input type="password" name="password" [(ngModel)]="password">
+        <span class="password-field">
+          <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="password">
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </span>
       </label>
 
       <label>
         Confirm password
-        <input type="password" name="confirmPassword" [(ngModel)]="confirmPassword">
+        <span class="password-field">
+          <input [type]="showConfirmPassword ? 'text' : 'password'" name="confirmPassword" [(ngModel)]="confirmPassword">
+          <button type="button" class="toggle-password" (click)="toggleConfirmPasswordVisibility()">
+            {{ showConfirmPassword ? 'Hide' : 'Show' }}
+          </button>
+        </span>
       </label>
 
       @if (error()) {

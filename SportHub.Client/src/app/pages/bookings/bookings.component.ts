@@ -108,6 +108,15 @@ export class BookingsComponent  implements OnInit {
     return new Date(endDate).getTime() < Date.now();
   }
 
+  canCancelBooking(booking: BookingResponse) {
+    if (booking.status === 'Cancelled' || booking.status === 'Completed' || !booking.startDate) {
+      return false;
+    }
+
+    const twoHoursFromNow = Date.now() + 2 * 60 * 60 * 1000;
+    return new Date(booking.startDate).getTime() > twoHoursFromNow;
+  }
+
   isFacilityBooking(booking: BookingResponse) {
     return booking.bookingType === 'Facility' || booking.bookingType === 'Package';
   }

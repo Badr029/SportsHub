@@ -25,15 +25,15 @@
     } @else {
       <section class="bookings-list">
         @for (booking of bookings(); track booking.id) {
-          <article class="booking-card">
+          <article class="booking-card" [class.facility-card]="booking.bookingType === 'Facility'" [class.equipment-card]="booking.bookingType === 'Equipment'" [class.package-card]="booking.bookingType === 'Package'">
             <div class="booking-content">
               <div class="booking-title-row">
                 <h2>{{ getBookingTypeLabel(booking.bookingType) }}</h2>
-                <span class="status-badge">{{ booking.status }}</span>
+                <span class="status-badge" [class.pending]="booking.status === 'Pending'" [class.confirmed]="booking.status === 'Confirmed'" [class.cancelled]="booking.status === 'Cancelled'" [class.completed]="booking.status === 'Completed'">{{ booking.status }}</span>
               </div>
 
               @if (booking.bookingType === 'Equipment' && booking.rentalStatus) {
-                <p class="muted">Rental status: {{ booking.rentalStatus }}</p>
+                <span class="status-badge rental" [class.pending]="booking.rentalStatus === 'PendingPickup'" [class.confirmed]="booking.rentalStatus === 'Active'" [class.completed]="booking.rentalStatus === 'Returned'">{{ booking.rentalStatus }}</span>
               }
 
               @if (isFacilityBooking(booking)) {
@@ -73,10 +73,12 @@
             </div>
 
             <div class="card-actions">
-              @if (booking.status !== 'Cancelled' && booking.status !== 'Completed') {
+              @if (canCancelBooking(booking)) {
                 <button type="button" (click)="cancelBooking(booking.id)">
                   Cancel
                 </button>
+              } @else if (booking.status !== 'Cancelled' && booking.status !== 'Completed') {
+                <span class="locked-note">Locked inside 2-hour cancellation window.</span>
               }
 
               @if (canClearBooking(booking)) {

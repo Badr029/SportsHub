@@ -14,6 +14,7 @@ export class LoginComponent {
 
   email = '';
   password = '';
+  showPassword = false;
   error = signal('');
   loading = signal(false);
 
@@ -51,6 +52,10 @@ export class LoginComponent {
           this.loading.set(false);
         }
     });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
 

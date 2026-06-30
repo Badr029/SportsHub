@@ -16,6 +16,8 @@ export class RegisterComponent {
   phoneNumber = ''
   password = ''
   confirmPassword = ''
+  showPassword = false
+  showConfirmPassword = false
   error = signal('')
   loading = signal(false)
 
@@ -25,6 +27,10 @@ export class RegisterComponent {
     this.error.set('');
     if (!this.name || !this.email || !this.phoneNumber || !this.password || !this.confirmPassword) {
       this.error.set('Please enter required field.');
+      return;
+    }
+    if (!this.isValidPhoneNumber(this.phoneNumber)) {
+      this.error.set('Please enter a valid phone number.');
       return;
     }
     if (this.password !== this.confirmPassword) {
@@ -52,6 +58,18 @@ export class RegisterComponent {
         this.loading.set(false);
       }
     });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  isValidPhoneNumber(phoneNumber: string) {
+    return /^\+?\d{10,15}$/.test(phoneNumber.trim());
   }
 
 }

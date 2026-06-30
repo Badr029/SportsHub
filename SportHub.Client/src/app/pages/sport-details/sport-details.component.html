@@ -20,7 +20,10 @@
 
     <section class="content-grid">
       <section>
-        <h2>Facilities</h2>
+        <div class="section-heading">
+          <h2>Facilities</h2>
+          <p>Choose a court or field and check real-time availability.</p>
+        </div>
 
         <div class="list">
           @for (facility of sport()!.facilities; track facility.id) {
@@ -30,9 +33,9 @@
               }
               <h3>{{ facility.name }}</h3>
               @if (facility.isOutOfService) {
-                <p class="service-label">Out of service</p>
+                <div class="service-label">OUT OF SERVICE</div>
               }
-              <p>{{ facility.pricePerHour }} / hour</p>
+              <p class="price-line">{{ facility.pricePerHour }} EGP / hour</p>
 
               <!-- MULTI-EQUIPMENT BOOKING START -->
               <div class="card-actions">
@@ -49,7 +52,10 @@
           }
         </div>
 
-        <h2>Equipment</h2>
+        <div class="section-heading">
+          <h2>Equipment</h2>
+          <p>Rent standalone equipment or add it to a package.</p>
+        </div>
 
         <div class="list">
           @for (equipment of sport()!.equipment; track equipment.id) {
@@ -58,15 +64,20 @@
                 <img class="item-image" [src]="getImageUrl(equipment.imageUrl)" [alt]="equipment.name">
               }
               <h3>{{ equipment.name }}</h3>
-              <p>Total stock: {{ equipment.quantity }}</p>
+              <div class="metric-row">
+                <span>Total stock: {{ equipment.quantity }}</span>
+                @if (getEquipmentAvailability(equipment.id); as availability) {
+                  <span>Available: {{ availability.availableQuantity }} / {{ availability.totalQuantity }}</span>
+                }
+              </div>
               @if (getEquipmentAvailability(equipment.id); as availability) {
                 <p class="availability-text">
                   Available for selected {{ bookingType === 2 ? 'day' : 'package time' }}:
                   {{ availability.availableQuantity }} / {{ availability.totalQuantity }}
                 </p>
               }
-              <p>{{ equipment.dailyRentalPrice }} / day</p>
-              <p>{{ equipment.packageHourlyPrice }} / hour in package</p>
+              <p class="price-line">{{ equipment.dailyRentalPrice }} EGP / day</p>
+              <p class="price-line package-price">{{ equipment.packageHourlyPrice }} EGP / package hour</p>
 
               <!-- MULTI-EQUIPMENT BOOKING START -->
               <div class="card-actions">
@@ -180,29 +191,42 @@
               Booking day
             <input type="date" name="bookingDate" [(ngModel)]="bookingDate" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">            </label>
 
-            <label>
-              Start time
-              <select name="startTime" [(ngModel)]="startTime" (ngModelChange)="loadEquipmentAvailability()">
-                <option value="">Select time</option>
+            <section class="slot-section">
+              <strong>Start time</strong>
+              @if (availabilitySlots.length === 0) {
+                <p class="panel-hint">Select a facility, day, and duration to see available slots.</p>
+              } @else {
+                <div class="slot-grid">
                 @for (slot of availabilitySlots; track slot.time) {
-                  <option [value]="slot.time" [disabled]="!slot.available">
-                    {{ slot.label }} - {{ slot.available ? 'Available' : 'Occupied' }}
-                  </option>
+                  <button
+                    type="button"
+                    class="slot-button"
+                    [class.selected]="startTime === slot.time"
+                    [class.occupied]="!slot.available"
+                    [disabled]="!slot.available"
+                    (click)="startTime = slot.time; loadEquipmentAvailability()">
+                    <span>{{ slot.label }}</span>
+                    <small>{{ slot.available ? 'Free' : 'Occupied' }}</small>
+                  </button>
                 }
-              </select>
-            </label>
+                </div>
+              }
+            </section>
 
-            <label>
-              Duration
-              <select name="durationHours" [(ngModel)]="durationHours" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">
-                <option [ngValue]="1">1 hour</option>
-                <option [ngValue]="2">2 hours</option>
-                <option [ngValue]="3">3 hours</option>
-                <option [ngValue]="4">4 hours</option>
-                <option [ngValue]="5">5 hours</option>
-                <option [ngValue]="6">6 hours</option>
-              </select>
-            </label>
+            <section class="duration-section">
+              <strong>Duration</strong>
+              <div class="duration-grid">
+                @for (hours of [1, 2, 3, 4, 5, 6]; track hours) {
+                  <button
+                    type="button"
+                    class="duration-button"
+                    [class.selected]="durationHours === hours"
+                    (click)="durationHours = hours; loadFacilityAvailability(); loadEquipmentAvailability()">
+                    {{ hours }}h
+                  </button>
+                }
+              </div>
+            </section>
           }
 
 
