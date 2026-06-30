@@ -144,15 +144,17 @@ namespace SportHub.Api.Migrations
                         {
                             Id = 1,
                             DailyRentalPrice = 30m,
+                            ImageUrl = "/uploads/seed/football/football-ball.png",
                             Name = "Football",
                             PackageHourlyPrice = 10m,
-                            Quantity = 20,
+                            Quantity = 30,
                             SportId = 1
                         },
                         new
                         {
                             Id = 2,
                             DailyRentalPrice = 50m,
+                            ImageUrl = "/uploads/seed/tennis/tennis-racket.png",
                             Name = "Tennis Racket",
                             PackageHourlyPrice = 15m,
                             Quantity = 12,
@@ -162,6 +164,7 @@ namespace SportHub.Api.Migrations
                         {
                             Id = 3,
                             DailyRentalPrice = 70m,
+                            ImageUrl = "/uploads/seed/padel/padel-racket.png",
                             Name = "Padel Racket",
                             PackageHourlyPrice = 20m,
                             Quantity = 10,
@@ -171,10 +174,291 @@ namespace SportHub.Api.Migrations
                         {
                             Id = 4,
                             DailyRentalPrice = 35m,
+                            ImageUrl = "/uploads/seed/basketball/basketball-ball.png",
                             Name = "Basketball",
                             PackageHourlyPrice = 10m,
-                            Quantity = 0,
+                            Quantity = 25,
                             SportId = 4
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DailyRentalPrice = 20m,
+                            ImageUrl = "/uploads/seed/football/training-cones.png",
+                            Name = "Football Training Cones",
+                            PackageHourlyPrice = 5m,
+                            Quantity = 60,
+                            SportId = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DailyRentalPrice = 25m,
+                            ImageUrl = "/uploads/seed/football/training-hurdles.png",
+                            Name = "Football Training Hurdles",
+                            PackageHourlyPrice = 8m,
+                            Quantity = 24,
+                            SportId = 1
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DailyRentalPrice = 25m,
+                            ImageUrl = "/uploads/seed/football/agility-ladder.png",
+                            Name = "Football Agility Ladder",
+                            PackageHourlyPrice = 8m,
+                            Quantity = 15,
+                            SportId = 1
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DailyRentalPrice = 15m,
+                            ImageUrl = "/uploads/seed/football/away-vest.png",
+                            Name = "Away Vest",
+                            PackageHourlyPrice = 5m,
+                            Quantity = 40,
+                            SportId = 1
+                        },
+                        new
+                        {
+                            Id = 9,
+                            DailyRentalPrice = 20m,
+                            ImageUrl = "/uploads/seed/tennis/tennis-ball.png",
+                            Name = "Tennis Ball",
+                            PackageHourlyPrice = 5m,
+                            Quantity = 80,
+                            SportId = 2
+                        },
+                        new
+                        {
+                            Id = 10,
+                            DailyRentalPrice = 120m,
+                            ImageUrl = "/uploads/seed/tennis/tennis-ball-machine.png",
+                            Name = "Tennis Ball Machine",
+                            PackageHourlyPrice = 45m,
+                            Quantity = 4,
+                            SportId = 2
+                        },
+                        new
+                        {
+                            Id = 11,
+                            DailyRentalPrice = 35m,
+                            ImageUrl = "/uploads/seed/tennis/ball-cart.png",
+                            Name = "Tennis Ball Cart",
+                            PackageHourlyPrice = 10m,
+                            Quantity = 8,
+                            SportId = 2
+                        },
+                        new
+                        {
+                            Id = 12,
+                            DailyRentalPrice = 25m,
+                            ImageUrl = "/uploads/seed/tennis/scoreboard.png",
+                            Name = "Tennis Scoreboard",
+                            PackageHourlyPrice = 8m,
+                            Quantity = 6,
+                            SportId = 2
+                        },
+                        new
+                        {
+                            Id = 13,
+                            DailyRentalPrice = 25m,
+                            ImageUrl = "/uploads/seed/padel/padel-ball.png",
+                            Name = "Padel Ball",
+                            PackageHourlyPrice = 8m,
+                            Quantity = 60,
+                            SportId = 3
+                        },
+                        new
+                        {
+                            Id = 14,
+                            DailyRentalPrice = 35m,
+                            ImageUrl = "/uploads/seed/padel/ball-basket-cart.png",
+                            Name = "Padel Ball Basket Cart",
+                            PackageHourlyPrice = 10m,
+                            Quantity = 8,
+                            SportId = 3
+                        },
+                        new
+                        {
+                            Id = 15,
+                            DailyRentalPrice = 25m,
+                            ImageUrl = "/uploads/seed/padel/scoreboard.png",
+                            Name = "Padel Scoreboard",
+                            PackageHourlyPrice = 8m,
+                            Quantity = 6,
+                            SportId = 3
+                        },
+                        new
+                        {
+                            Id = 16,
+                            DailyRentalPrice = 60m,
+                            ImageUrl = "/uploads/seed/padel/target-rebounder-net.png",
+                            Name = "Target Rebounder Net",
+                            PackageHourlyPrice = 20m,
+                            Quantity = 5,
+                            SportId = 3
+                        },
+                        new
+                        {
+                            Id = 17,
+                            DailyRentalPrice = 40m,
+                            ImageUrl = "/uploads/seed/basketball/basketball-ball-rack.png",
+                            Name = "Basketball Ball Rack",
+                            PackageHourlyPrice = 12m,
+                            Quantity = 5,
+                            SportId = 4
+                        },
+                        new
+                        {
+                            Id = 18,
+                            DailyRentalPrice = 20m,
+                            ImageUrl = "/uploads/seed/basketball/training-cones.png",
+                            Name = "Basketball Training Cones",
+                            PackageHourlyPrice = 5m,
+                            Quantity = 60,
+                            SportId = 4
+                        },
+                        new
+                        {
+                            Id = 19,
+                            DailyRentalPrice = 25m,
+                            ImageUrl = "/uploads/seed/basketball/training-hurdles.png",
+                            Name = "Basketball Training Hurdles",
+                            PackageHourlyPrice = 8m,
+                            Quantity = 24,
+                            SportId = 4
+                        },
+                        new
+                        {
+                            Id = 20,
+                            DailyRentalPrice = 25m,
+                            ImageUrl = "/uploads/seed/basketball/agility-ladder.png",
+                            Name = "Basketball Agility Ladder",
+                            PackageHourlyPrice = 8m,
+                            Quantity = 15,
+                            SportId = 4
+                        },
+                        new
+                        {
+                            Id = 21,
+                            DailyRentalPrice = 80m,
+                            ImageUrl = "/uploads/seed/boxing/heavy-punching-bag.png",
+                            Name = "Heavy Punching Bag",
+                            PackageHourlyPrice = 25m,
+                            Quantity = 8,
+                            SportId = 5
+                        },
+                        new
+                        {
+                            Id = 22,
+                            DailyRentalPrice = 60m,
+                            ImageUrl = "/uploads/seed/boxing/double-end-punching-bag.png",
+                            Name = "Double-end Punching Bag",
+                            PackageHourlyPrice = 20m,
+                            Quantity = 6,
+                            SportId = 5
+                        },
+                        new
+                        {
+                            Id = 23,
+                            DailyRentalPrice = 50m,
+                            ImageUrl = "/uploads/seed/boxing/reflex-punching-ball.png",
+                            Name = "Reflex Punching Ball",
+                            PackageHourlyPrice = 18m,
+                            Quantity = 6,
+                            SportId = 5
+                        },
+                        new
+                        {
+                            Id = 24,
+                            DailyRentalPrice = 45m,
+                            ImageUrl = "/uploads/seed/boxing/speed-bag.png",
+                            Name = "Speed Bag",
+                            PackageHourlyPrice = 15m,
+                            Quantity = 6,
+                            SportId = 5
+                        },
+                        new
+                        {
+                            Id = 25,
+                            DailyRentalPrice = 15m,
+                            ImageUrl = "/uploads/seed/boxing/jump-rope.png",
+                            Name = "Jump Rope",
+                            PackageHourlyPrice = 5m,
+                            Quantity = 25,
+                            SportId = 5
+                        },
+                        new
+                        {
+                            Id = 26,
+                            DailyRentalPrice = 30m,
+                            ImageUrl = "/uploads/seed/boxing/medicine-ball.png",
+                            Name = "Medicine Ball",
+                            PackageHourlyPrice = 10m,
+                            Quantity = 12,
+                            SportId = 5
+                        },
+                        new
+                        {
+                            Id = 27,
+                            DailyRentalPrice = 70m,
+                            ImageUrl = "/uploads/seed/archery/bow-equipment.png",
+                            Name = "Bow",
+                            PackageHourlyPrice = 20m,
+                            Quantity = 12,
+                            SportId = 6
+                        },
+                        new
+                        {
+                            Id = 28,
+                            DailyRentalPrice = 25m,
+                            ImageUrl = "/uploads/seed/archery/arrows-equipment.png",
+                            Name = "Arrows",
+                            PackageHourlyPrice = 8m,
+                            Quantity = 120,
+                            SportId = 6
+                        },
+                        new
+                        {
+                            Id = 29,
+                            DailyRentalPrice = 20m,
+                            ImageUrl = "/uploads/seed/archery/arrow-holder-equipment.png",
+                            Name = "Arrow Holder",
+                            PackageHourlyPrice = 6m,
+                            Quantity = 20,
+                            SportId = 6
+                        },
+                        new
+                        {
+                            Id = 30,
+                            DailyRentalPrice = 15m,
+                            ImageUrl = "/uploads/seed/archery/arm-guard.png",
+                            Name = "Arm Guard",
+                            PackageHourlyPrice = 5m,
+                            Quantity = 25,
+                            SportId = 6
+                        },
+                        new
+                        {
+                            Id = 31,
+                            DailyRentalPrice = 15m,
+                            ImageUrl = "/uploads/seed/archery/finger-tab.png",
+                            Name = "Finger Tab",
+                            PackageHourlyPrice = 5m,
+                            Quantity = 25,
+                            SportId = 6
+                        },
+                        new
+                        {
+                            Id = 32,
+                            DailyRentalPrice = 45m,
+                            ImageUrl = "/uploads/seed/archery/archery-target-target-stand.png",
+                            Name = "Archery Target Stand",
+                            PackageHourlyPrice = 15m,
+                            Quantity = 10,
+                            SportId = 6
                         });
                 });
 
@@ -212,6 +496,7 @@ namespace SportHub.Api.Migrations
                         new
                         {
                             Id = 1,
+                            ImageUrl = "/uploads/seed/football/5-a-side-football-field.png",
                             IsOutOfService = false,
                             Name = "5-a-side Football Field",
                             PricePerHour = 350m,
@@ -220,6 +505,7 @@ namespace SportHub.Api.Migrations
                         new
                         {
                             Id = 2,
+                            ImageUrl = "/uploads/seed/tennis/tennis-court-facility.png",
                             IsOutOfService = false,
                             Name = "Tennis Court 1",
                             PricePerHour = 250m,
@@ -228,6 +514,7 @@ namespace SportHub.Api.Migrations
                         new
                         {
                             Id = 3,
+                            ImageUrl = "/uploads/seed/padel/padel-court-facility.png",
                             IsOutOfService = false,
                             Name = "Padel Court 1",
                             PricePerHour = 400m,
@@ -236,10 +523,56 @@ namespace SportHub.Api.Migrations
                         new
                         {
                             Id = 4,
+                            ImageUrl = "/uploads/seed/basketball/indoor-basketball-court.png",
                             IsOutOfService = false,
                             Name = "Indoor Basketball Court",
                             PricePerHour = 300m,
                             SportId = 4
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ImageUrl = "/uploads/seed/football/7-a-side-football-field.png",
+                            IsOutOfService = false,
+                            Name = "7-a-side Football Field",
+                            PricePerHour = 500m,
+                            SportId = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ImageUrl = "/uploads/seed/football/11-a-side-full-football-field.png",
+                            IsOutOfService = false,
+                            Name = "11-a-side Full Football Field",
+                            PricePerHour = 800m,
+                            SportId = 1
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ImageUrl = "/uploads/seed/basketball/outdoor-basketball-court.png",
+                            IsOutOfService = false,
+                            Name = "Outdoor Basketball Court",
+                            PricePerHour = 220m,
+                            SportId = 4
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ImageUrl = "/uploads/seed/boxing/boxing-ring-facility.png",
+                            IsOutOfService = false,
+                            Name = "Boxing Ring",
+                            PricePerHour = 280m,
+                            SportId = 5
+                        },
+                        new
+                        {
+                            Id = 9,
+                            ImageUrl = "/uploads/seed/archery/archry-facility.png",
+                            IsOutOfService = false,
+                            Name = "Archery Range",
+                            PricePerHour = 240m,
+                            SportId = 6
                         });
                 });
 
@@ -270,26 +603,44 @@ namespace SportHub.Api.Migrations
                         new
                         {
                             Id = 1,
-                            Description = "Football fields and rental equipment.",
+                            Description = "Football fields for 5-a-side, 7-a-side, and full matches with training equipment.",
+                            ImageUrl = "/uploads/seed/football/sport-image.png",
                             Name = "Football"
                         },
                         new
                         {
                             Id = 2,
-                            Description = "Tennis courts, rackets, and balls.",
+                            Description = "Tennis courts with rackets, balls, carts, and training equipment.",
+                            ImageUrl = "/uploads/seed/tennis/sport-image.png",
                             Name = "Tennis"
                         },
                         new
                         {
                             Id = 3,
-                            Description = "Padel courts and racket rentals.",
+                            Description = "Padel courts with rackets, balls, scoreboards, and training gear.",
+                            ImageUrl = "/uploads/seed/padel/sport-image.png",
                             Name = "Padel"
                         },
                         new
                         {
                             Id = 4,
-                            Description = "Basketball courts and balls.",
+                            Description = "Indoor and outdoor basketball courts with balls and training equipment.",
+                            ImageUrl = "/uploads/seed/basketball/sport-image.png",
                             Name = "Basketball"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Boxing ring and training equipment for strength, speed, and reflex practice.",
+                            ImageUrl = "/uploads/seed/boxing/sport-image.png",
+                            Name = "Boxing"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Archery range with bows, arrows, safety gear, and target stands.",
+                            ImageUrl = "/uploads/seed/archery/sport-image.png",
+                            Name = "Archery"
                         });
                 });
 

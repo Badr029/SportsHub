@@ -63,7 +63,7 @@
 
   @if (editorOpen()) {
     <section class="modal-backdrop">
-      <form class="modal-panel" (ngSubmit)="saveEquipment()">
+      <form class="modal-panel editor-modal" (ngSubmit)="saveEquipment()">
         <h2>{{ editingId ? 'Edit equipment' : 'Add equipment' }}</h2>
 
         <label>
@@ -86,14 +86,15 @@
           <input type="number" name="quantity" min="0" [(ngModel)]="form.quantity">
         </label>
 
-        <label>
-          Photo
+        <label class="photo-upload">
           <input type="file" accept="image/*" (change)="uploadEquipmentImage($event)">
+          @if (form.imageUrl) {
+            <img class="image-preview" [src]="getImageUrl(form.imageUrl)" alt="Equipment preview">
+          } @else {
+            <span>Photo Upload</span>
+          }
+          <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
-
-        @if (form.imageUrl) {
-          <img class="image-preview" [src]="getImageUrl(form.imageUrl)" alt="Equipment preview">
-        }
 
         <label>
           Daily rental price

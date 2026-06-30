@@ -3,7 +3,7 @@
 <main class="page">
   <header class="page-header">
     <div>
-      <a routerLink="/admin/sports">Back to admin sports</a>
+      <a class="back-button" routerLink="/admin/sports">Back to admin sports</a>
       <h1>{{ sport()?.name || 'Sport details' }}</h1>
       <p>Customize sport details, facilities, and equipment.</p>
     </div>
@@ -23,14 +23,24 @@
     }
 
     <section class="sport-summary">
-      @if (sport()?.imageUrl) {
-        <img [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name">
-      }
+      <div class="sport-media">
+        @if (sport()?.imageUrl) {
+          <img [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name">
+        }
+      </div>
 
-      <div>
+      <div class="sport-info">
+        <p class="eyebrow">Managed sport</p>
         <h2>{{ sport()?.name }}</h2>
         <p>{{ sport()?.description }}</p>
-        <button type="button" (click)="openSportEditor()">Edit sport</button>
+        <div class="sport-metrics">
+          <span>{{ facilities().length }} facilities</span>
+          <span>{{ equipment().length }} equipment items</span>
+        </div>
+        <div class="sport-actions">
+          <button type="button" (click)="openSportEditor()">Edit sport</button>
+          <button type="button" class="danger" (click)="deleteSport()">Delete sport</button>
+        </div>
       </div>
     </section>
 
@@ -44,17 +54,37 @@
         <div class="cards-list">
           @for (facility of facilities(); track facility.id) {
             <article class="item-card" [class.out-of-service]="facility.isOutOfService">
-              @if (facility.imageUrl) {
-                <img [src]="getImageUrl(facility.imageUrl)" [alt]="facility.name">
-              }
+              <div class="card-image">
+                @if (facility.imageUrl) {
+                  <img [src]="getImageUrl(facility.imageUrl)" [alt]="facility.name">
+                }
+              </div>
 
-              <h3>{{ facility.name }}</h3>
+              <div class="card-body">
+                <div class="card-title-row">
+                  <h3>{{ facility.name }}</h3>
+                  @if (facility.isOutOfService) {
+                    <span class="service-label">Out of service</span>
+                  }
+                </div>
 
-              @if (facility.isOutOfService) {
-                <p class="service-label">Out of service</p>
-              }
+                <div class="card-metrics">
+                  <span>{{ facility.pricePerHour }} EGP / hour</span>
+                  <span>{{ facility.isOutOfService ? 'Unavailable' : 'Available' }}</span>
+                </div>
 
-              <p>{{ facility.pricePerHour }} EGP / hour</p>
+                <div class="toggle-row">
+                  <span>Out of service</span>
+                  <button
+                    type="button"
+                    class="ios-toggle"
+                    [class.active]="facility.isOutOfService"
+                    [attr.aria-pressed]="facility.isOutOfService"
+                    (click)="toggleFacilityService(facility)">
+                    <span></span>
+                  </button>
+                </div>
+              </div>
 
               <div class="card-actions">
                 <button type="button" class="secondary" (click)="editFacility(facility)">Edit</button>
@@ -72,16 +102,25 @@
         </div>
 
         <div class="cards-list">
-          @for (item of equipment(); track item.id) {
+          @for (item of pagedEquipment(); track item.id) {
             <article class="item-card">
-              @if (item.imageUrl) {
-                <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name">
-              }
+              <div class="card-image">
+                @if (item.imageUrl) {
+                  <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name">
+                }
+              </div>
 
-              <h3>{{ item.name }}</h3>
-              <p>Stock: {{ item.quantity }}</p>
-              <p>{{ item.dailyRentalPrice }} EGP / day</p>
-              <p>{{ item.packageHourlyPrice }} EGP / package hour</p>
+              <div class="card-body">
+                <div class="card-title-row">
+                  <h3>{{ item.name }}</h3>
+                </div>
+
+                <div class="card-metrics">
+                  <span>Stock: {{ item.quantity }}</span>
+                  <span>{{ item.dailyRentalPrice }} EGP / day</span>
+                  <span>{{ item.packageHourlyPrice }} EGP / package hour</span>
+                </div>
+              </div>
 
               <div class="card-actions">
                 <button type="button" class="secondary" (click)="editEquipment(item)">Edit</button>
@@ -90,13 +129,25 @@
             </article>
           }
         </div>
+
+        @if (equipment().length > equipmentPageSize) {
+          <div class="pager">
+            <button type="button" class="secondary" (click)="previousEquipmentPage()" [disabled]="equipmentPage === 1">
+              Previous
+            </button>
+            <span>Page {{ equipmentPage }} / {{ equipmentTotalPages() }}</span>
+            <button type="button" class="secondary" (click)="nextEquipmentPage()" [disabled]="equipmentPage === equipmentTotalPages()">
+              Next
+            </button>
+          </div>
+        }
       </section>
     </section>
   }
 
   @if (sportEditorOpen()) {
     <section class="modal-backdrop">
-      <form class="modal-panel" (ngSubmit)="saveSport()">
+      <form class="modal-panel editor-modal" (ngSubmit)="requestSaveSport()">
         <h2>Edit sport</h2>
 
         <label>
@@ -109,14 +160,15 @@
           <textarea name="sportDescription" rows="3" [(ngModel)]="sportForm.description"></textarea>
         </label>
 
-        <label>
-          Photo
+        <label class="photo-upload">
           <input type="file" accept="image/*" (change)="uploadSportImage($event)">
+          @if (sportForm.imageUrl) {
+            <img class="image-preview" [src]="getImageUrl(sportForm.imageUrl)" alt="Sport preview">
+          } @else {
+            <span>Photo Upload</span>
+          }
+          <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
-
-        @if (sportForm.imageUrl) {
-          <img class="image-preview" [src]="getImageUrl(sportForm.imageUrl)" alt="Sport preview">
-        }
 
         <div class="form-actions">
           <button type="submit">Save sport</button>
@@ -128,7 +180,7 @@
 
   @if (facilityEditorOpen()) {
     <section class="modal-backdrop">
-      <form class="modal-panel" (ngSubmit)="saveFacility()">
+      <form class="modal-panel editor-modal" (ngSubmit)="requestSaveFacility()">
         <h2>{{ editingFacilityId ? 'Edit facility' : 'Add facility' }}</h2>
 
         <label>
@@ -141,19 +193,27 @@
           <input type="number" name="facilityPrice" min="1" [(ngModel)]="facilityForm.pricePerHour">
         </label>
 
-        <label>
-          Photo
+        <label class="photo-upload">
           <input type="file" accept="image/*" (change)="uploadFacilityImage($event)">
+          @if (facilityForm.imageUrl) {
+            <img class="image-preview" [src]="getImageUrl(facilityForm.imageUrl)" alt="Facility preview">
+          } @else {
+            <span>Photo Upload</span>
+          }
+          <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
 
-        @if (facilityForm.imageUrl) {
-          <img class="image-preview" [src]="getImageUrl(facilityForm.imageUrl)" alt="Facility preview">
-        }
-
-        <label class="checkbox-row">
-          <input type="checkbox" name="facilityOutOfService" [(ngModel)]="facilityForm.isOutOfService">
-          Out of service
-        </label>
+        <div class="service-toggle-row">
+          <span>Out of service</span>
+          <button
+            type="button"
+            class="ios-toggle"
+            [class.active]="facilityForm.isOutOfService"
+            [attr.aria-pressed]="facilityForm.isOutOfService"
+            (click)="facilityForm.isOutOfService = !facilityForm.isOutOfService">
+            <span></span>
+          </button>
+        </div>
 
         <div class="form-actions">
           <button type="submit">{{ editingFacilityId ? 'Update facility' : 'Create facility' }}</button>
@@ -165,7 +225,7 @@
 
   @if (equipmentEditorOpen()) {
     <section class="modal-backdrop">
-      <form class="modal-panel" (ngSubmit)="saveEquipment()">
+      <form class="modal-panel editor-modal" (ngSubmit)="requestSaveEquipment()">
         <h2>{{ editingEquipmentId ? 'Edit equipment' : 'Add equipment' }}</h2>
 
         <label>
@@ -188,20 +248,35 @@
           <input type="number" name="packageHourlyPrice" min="1" [(ngModel)]="equipmentForm.packageHourlyPrice">
         </label>
 
-        <label>
-          Photo
+        <label class="photo-upload">
           <input type="file" accept="image/*" (change)="uploadEquipmentImage($event)">
+          @if (equipmentForm.imageUrl) {
+            <img class="image-preview" [src]="getImageUrl(equipmentForm.imageUrl)" alt="Equipment preview">
+          } @else {
+            <span>Photo Upload</span>
+          }
+          <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
-
-        @if (equipmentForm.imageUrl) {
-          <img class="image-preview" [src]="getImageUrl(equipmentForm.imageUrl)" alt="Equipment preview">
-        }
 
         <div class="form-actions">
           <button type="submit">{{ editingEquipmentId ? 'Update equipment' : 'Create equipment' }}</button>
           <button type="button" class="secondary" (click)="resetEquipmentForm()">Cancel</button>
         </div>
       </form>
+    </section>
+  }
+
+  @if (confirmOpen()) {
+    <section class="modal-backdrop">
+      <div class="modal-panel confirm-panel">
+        <h2>{{ confirmTitle() }}</h2>
+        <p>{{ confirmMessage() }}</p>
+
+        <div class="form-actions">
+          <button type="button" (click)="confirmAction()">Confirm</button>
+          <button type="button" class="secondary" (click)="closeConfirm()">Cancel</button>
+        </div>
+      </div>
     </section>
   }
 </main>

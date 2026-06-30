@@ -20,6 +20,7 @@ export class SportDetailsComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   success = signal('');
+  confirmBookingOpen = signal(false);
 
   bookingType: BookingType = 1;
   facilityId: number | null = null;
@@ -27,11 +28,12 @@ export class SportDetailsComponent implements OnInit {
   selectedEquipmentItems: { equipmentId: number; quantity: number }[] = [];
   bookingDate = '';
   startTime = '';
-  durationHours = 1;
+  selectedSlotCount = 0;
   pickupDate = '';
   pickupTime = '';
   availabilitySlots: FacilityAvailabilitySlot[] = [];
   equipmentAvailability: EquipmentAvailability[] = [];
+  pendingBookingRequest: CreateBooking | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -106,6 +108,53 @@ export class SportDetailsComponent implements OnInit {
     return this.sport()?.equipment.find(equipment => equipment.id === equipmentId)?.name || 'Equipment';
   }
 
+  getFacilityName() {
+    return this.sport()?.facilities.find(facility => facility.id === this.facilityId)?.name || 'Facility';
+  }
+
+  selectedEquipmentDetails() {
+    return this.selectedEquipmentItems.map(item => ({
+      ...item,
+      name: this.getEquipmentName(item.equipmentId),
+      equipment: this.sport()?.equipment.find(equipment => equipment.id === item.equipmentId)
+    }));
+  }
+
+  bookingTypeLabel() {
+    return this.bookingType === 3 ? 'Package' : this.bookingType === 2 ? 'Equipment' : 'Facility';
+  }
+
+  estimatedTotal() {
+    const sport = this.sport();
+
+    if (!sport) {
+      return 0;
+    }
+
+    let total = 0;
+
+    if (this.bookingType === 1 || this.bookingType === 3) {
+      const facility = sport.facilities.find(facility => facility.id === this.facilityId);
+      total += (facility?.pricePerHour ?? 0) * this.selectedDurationHours();
+    }
+
+    if (this.bookingType === 3) {
+      for (const item of this.selectedEquipmentItems) {
+        const equipment = sport.equipment.find(equipment => equipment.id === item.equipmentId);
+        total += (equipment?.packageHourlyPrice ?? 0) * item.quantity * this.selectedDurationHours();
+      }
+    }
+
+    if (this.bookingType === 2) {
+      for (const item of this.selectedEquipmentItems) {
+        const equipment = sport.equipment.find(equipment => equipment.id === item.equipmentId);
+        total += (equipment?.dailyRentalPrice ?? 0) * item.quantity;
+      }
+    }
+
+    return total;
+  }
+
   addEquipmentFromPanel() {
   if (!this.equipmentToAddId) {
     this.error.set('Please select equipment to add.');
@@ -121,7 +170,7 @@ export class SportDetailsComponent implements OnInit {
 
   buildFacilityEndDate(startDate: Date): Date {
     const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + Number(this.durationHours));
+    endDate.setMinutes(endDate.getMinutes() + this.selectedSlotCount * 30);
     return endDate;
   }
 
@@ -130,13 +179,14 @@ export class SportDetailsComponent implements OnInit {
   }
 
   loadFacilityAvailability() {
-    if (!this.facilityId || !this.bookingDate || !this.durationHours) {
+    if (!this.facilityId || !this.bookingDate) {
       this.availabilitySlots = [];
       this.startTime = '';
+      this.selectedSlotCount = 0;
       return;
     }
 
-    this.bookingService.getFacilityAvailability(this.facilityId, this.bookingDate, this.durationHours).subscribe({
+    this.bookingService.getFacilityAvailability(this.facilityId, this.bookingDate, 30).subscribe({
       next: slots => {
         this.availabilitySlots = slots;
 
@@ -144,11 +194,15 @@ export class SportDetailsComponent implements OnInit {
 
         if (selectedSlot && !selectedSlot.available) {
           this.startTime = '';
+          this.selectedSlotCount = 0;
         }
+
+        this.trimSelectionAtFirstUnavailableSlot();
       },
       error: error => {
         this.availabilitySlots = [];
         this.startTime = '';
+        this.selectedSlotCount = 0;
 
         if (error.status === 0) {
           this.error.set('Cannot connect to the server.');
@@ -182,7 +236,7 @@ export class SportDetailsComponent implements OnInit {
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 1);
     } else if (this.bookingType === 3) {
-      if (!this.bookingDate || !this.startTime) {
+      if (!this.bookingDate || !this.startTime || this.selectedSlotCount === 0) {
         return;
       }
 
@@ -218,8 +272,8 @@ export class SportDetailsComponent implements OnInit {
   this.success.set('');
 
   if ((this.bookingType === 1 || this.bookingType === 3) &&
-      (!this.bookingDate || !this.startTime)) {
-    this.error.set('Facility date and start time are required.');
+      (!this.bookingDate || !this.startTime || this.selectedSlotCount === 0)) {
+    this.error.set('Facility date and time slot are required.');
     return;
   }
 
@@ -242,9 +296,8 @@ export class SportDetailsComponent implements OnInit {
   const selectedSlot = this.availabilitySlots.find(slot => slot.time === this.startTime);
 
   if ((this.bookingType === 1 || this.bookingType === 3) &&
-      selectedSlot &&
-      !selectedSlot.available) {
-    this.error.set('This time is already occupied.');
+      (!selectedSlot || !selectedSlot.available || !this.isSelectedRangeAvailable())) {
+    this.error.set('Selected time range overlaps an occupied slot.');
     return;
   }
 
@@ -274,16 +327,26 @@ export class SportDetailsComponent implements OnInit {
   const request: CreateBooking = {
     bookingType: this.bookingType,
     facilityId: this.bookingType === 2 ? null : this.facilityId,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
-    pickupDate: pickupDate ? pickupDate.toISOString() : null,
-    returnDate: returnDate ? returnDate.toISOString() : null,
+    startDate: this.bookingType === 2 ? startDate.toISOString() : this.formatLocalDateTime(startDate),
+    endDate: this.bookingType === 2 ? endDate.toISOString() : this.formatLocalDateTime(endDate),
+    pickupDate: pickupDate ? (this.bookingType === 2 ? pickupDate.toISOString() : this.formatLocalDateTime(pickupDate)) : null,
+    returnDate: returnDate ? (this.bookingType === 2 ? returnDate.toISOString() : this.formatLocalDateTime(returnDate)) : null,
     equipmentItems: this.bookingType === 1 ? [] : this.selectedEquipmentItems
   };
 
-  this.bookingService.createBooking(request).subscribe({
+  this.pendingBookingRequest = request;
+  this.confirmBookingOpen.set(true);
+  }
+
+  confirmCreateBooking() {
+    if (!this.pendingBookingRequest) {
+      return;
+    }
+
+    this.bookingService.createBooking(this.pendingBookingRequest).subscribe({
       next: booking => {
         this.success.set('Booking created successfully. Status: ' + booking.status);
+        this.closeBookingConfirmation();
       },
       error: error => {
         if (error.status === 0) {
@@ -293,6 +356,11 @@ export class SportDetailsComponent implements OnInit {
         }
       }
     });
+  }
+
+  closeBookingConfirmation() {
+    this.confirmBookingOpen.set(false);
+    this.pendingBookingRequest = null;
   }
 
   selectFacilityBooking(facilityId: number){
@@ -306,6 +374,8 @@ export class SportDetailsComponent implements OnInit {
     this.bookingType = 1;
     this.facilityId = facilityId;
     this.selectedEquipmentItems = [];
+    this.startTime = '';
+    this.selectedSlotCount = 0;
     this.loadFacilityAvailability();
     this.success.set('');
     this.error.set('');
@@ -328,7 +398,18 @@ export class SportDetailsComponent implements OnInit {
 
     this.bookingType = 3;
     this.facilityId = facilityId;
+    this.startTime = '';
+    this.selectedSlotCount = 0;
     this.loadFacilityAvailability();
+    this.success.set('');
+    this.error.set('');
+  }
+
+  cancelPackage() {
+    this.bookingType = 1;
+    this.selectedEquipmentItems = [];
+    this.equipmentToAddId = null;
+    this.equipmentAvailability = [];
     this.success.set('');
     this.error.set('');
   }
@@ -336,6 +417,139 @@ export class SportDetailsComponent implements OnInit {
   addEquipmentToPackage(equipmentId: number) {
     this.bookingType = 3;
     this.addEquipmentItem(equipmentId);
+  }
+
+  selectTimeSlot(slot: FacilityAvailabilitySlot) {
+    if (!slot.available) {
+      return;
+    }
+
+    if (!this.startTime) {
+      this.startTime = slot.time;
+      this.selectedSlotCount = 1;
+      this.loadEquipmentAvailability();
+      return;
+    }
+
+    const startIndex = this.availabilitySlots.findIndex(item => item.time === this.startTime);
+    const clickedIndex = this.availabilitySlots.findIndex(item => item.time === slot.time);
+
+    if (slot.time === this.startTime) {
+      this.startTime = '';
+      this.selectedSlotCount = 0;
+      this.loadEquipmentAvailability();
+      return;
+    }
+
+    if (clickedIndex < startIndex) {
+      this.startTime = slot.time;
+      this.selectedSlotCount = 1;
+      this.loadEquipmentAvailability();
+      return;
+    }
+
+    const range = this.availabilitySlots.slice(startIndex, clickedIndex + 1);
+
+    if (range.length > 12) {
+      this.error.set('Facility bookings can be up to 6 hours.');
+      return;
+    }
+
+    if (range.some(item => !item.available)) {
+      this.error.set('This range crosses an occupied time slot.');
+      return;
+    }
+
+    this.selectedSlotCount = range.length;
+    this.error.set('');
+    this.loadEquipmentAvailability();
+  }
+
+  isSlotSelected(slot: FacilityAvailabilitySlot) {
+    const startIndex = this.availabilitySlots.findIndex(item => item.time === this.startTime);
+    const slotIndex = this.availabilitySlots.findIndex(item => item.time === slot.time);
+
+    return startIndex >= 0 &&
+      slotIndex >= startIndex &&
+      slotIndex < startIndex + this.selectedSlotCount;
+  }
+
+  isSlotBlockedBySelection(slot: FacilityAvailabilitySlot) {
+    if (!this.startTime || !slot.available) {
+      return false;
+    }
+
+    const startIndex = this.availabilitySlots.findIndex(item => item.time === this.startTime);
+    const slotIndex = this.availabilitySlots.findIndex(item => item.time === slot.time);
+
+    return slotIndex > startIndex && this.availabilitySlots
+      .slice(startIndex, slotIndex + 1)
+      .some(item => !item.available);
+  }
+
+  isSelectedRangeAvailable() {
+    const startIndex = this.availabilitySlots.findIndex(item => item.time === this.startTime);
+
+    if (startIndex < 0 || this.selectedSlotCount <= 0) {
+      return false;
+    }
+
+    const range = this.availabilitySlots.slice(startIndex, startIndex + this.selectedSlotCount);
+    return range.length === this.selectedSlotCount && range.every(item => item.available);
+  }
+
+  trimSelectionAtFirstUnavailableSlot() {
+    if (!this.startTime || this.selectedSlotCount === 0) {
+      return;
+    }
+
+    const startIndex = this.availabilitySlots.findIndex(item => item.time === this.startTime);
+
+    if (startIndex < 0) {
+      this.startTime = '';
+      this.selectedSlotCount = 0;
+      return;
+    }
+
+    const range = this.availabilitySlots.slice(startIndex, startIndex + this.selectedSlotCount);
+    const firstUnavailableIndex = range.findIndex(item => !item.available);
+
+    if (firstUnavailableIndex >= 0) {
+      this.selectedSlotCount = firstUnavailableIndex;
+    }
+
+    if (this.selectedSlotCount === 0) {
+      this.startTime = '';
+    }
+  }
+
+  selectedDurationHours() {
+    return this.selectedSlotCount / 2;
+  }
+
+  selectedEndTimeLabel() {
+    if (!this.bookingDate || !this.startTime || this.selectedSlotCount === 0) {
+      return '';
+    }
+
+    return this.formatTimeLabel(this.buildFacilityEndDate(this.buildFacilityStartDate()));
+  }
+
+  selectedStartTimeLabel() {
+    if (!this.bookingDate || !this.startTime) {
+      return '';
+    }
+
+    return this.formatTimeLabel(this.buildFacilityStartDate());
+  }
+
+  formatTimeLabel(date: Date) {
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+
+  formatLocalDateTime(date: Date) {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
   }
 
   getImageUrl(imageUrl?: string | null) {

@@ -9,13 +9,24 @@
       <a routerLink="/sports">Back to sports</a>
     </section>
   } @else if (sport()) {
-    <header class="page-header">
-      @if (sport()!.imageUrl) {
-        <img class="sport-hero" [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name">
-      }
-      <a routerLink="/sports">Back to sports</a>
-      <h1>{{ sport()!.name }}</h1>
-      <p>{{ sport()!.description }}</p>
+    <a class="back-button" routerLink="/sports">Back to sports</a>
+    <header class="sport-card">
+      <div class="sport-media">
+        @if (sport()!.imageUrl) {
+          <img [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name">
+        }
+      </div>
+
+      <div class="sport-info">
+        <p class="eyebrow">Sport details</p>
+        <h1>{{ sport()!.name }}</h1>
+        <p>{{ sport()!.description }}</p>
+
+        <div class="sport-metrics">
+          <span>{{ sport()!.facilities.length }} facilities</span>
+          <span>{{ sport()!.equipment.length }} equipment items</span>
+        </div>
+      </div>
     </header>
 
     <section class="content-grid">
@@ -52,47 +63,44 @@
           }
         </div>
 
-        <div class="section-heading">
-          <h2>Equipment</h2>
-          <p>Rent standalone equipment or add it to a package.</p>
-        </div>
+        @if (bookingType === 3 && facilityId) {
+          <div class="section-heading">
+            <h2>Equipment</h2>
+            <p>Add equipment to the selected facility package.</p>
+            <button type="button" class="danger" (click)="cancelPackage()">Cancel package</button>
+          </div>
 
-        <div class="list">
-          @for (equipment of sport()!.equipment; track equipment.id) {
-            <article class="item-card">
-              @if (equipment.imageUrl) {
-                <img class="item-image" [src]="getImageUrl(equipment.imageUrl)" [alt]="equipment.name">
-              }
-              <h3>{{ equipment.name }}</h3>
-              <div class="metric-row">
-                <span>Total stock: {{ equipment.quantity }}</span>
-                @if (getEquipmentAvailability(equipment.id); as availability) {
-                  <span>Available: {{ availability.availableQuantity }} / {{ availability.totalQuantity }}</span>
+          <div class="list">
+            @for (equipment of sport()!.equipment; track equipment.id) {
+              <article class="item-card">
+                @if (equipment.imageUrl) {
+                  <img class="item-image" [src]="getImageUrl(equipment.imageUrl)" [alt]="equipment.name">
                 }
-              </div>
-              @if (getEquipmentAvailability(equipment.id); as availability) {
-                <p class="availability-text">
-                  Available for selected {{ bookingType === 2 ? 'day' : 'package time' }}:
-                  {{ availability.availableQuantity }} / {{ availability.totalQuantity }}
-                </p>
-              }
-              <p class="price-line">{{ equipment.dailyRentalPrice }} EGP / day</p>
-              <p class="price-line package-price">{{ equipment.packageHourlyPrice }} EGP / package hour</p>
+                <h3>{{ equipment.name }}</h3>
+                <div class="metric-row">
+                  <span>Total stock: {{ equipment.quantity }}</span>
+                  @if (getEquipmentAvailability(equipment.id); as availability) {
+                    <span>Available: {{ availability.availableQuantity }} / {{ availability.totalQuantity }}</span>
+                  }
+                </div>
+                @if (getEquipmentAvailability(equipment.id); as availability) {
+                  <p class="availability-text">
+                    Available for selected package time:
+                    {{ availability.availableQuantity }} / {{ availability.totalQuantity }}
+                  </p>
+                }
+                <p class="price-line">{{ equipment.dailyRentalPrice }} EGP / day</p>
+                <p class="price-line package-price">{{ equipment.packageHourlyPrice }} EGP / package hour</p>
 
-              <!-- MULTI-EQUIPMENT BOOKING START -->
-              <div class="card-actions">
-                <button type="button" (click)="selectEquipmentBooking(equipment.id)">
-                  Rent equipment
-                </button>
-
-                <button type="button" class="secondary" (click)="addEquipmentToPackage(equipment.id)">
-                  Add to package
-                </button>
-              </div>
-              <!-- MULTI-EQUIPMENT BOOKING END -->
-            </article>
-          }
-        </div>
+                <div class="card-actions">
+                  <button type="button" class="secondary" (click)="addEquipmentToPackage(equipment.id)">
+                    Add to package
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        }
       </section>
 
       <aside class="booking-panel">
@@ -107,7 +115,6 @@
             Booking type
             <select name="bookingType" [(ngModel)]="bookingType">
               <option [ngValue]="1">Facility</option>
-              <option [ngValue]="2">Equipment</option>
               <option [ngValue]="3">Package</option>
             </select>
           </label>
@@ -127,8 +134,13 @@
           }
 
           <!-- MULTI-EQUIPMENT BOOKING START -->
-          @if (bookingType === 2 || bookingType === 3) {
+          @if (bookingType === 3 && facilityId) {
             <section class="selected-equipment">
+              <div class="package-header">
+                <h3>Package equipment</h3>
+                <button type="button" class="danger" (click)="cancelPackage()">Cancel package</button>
+              </div>
+
               <div class="equipment-picker">
                 <label>
                   Add equipment
@@ -146,8 +158,6 @@
                   Add
                 </button>
               </div>
-              <h3>Selected equipment</h3>
-
               @if (selectedEquipmentItems.length === 0) {
                 <p>No equipment selected yet.</p>
               } @else {
@@ -189,80 +199,51 @@
             }
             <label>
               Booking day
-            <input type="date" name="bookingDate" [(ngModel)]="bookingDate" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">            </label>
+              <input type="date" name="bookingDate" [(ngModel)]="bookingDate" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">
+            </label>
 
             <section class="slot-section">
-              <strong>Start time</strong>
+              <strong>Choose Time Slot</strong>
               @if (availabilitySlots.length === 0) {
-                <p class="panel-hint">Select a facility, day, and duration to see available slots.</p>
+                <p class="panel-hint">Select a facility and day to see available 30-minute blocks.</p>
               } @else {
                 <div class="slot-grid">
                 @for (slot of availabilitySlots; track slot.time) {
                   <button
                     type="button"
                     class="slot-button"
-                    [class.selected]="startTime === slot.time"
+                    [class.selected]="isSlotSelected(slot)"
                     [class.occupied]="!slot.available"
-                    [disabled]="!slot.available"
-                    (click)="startTime = slot.time; loadEquipmentAvailability()">
+                    [class.blocked]="isSlotBlockedBySelection(slot)"
+                    [disabled]="!slot.available || isSlotBlockedBySelection(slot)"
+                    (click)="selectTimeSlot(slot)">
                     <span>{{ slot.label }}</span>
-                    <small>{{ slot.available ? 'Free' : 'Occupied' }}</small>
+                    <small>
+                      {{ !slot.available ? 'Occupied' : isSlotSelected(slot) ? 'Selected' : 'Free' }}
+                    </small>
                   </button>
                 }
                 </div>
               }
             </section>
 
-            <section class="duration-section">
-              <strong>Duration</strong>
-              <div class="duration-grid">
-                @for (hours of [1, 2, 3, 4, 5, 6]; track hours) {
-                  <button
-                    type="button"
-                    class="duration-button"
-                    [class.selected]="durationHours === hours"
-                    (click)="durationHours = hours; loadFacilityAvailability(); loadEquipmentAvailability()">
-                    {{ hours }}h
-                  </button>
-                }
-              </div>
+            <section class="booking-summary">
+              <strong>Booking Summary</strong>
+              @if (startTime && selectedSlotCount > 0) {
+                <p>{{ selectedStartTimeLabel() }} to {{ selectedEndTimeLabel() }}</p>
+                <p>Duration: {{ selectedDurationHours() }} hour{{ selectedDurationHours() === 1 ? '' : 's' }}</p>
+              } @else {
+                <p>Select the first block, then click the last block you want to reserve.</p>
+              }
             </section>
           }
 
 
-          @if (bookingType === 2 || bookingType === 3) {
-            @if (bookingType === 3) {
-              <div class="date-section-label equipment-label">
-                <span>Equipment rental</span>
-                <small>When equipment is picked up and returned.</small>
-              </div>
-            }
-            @if (bookingType === 2) {
-              <label>
-                Pickup day
-                <input type="date" name="pickupDate" [(ngModel)]="pickupDate" (ngModelChange)="loadEquipmentAvailability()">
-              </label>
-
-              <label>
-                Pickup time
-                <select name="pickupTime" [(ngModel)]="pickupTime">
-                  <option value="">Select time</option>
-                  @for (time of timeSlots; track time.value) {
-                    <option [value]="time.value">{{ time.label }}</option>
-                  }
-                </select>
-              </label>
-
-              <p class="panel-hint">
-                Return date will be set automatically to the same time next day.
-              </p>
-            }
-
-            @if (bookingType === 3) {
-              <p class="panel-hint">
-                Equipment follows the facility time in package bookings.
-              </p>
-            }
+          @if (bookingType === 3) {
+            <div class="date-section-label equipment-label">
+              <span>Equipment rental</span>
+              <small>Equipment follows the facility time in package bookings.</small>
+            </div>
           }
 
           @if (error()) {
@@ -277,5 +258,61 @@
         </form>
       </aside>
     </section>
+
+    @if (confirmBookingOpen()) {
+      <section class="modal-backdrop">
+        <div class="modal-panel booking-confirmation">
+          <h2>Confirm booking</h2>
+
+          <div class="confirmation-list">
+            <div>
+              <span>Type</span>
+              <strong>{{ bookingTypeLabel() }}</strong>
+            </div>
+
+            @if (bookingType === 1 || bookingType === 3) {
+              <div>
+                <span>Facility</span>
+                <strong>{{ getFacilityName() }}</strong>
+              </div>
+
+              <div>
+                <span>Date</span>
+                <strong>{{ bookingDate }}</strong>
+              </div>
+
+              <div>
+                <span>Time</span>
+                <strong>{{ selectedStartTimeLabel() }} to {{ selectedEndTimeLabel() }}</strong>
+              </div>
+
+              <div>
+                <span>Duration</span>
+                <strong>{{ selectedDurationHours() }} hour{{ selectedDurationHours() === 1 ? '' : 's' }}</strong>
+              </div>
+            }
+
+            @if (bookingType === 3) {
+              <div class="confirmation-equipment">
+                <span>Equipment</span>
+                @for (item of selectedEquipmentDetails(); track item.equipmentId) {
+                  <strong>{{ item.name }} × {{ item.quantity }}</strong>
+                }
+              </div>
+            }
+
+            <div class="confirmation-total">
+              <span>Estimated total</span>
+              <strong>{{ estimatedTotal() }} EGP</strong>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" (click)="confirmCreateBooking()">Confirm booking</button>
+            <button type="button" class="secondary" (click)="closeBookingConfirmation()">Cancel</button>
+          </div>
+        </div>
+      </section>
+    }
   }
 </main>

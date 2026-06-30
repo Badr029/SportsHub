@@ -18,12 +18,12 @@ export class BookingService {
     return this.http.post<BookingResponse>(`${API_BASE_URL}/Bookings`, request);
   }
 
-  getFacilityAvailability(facilityId: number, date: string, durationHours: number) {
+  getFacilityAvailability(facilityId: number, date: string, durationMinutes = 30) {
     return this.http.get<FacilityAvailabilitySlot[]>(`${API_BASE_URL}/Bookings/facility-availability`, {
       params: {
         facilityId,
         date,
-        durationHours
+        durationMinutes
       }
     });
   }

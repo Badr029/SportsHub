@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../../shared/navbar/navbar.component';
 import { AdminService } from '../../../core/services/admin.service';
 import { resolveImageUrl } from '../../../core/services/api.config';
@@ -29,9 +29,15 @@ export class AdminSportDetailsComponent implements OnInit {
   sportEditorOpen = signal(false);
   facilityEditorOpen = signal(false);
   equipmentEditorOpen = signal(false);
+  confirmOpen = signal(false);
+  confirmTitle = signal('');
+  confirmMessage = signal('');
   sportId = 0;
   editingFacilityId: number | null = null;
   editingEquipmentId: number | null = null;
+  equipmentPage = 1;
+  readonly equipmentPageSize = 2;
+  private pendingConfirmAction: (() => void) | null = null;
 
   sportForm: SportRequest = {
     name: '',
@@ -44,6 +50,7 @@ export class AdminSportDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private adminService: AdminService
   ) { }
 
@@ -97,6 +104,7 @@ export class AdminSportDetailsComponent implements OnInit {
     this.adminService.getEquipment().subscribe({
       next: equipment => {
         this.equipment.set(equipment.filter(item => item.sport.id === this.sportId));
+        this.normalizeEquipmentPage();
         this.loading.set(false);
       },
       error: error => {
@@ -106,7 +114,7 @@ export class AdminSportDetailsComponent implements OnInit {
     });
   }
 
-  saveSport() {
+  requestSaveSport() {
     this.error.set('');
     this.success.set('');
 
@@ -115,6 +123,14 @@ export class AdminSportDetailsComponent implements OnInit {
       return;
     }
 
+    this.openConfirm(
+      'Update sport?',
+      'This will save the new sport details.',
+      () => this.saveSport()
+    );
+  }
+
+  saveSport() {
     this.adminService.updateSport(this.sportId, {
       name: this.sportForm.name.trim(),
       description: this.sportForm.description.trim(),
@@ -131,7 +147,23 @@ export class AdminSportDetailsComponent implements OnInit {
     });
   }
 
-  saveFacility() {
+  deleteSport() {
+    this.clearMessages();
+    this.openConfirm(
+      'Delete sport?',
+      'This sport and its related facilities and equipment will be permanently removed.',
+      () => this.adminService.deleteSport(this.sportId).subscribe({
+        next: () => {
+          this.router.navigate(['/admin/sports']);
+        },
+        error: error => {
+          this.error.set(this.getErrorMessage(error, 'Failed to delete sport.'));
+        }
+      })
+    );
+  }
+
+  requestSaveFacility() {
     this.error.set('');
     this.success.set('');
 
@@ -153,6 +185,19 @@ export class AdminSportDetailsComponent implements OnInit {
       isOutOfService: this.facilityForm.isOutOfService
     };
 
+    if (this.editingFacilityId) {
+      this.openConfirm(
+        'Update facility?',
+        'This will save the facility changes.',
+        () => this.saveFacility(request)
+      );
+      return;
+    }
+
+    this.saveFacility(request);
+  }
+
+  saveFacility(request: FacilityRequest) {
     const action = this.editingFacilityId
       ? this.adminService.updateFacility(this.editingFacilityId, request)
       : this.adminService.createFacility(request);
@@ -205,7 +250,10 @@ export class AdminSportDetailsComponent implements OnInit {
 
   deleteFacility(id: number) {
     this.clearMessages();
-    this.adminService.deleteFacility(id).subscribe({
+    this.openConfirm(
+      'Delete facility?',
+      'This facility will be permanently removed.',
+      () => this.adminService.deleteFacility(id).subscribe({
       next: () => {
         this.success.set('Facility deleted.');
         this.loadFacilities();
@@ -213,7 +261,7 @@ export class AdminSportDetailsComponent implements OnInit {
       error: error => {
         this.error.set(this.getErrorMessage(error, 'Failed to delete facility.'));
       }
-    });
+    }));
   }
 
   uploadSportImage(event: Event) {
@@ -254,7 +302,7 @@ export class AdminSportDetailsComponent implements OnInit {
     });
   }
 
-  saveEquipment() {
+  requestSaveEquipment() {
     this.error.set('');
     this.success.set('');
 
@@ -282,6 +330,19 @@ export class AdminSportDetailsComponent implements OnInit {
       packageHourlyPrice: Number(this.equipmentForm.packageHourlyPrice)
     };
 
+    if (this.editingEquipmentId) {
+      this.openConfirm(
+        'Update equipment?',
+        'This will save the equipment changes.',
+        () => this.saveEquipment(request)
+      );
+      return;
+    }
+
+    this.saveEquipment(request);
+  }
+
+  saveEquipment(request: EquipmentRequest) {
     const action = this.editingEquipmentId
       ? this.adminService.updateEquipment(this.editingEquipmentId, request)
       : this.adminService.createEquipment(request);
@@ -291,6 +352,7 @@ export class AdminSportDetailsComponent implements OnInit {
         this.success.set(this.editingEquipmentId ? 'Equipment updated.' : 'Equipment created.');
         this.resetEquipmentForm();
         this.loadEquipment();
+        this.normalizeEquipmentPage();
       },
       error: error => {
         this.error.set(this.getErrorMessage(error, 'Failed to save equipment.'));
@@ -320,7 +382,10 @@ export class AdminSportDetailsComponent implements OnInit {
 
   deleteEquipment(id: number) {
     this.clearMessages();
-    this.adminService.deleteEquipment(id).subscribe({
+    this.openConfirm(
+      'Delete equipment?',
+      'This equipment item will be permanently removed.',
+      () => this.adminService.deleteEquipment(id).subscribe({
       next: () => {
         this.success.set('Equipment deleted.');
         this.loadEquipment();
@@ -328,7 +393,7 @@ export class AdminSportDetailsComponent implements OnInit {
       error: error => {
         this.error.set(this.getErrorMessage(error, 'Failed to delete equipment.'));
       }
-    });
+    }));
   }
 
   uploadEquipmentImage(event: Event) {
@@ -369,6 +434,75 @@ export class AdminSportDetailsComponent implements OnInit {
   clearMessages() {
     this.error.set('');
     this.success.set('');
+  }
+
+  toggleFacilityService(facility: AdminFacility) {
+    const request: FacilityRequest = {
+      sportId: this.sportId,
+      name: facility.name,
+      pricePerHour: facility.pricePerHour,
+      imageUrl: facility.imageUrl,
+      isOutOfService: !facility.isOutOfService
+    };
+
+    this.openConfirm(
+      request.isOutOfService ? 'Set facility out of service?' : 'Return facility to service?',
+      request.isOutOfService
+        ? 'Customers will not be able to book this facility.'
+        : 'Customers will be able to book this facility again.',
+      () => this.adminService.updateFacility(facility.id, request).subscribe({
+        next: () => {
+          this.success.set(request.isOutOfService ? 'Facility set out of service.' : 'Facility is available again.');
+          this.loadFacilities();
+        },
+        error: error => {
+          this.error.set(this.getErrorMessage(error, 'Failed to update facility service status.'));
+        }
+      })
+    );
+  }
+
+  pagedEquipment() {
+    const start = (this.equipmentPage - 1) * this.equipmentPageSize;
+    return this.equipment().slice(start, start + this.equipmentPageSize);
+  }
+
+  equipmentTotalPages() {
+    return Math.max(1, Math.ceil(this.equipment().length / this.equipmentPageSize));
+  }
+
+  nextEquipmentPage() {
+    if (this.equipmentPage < this.equipmentTotalPages()) {
+      this.equipmentPage++;
+    }
+  }
+
+  previousEquipmentPage() {
+    if (this.equipmentPage > 1) {
+      this.equipmentPage--;
+    }
+  }
+
+  normalizeEquipmentPage() {
+    this.equipmentPage = Math.min(this.equipmentPage, this.equipmentTotalPages());
+  }
+
+  openConfirm(title: string, message: string, action: () => void) {
+    this.confirmTitle.set(title);
+    this.confirmMessage.set(message);
+    this.pendingConfirmAction = action;
+    this.confirmOpen.set(true);
+  }
+
+  confirmAction() {
+    const action = this.pendingConfirmAction;
+    this.closeConfirm();
+    action?.();
+  }
+
+  closeConfirm() {
+    this.confirmOpen.set(false);
+    this.pendingConfirmAction = null;
   }
 
   createEmptyFacilityForm(): FacilityRequest {

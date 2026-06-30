@@ -7,13 +7,13 @@
   <nav>
     @if (!authService.isAdmin()) {
       <a routerLink="/sports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Sports</a>
+      <a routerLink="/equipment" routerLinkActive="active">Equipment</a>
       <a routerLink="/bookings" routerLinkActive="active">My Bookings</a>
     }
 
     @if (authService.isAdmin()) {
       <a routerLink="/admin/bookings" routerLinkActive="active">Admin Bookings</a>
-      <a routerLink="/admin/sports" routerLinkActive="active">Admin Sports</a>
-      <a routerLink="/admin/equipment" routerLinkActive="active">Admin Equipment</a>
+      <a routerLink="/admin/sports" routerLinkActive="active">Sports Management</a>
     }
 
     <button type="button" (click)="logout()">Logout</button>

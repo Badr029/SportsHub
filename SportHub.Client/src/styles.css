@@ -57,3 +57,146 @@ a:hover {
 button:disabled {
   transform: none;
 }
+
+button {
+  border: 0;
+  border-radius: 6px;
+  background: var(--teal);
+  color: white;
+  padding: 10px 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.secondary {
+  background: rgba(20, 184, 166, 0.14);
+  color: var(--teal-bright);
+}
+
+.danger {
+  border: 1px solid var(--cancelled);
+  background: transparent;
+  color: #fecaca;
+}
+
+.error,
+.success {
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 0;
+  font-weight: 800;
+}
+
+.error {
+  border: 1px solid #fca5a5;
+  background: rgba(127, 29, 29, 0.42);
+  color: #fecaca;
+}
+
+.success {
+  border: 1px solid #86efac;
+  background: rgba(5, 150, 105, 0.18);
+  color: #bbf7d0;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+
+.modal-panel {
+  display: grid;
+  gap: 13px;
+  width: min(520px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.modal-panel.editor-modal {
+  width: min(620px, 100%);
+}
+
+.photo-upload {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 230px;
+  border: 1px dashed rgba(45, 212, 191, 0.72);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.38);
+  padding: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.photo-upload input {
+  display: none;
+}
+
+.photo-upload .image-preview {
+  width: 100%;
+  height: 150px !important;
+  object-fit: contain;
+  border-radius: 7px;
+  background: rgba(2, 6, 23, 0.72);
+}
+
+.upload-icon {
+  width: 34px;
+  height: 34px;
+  opacity: 0.9;
+}
+
+.service-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.confirmation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.confirmation-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
+.confirmation-list span {
+  color: var(--muted);
+}
+
+.confirmation-list strong {
+  color: white;
+}
+
+.confirmation-equipment {
+  display: grid !important;
+}
+
+.confirmation-total strong {
+  color: var(--teal-bright);
+}

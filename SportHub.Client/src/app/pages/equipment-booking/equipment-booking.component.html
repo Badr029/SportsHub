@@ -1,0 +1,119 @@
+<app-navbar></app-navbar>
+
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Equipment rental</p>
+      <h1>Book equipment</h1>
+      <p>Browse available gear across all sports, filter by sport, and reserve items for daily rental.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p>Loading equipment...</p>
+  } @else {
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    @if (success()) {
+      <p class="success">{{ success() }}</p>
+    }
+
+    <section class="toolbar">
+      <label>
+        Sport
+        <select name="selectedSportId" [(ngModel)]="selectedSportId">
+          <option [ngValue]="0">All sports</option>
+          @for (sport of sports(); track sport.id) {
+            <option [ngValue]="sport.id">{{ sport.name }}</option>
+          }
+        </select>
+      </label>
+
+
+    </section>
+
+    <section class="content-grid">
+      <section class="equipment-grid">
+        @for (item of filteredEquipment(); track item.id) {
+          <article class="equipment-card" [class.selected]="isSelected(item.id)">
+            @if (item.imageUrl) {
+              <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name">
+            }
+
+            <div class="card-body">
+              <div class="card-title">
+                <span>{{ item.sportName }}</span>
+                <strong>{{ item.name }}</strong>
+              </div>
+
+              <div class="metric-row">
+                <span>Total: {{ item.quantity }}</span>
+                @if (getAvailability(item.id); as availability) {
+                  <span>Available: {{ availability.availableQuantity }} / {{ availability.totalQuantity }}</span>
+                } @else {
+                  <span>Select date</span>
+                }
+              </div>
+
+              <p class="price-line">{{ item.dailyRentalPrice }} EGP / day</p>
+
+              <button
+                type="button"
+                (click)="addEquipment(item.id)"
+                [disabled]="getAvailability(item.id)?.availableQuantity === 0">
+                {{ isSelected(item.id) ? 'Add another' : 'Add to rental' }}
+              </button>
+            </div>
+          </article>
+        }
+      </section>
+
+      <aside class="booking-panel">
+        <h2>Rental summary</h2>
+        <p class="panel-hint">Return date is automatically set to the same time next day.</p>
+        <label>
+        Pickup day
+        <input type="date" name="pickupDate" [(ngModel)]="pickupDate" (ngModelChange)="loadAvailability()">
+      </label>
+
+      <label>
+        Pickup time
+        <select name="pickupTime" [(ngModel)]="pickupTime">
+          @for (time of timeSlots; track time.value) {
+            <option [value]="time.value">{{ time.label }}</option>
+          }
+        </select>
+      </label>
+        @if (selectedEquipmentItems.length === 0) {
+          <p class="empty-state">No equipment selected yet.</p>
+        } @else {
+          <div class="selected-list">
+            @for (item of selectedEquipmentItems; track item.equipmentId) {
+              <div class="selected-row">
+                <div>
+                  <strong>{{ getEquipmentName(item.equipmentId) }}</strong>
+                  @if (getAvailability(item.equipmentId); as availability) {
+                    <small>Available {{ availability.availableQuantity }} / {{ availability.totalQuantity }}</small>
+                  }
+                </div>
+
+                <input
+                  type="number"
+                  min="1"
+                  [ngModel]="item.quantity"
+                  (ngModelChange)="updateQuantity(item.equipmentId, $event)"
+                  [name]="'equipment-' + item.equipmentId">
+
+                <button type="button" class="danger" (click)="removeEquipment(item.equipmentId)">Remove</button>
+              </div>
+            }
+          </div>
+        }
+
+        <button type="button" (click)="createBooking()">Create equipment booking</button>
+      </aside>
+    </section>
+  }
+</main>

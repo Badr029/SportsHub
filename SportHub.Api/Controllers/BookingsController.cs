@@ -69,11 +69,11 @@ namespace SportHub.Api.Controllers
 
         [HttpGet("facility-availability")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetFacilityAvailability(int facilityId, DateTime date, int durationHours)
+        public async Task<IActionResult> GetFacilityAvailability(int facilityId, DateTime date, int durationMinutes = 30)
         {
-            if (durationHours <= 0 || durationHours > 6)
+            if (durationMinutes <= 0 || durationMinutes > 360)
             {
-                return BadRequest("Duration must be between 1 and 6 hours.");
+                return BadRequest("Duration must be between 30 minutes and 6 hours.");
             }
 
             var facility = await _context.Facilities.FirstOrDefaultAsync(facility => facility.Id == facilityId);
@@ -109,7 +109,7 @@ namespace SportHub.Api.Controllers
             for (var time = TimeSpan.FromHours(8); time <= TimeSpan.FromHours(22); time += TimeSpan.FromMinutes(30))
             {
                 var slotStart = dayStart.Add(time);
-                var slotEnd = slotStart.AddHours(durationHours);
+                var slotEnd = slotStart.AddMinutes(durationMinutes);
 
                 var overlaps = existingBookings.Any(booking =>
                     slotStart < booking.EndDate &&

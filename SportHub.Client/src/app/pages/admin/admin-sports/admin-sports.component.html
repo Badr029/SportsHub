@@ -37,7 +37,6 @@
 
             <div class="card-actions">
               <a [routerLink]="['/admin/sports', sport.id]">Manage</a>
-              <button type="button" class="danger" (click)="deleteSport(sport.id)">Delete</button>
             </div>
           </div>
         </article>
@@ -47,7 +46,7 @@
 
   @if (editorOpen()) {
     <section class="modal-backdrop">
-      <form class="modal-panel" (ngSubmit)="saveSport()">
+      <form class="modal-panel editor-modal" (ngSubmit)="saveSport()">
         <h2>{{ editingId ? 'Edit sport' : 'Add sport' }}</h2>
 
         <label>
@@ -60,14 +59,15 @@
           <textarea name="description" rows="4" [(ngModel)]="form.description"></textarea>
         </label>
 
-        <label>
-          Photo
+        <label class="photo-upload">
           <input type="file" accept="image/*" (change)="uploadSportImage($event)">
+          @if (form.imageUrl) {
+            <img class="image-preview" [src]="getImageUrl(form.imageUrl)" alt="Sport preview">
+          } @else {
+            <span>Photo Upload</span>
+          }
+          <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
-
-        @if (form.imageUrl) {
-          <img class="image-preview" [src]="getImageUrl(form.imageUrl)" alt="Sport preview">
-        }
 
         <div class="form-actions">
           <button type="submit">{{ editingId ? 'Update sport' : 'Create sport' }}</button>

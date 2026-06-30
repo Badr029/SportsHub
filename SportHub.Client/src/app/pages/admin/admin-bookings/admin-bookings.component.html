@@ -58,7 +58,7 @@
               <div class="booking-title-row">
                 <h2>#{{ booking.id }} {{ booking.bookingType }}</h2>
                 <span class="status-badge" [class.pending]="booking.status === 'Pending'" [class.confirmed]="booking.status === 'Confirmed'" [class.cancelled]="booking.status === 'Cancelled'" [class.completed]="booking.status === 'Completed'">{{ booking.status }}</span>
-                @if (booking.rentalStatus) {
+                @if (booking.rentalStatus && booking.bookingType === 'Equipment') {
                   <span class="status-badge rental" [class.pending]="booking.rentalStatus === 'PendingPickup'" [class.confirmed]="booking.rentalStatus === 'Active'" [class.completed]="booking.rentalStatus === 'Returned'">{{ booking.rentalStatus }}</span>
                 }
               </div>
@@ -126,10 +126,6 @@
           Showing {{ filteredBookings().length }} bookings
         </span>
 
-        <div>
-          <button type="button" class="secondary" [disabled]="page() <= 1" (click)="previousPage()">Previous</button>
-          <button type="button" class="secondary" [disabled]="page() >= totalPages()" (click)="nextPage()">Next</button>
-        </div>
       </div>
     }
   }
