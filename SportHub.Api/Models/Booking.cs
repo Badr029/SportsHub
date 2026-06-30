@@ -34,5 +34,7 @@ public class Booking
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public bool HiddenFromCustomer { get; set; }
+
     public ICollection<BookingEquipment> BookingEquipment { get; set; } = new List<BookingEquipment>();
 }

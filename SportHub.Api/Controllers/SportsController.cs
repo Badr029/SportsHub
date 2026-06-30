@@ -54,7 +54,8 @@ public class SportsController : ControllerBase
                     e.Id,
                     e.Name,
                     e.Quantity,
-                    e.RentalPrice
+                    e.DailyRentalPrice,
+                    e.PackageHourlyPrice
                 })
             })
             .FirstOrDefaultAsync();

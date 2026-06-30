@@ -1,0 +1,202 @@
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header a {
+  color: #153655;
+  font-weight: 700;
+}
+
+.page-header h1 {
+  margin: 10px 0 8px;
+  color: #153655;
+}
+
+.page-header p {
+  color: #5c6b78;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.item-card,
+.booking-panel,
+.message {
+  border: 1px solid #dfe7ef;
+  border-radius: 8px;
+  background: white;
+  padding: 18px;
+}
+
+.item-card h3 {
+  margin: 0 0 8px;
+  color: #153655;
+}
+
+.item-card p {
+  margin: 4px 0;
+  color: #5c6b78;
+}
+
+.availability-text {
+  font-weight: 800;
+  color: #20584a !important;
+}
+
+.booking-panel {
+  position: sticky;
+  top: 20px;
+}
+
+.panel-hint {
+  margin: 0 0 14px;
+  color: #5c6b78;
+}
+
+.date-section-label {
+  display: grid;
+  gap: 2px;
+  border-inline-start: 4px solid #153655;
+  background: #f4f7fb;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.date-section-label span {
+  color: #153655;
+  font-weight: 800;
+}
+
+.date-section-label small {
+  color: #5c6b78;
+  font-size: 12px;
+}
+
+.equipment-label {
+  border-inline-start-color: #2f6f5e;
+  background: #f2faf7;
+}
+
+.equipment-label span {
+  color: #20584a;
+}
+
+form {
+  display: grid;
+  gap: 13px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+input,
+select {
+  padding: 10px 12px;
+  border: 1px solid #c8d4df;
+  border-radius: 6px;
+}
+
+button {
+  border: 0;
+  border-radius: 6px;
+  background: #153655;
+  color: white;
+  padding: 11px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.error {
+  color: #b42318;
+  margin: 0;
+}
+
+.success {
+  color: #067647;
+  margin: 0;
+}
+
+/* MULTI-EQUIPMENT BOOKING START */
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.card-actions button {
+  padding: 8px 10px;
+}
+
+.secondary {
+  background: #eef3f8;
+  color: #153655;
+}
+
+.selected-equipment {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #dfe7ef;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.selected-equipment h3 {
+  margin: 0;
+  color: #153655;
+}
+
+.selected-equipment p {
+  margin: 0;
+  color: #5c6b78;
+}
+
+.selected-equipment-row {
+  display: grid;
+  grid-template-columns: 1fr 80px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.selected-equipment-row div {
+  display: grid;
+  gap: 2px;
+}
+
+.selected-equipment-row small {
+  color: #5c6b78;
+}
+
+.danger {
+  background: #b42318;
+}
+/* MULTI-EQUIPMENT BOOKING END */
+
+@media (max-width: 820px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-panel {
+    position: static;
+  }
+}

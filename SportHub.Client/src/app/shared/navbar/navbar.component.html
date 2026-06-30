@@ -1,0 +1,14 @@
+<header class="navbar">
+  <a class="brand" routerLink="/sports">SportHub</a>
+
+  <nav>
+    <a routerLink="/sports">Sports</a>
+    <a routerLink="/bookings">My Bookings</a>
+
+    @if (authService.isAdmin()) {
+      <a routerLink="/admin/bookings">Admin</a>
+    }
+
+    <button type="button" (click)="logout()">Logout</button>
+  </nav>
+</header>

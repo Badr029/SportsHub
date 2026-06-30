@@ -1,0 +1,38 @@
+.navbar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  border-bottom: 1px solid #dfe7ef;
+  background: white;
+}
+
+.brand {
+  font-weight: 800;
+  color: #153655;
+  text-decoration: none;
+  font-size: 22px;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+a {
+  color: #263645;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+button {
+  border: 0;
+  background: #153655;
+  color: white;
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}

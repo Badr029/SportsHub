@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SportHub.Api.Data;
 
@@ -11,9 +12,11 @@ using SportHub.Api.Data;
 namespace SportHub.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260629222149_AddEquipmentDailyAndPackagePrices")]
+    partial class AddEquipmentDailyAndPackagePrices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,9 +45,6 @@ namespace SportHub.Api.Migrations
 
                     b.Property<int?>("FacilityId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("HiddenFromCustomer")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("PickupDate")
                         .HasColumnType("datetime(6)");

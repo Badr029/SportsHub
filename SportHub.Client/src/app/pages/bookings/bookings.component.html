@@ -1,0 +1,93 @@
+<app-navbar></app-navbar>
+
+<main class="page">
+  <header class="page-header">
+    <h1>My Bookings</h1>
+    <p>View and manage your facility bookings and equipment rentals.</p>
+  </header>
+
+  @if (loading()) {
+    <p>Loading bookings...</p>
+  } @else if (error()) {
+    <section class="message">
+      <p>{{ error() }}</p>
+      <button type="button" (click)="loadBookings()">Try again</button>
+    </section>
+  } @else {
+    @if (success()) {
+      <p class="success">{{ success() }}</p>
+    }
+
+    @if (bookings().length === 0) {
+      <section class="message">
+        <p>You don't have any bookings yet.</p>
+      </section>
+    } @else {
+      <section class="bookings-list">
+        @for (booking of bookings(); track booking.id) {
+          <article class="booking-card">
+            <div class="booking-content">
+              <div class="booking-title-row">
+                <h2>{{ getBookingTypeLabel(booking.bookingType) }}</h2>
+                <span class="status-badge">{{ booking.status }}</span>
+              </div>
+
+              @if (booking.bookingType === 'Equipment' && booking.rentalStatus) {
+                <p class="muted">Rental status: {{ booking.rentalStatus }}</p>
+              }
+
+              @if (isFacilityBooking(booking)) {
+                @if (booking.startDate && booking.endDate) {
+                  <section class="time-block">
+                    <strong>Facility time</strong>
+                    <p>{{ formatDateTime(booking.startDate) }} - {{ formatTime(booking.endDate) }}</p>
+                    <small>{{ getDurationHours(booking.startDate, booking.endDate) }} hour reservation</small>
+                  </section>
+                }
+              }
+
+              @if (isEquipmentBooking(booking)) {
+                @if (booking.equipment.length > 0) {
+                  <section class="equipment-list">
+                    <strong>Rented equipment</strong>
+
+                    @for (item of booking.equipment; track item.equipmentId) {
+                      <div class="equipment-row">
+                        <span>{{ item.name }}</span>
+                        <small>Quantity: {{ item.quantity }}</small>
+                      </div>
+                    }
+                  </section>
+                }
+
+                @if (booking.bookingType === 'Equipment' && booking.pickupDate && booking.returnDate) {
+                  <section class="time-block equipment-time">
+                    <strong>Equipment rental</strong>
+                    <p>Pickup: {{ formatDateTime(booking.pickupDate) }}</p>
+                    <p>Return: {{ formatDateTime(booking.returnDate) }}</p>
+                  </section>
+                }
+              }
+
+              <p class="total-price">Total price: {{ booking.totalPrice }} EGP</p>
+            </div>
+
+            <div class="card-actions">
+              @if (booking.status !== 'Cancelled' && booking.status !== 'Completed') {
+                <button type="button" (click)="cancelBooking(booking.id)">
+                  Cancel
+                </button>
+              }
+
+              @if (canClearBooking(booking)) {
+                <button type="button" class="secondary" (click)="clearBooking(booking.id)">
+                  Clear
+                </button>
+              }
+            </div>
+          </article>
+        }
+      </section>
+    }
+  }
+</main>

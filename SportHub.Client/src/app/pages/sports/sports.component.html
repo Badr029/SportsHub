@@ -1,0 +1,27 @@
+<app-navbar></app-navbar>
+
+<main class="page">
+  <header class="page-header">
+    <h1>Sports</h1>
+    <p>Choose a sport to view facilities and equipment.</p>
+  </header>
+
+  @if (loading()) {
+    <p>Loading sports...</p>
+  } @else if (error()) {
+    <section class="message">
+      <p>{{ error() }}</p>
+      <button type="button" (click)="loadSports()">Try again</button>
+    </section>
+  } @else {
+    <section class="sports-grid">
+      @for (sport of sports(); track sport.id) {
+        <article class="sport-card">
+          <h2>{{ sport.name }}</h2>
+          <p>{{ sport.description }}</p>
+          <a [routerLink]="['/sport', sport.id]">View details</a>
+        </article>
+      }
+    </section>
+  }
+</main>

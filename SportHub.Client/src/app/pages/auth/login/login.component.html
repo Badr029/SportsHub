@@ -1,0 +1,31 @@
+<main class="auth-page">
+  <section class="auth-panel">
+    <h1>SportHub</h1>
+    <h2>Login</h2>
+
+    <form (ngSubmit)="login()">
+      <label>
+        Email
+        <input type="email" name="email" [(ngModel)]="email">
+      </label>
+
+      <label>
+        Password
+        <input type="password" name="password" [(ngModel)]="password">
+      </label>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <button type="submit" [disabled]="loading()" >
+        {{ loading() ? 'Logging in...' : 'Login' }}
+      </button>
+    </form>
+
+    <p>
+      No account?
+      <a routerLink="/register">Register</a>
+    </p>
+  </section>
+</main>

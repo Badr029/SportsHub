@@ -1,0 +1,245 @@
+<app-navbar></app-navbar>
+
+<main class="page">
+  @if (loading()) {
+    <p>Loading sport...</p>
+  } @else if (error() && !sport()) {
+    <section class="message">
+      <p>{{ error() }}</p>
+      <a routerLink="/sports">Back to sports</a>
+    </section>
+  } @else if (sport()) {
+    <header class="page-header">
+      <a routerLink="/sports">Back to sports</a>
+      <h1>{{ sport()!.name }}</h1>
+      <p>{{ sport()!.description }}</p>
+    </header>
+
+    <section class="content-grid">
+      <section>
+        <h2>Facilities</h2>
+
+        <div class="list">
+          @for (facility of sport()!.facilities; track facility.id) {
+            <article class="item-card">
+              <h3>{{ facility.name }}</h3>
+              <p>{{ facility.pricePerHour }} / hour</p>
+
+              <!-- MULTI-EQUIPMENT BOOKING START -->
+              <div class="card-actions">
+                <button type="button" (click)="selectFacilityBooking(facility.id)">
+                  Book facility
+                </button>
+
+                <button type="button" class="secondary" (click)="startPackageWithFacility(facility.id)">
+                  Start package
+                </button>
+              </div>
+              <!-- MULTI-EQUIPMENT BOOKING END -->
+            </article>
+          }
+        </div>
+
+        <h2>Equipment</h2>
+
+        <div class="list">
+          @for (equipment of sport()!.equipment; track equipment.id) {
+            <article class="item-card">
+              <h3>{{ equipment.name }}</h3>
+              <p>Total stock: {{ equipment.quantity }}</p>
+              @if (getEquipmentAvailability(equipment.id); as availability) {
+                <p class="availability-text">
+                  Available for selected {{ bookingType === 2 ? 'day' : 'package time' }}:
+                  {{ availability.availableQuantity }} / {{ availability.totalQuantity }}
+                </p>
+              }
+              <p>{{ equipment.dailyRentalPrice }} / day</p>
+              <p>{{ equipment.packageHourlyPrice }} / hour in package</p>
+
+              <!-- MULTI-EQUIPMENT BOOKING START -->
+              <div class="card-actions">
+                <button type="button" (click)="selectEquipmentBooking(equipment.id)">
+                  Rent equipment
+                </button>
+
+                <button type="button" class="secondary" (click)="addEquipmentToPackage(equipment.id)">
+                  Add to package
+                </button>
+              </div>
+              <!-- MULTI-EQUIPMENT BOOKING END -->
+            </article>
+          }
+        </div>
+      </section>
+
+      <aside class="booking-panel">
+        <h2>Create booking</h2>
+
+        <p class="panel-hint">
+          Pick from the cards, then review and complete the booking here.
+        </p>
+
+        <form (ngSubmit)="createBooking()">
+          <label>
+            Booking type
+            <select name="bookingType" [(ngModel)]="bookingType">
+              <option [ngValue]="1">Facility</option>
+              <option [ngValue]="2">Equipment</option>
+              <option [ngValue]="3">Package</option>
+            </select>
+          </label>
+
+          @if (bookingType === 1 || bookingType === 3) {
+            <label>
+              Facility
+              <select name="facilityId" [(ngModel)]="facilityId" (ngModelChange)="loadFacilityAvailability()">
+                <option [ngValue]="null">Select facility</option>
+                @for (facility of sport()!.facilities; track facility.id) {
+                  <option [ngValue]="facility.id">
+                    {{ facility.name }} - {{ facility.pricePerHour }} / hour
+                  </option>
+                }
+              </select>
+            </label>
+          }
+
+          <!-- MULTI-EQUIPMENT BOOKING START -->
+          @if (bookingType === 2 || bookingType === 3) {
+            <section class="selected-equipment">
+              <div class="equipment-picker">
+                <label>
+                  Add equipment
+                  <select name="equipmentToAddId" [(ngModel)]="equipmentToAddId">
+                    <option [ngValue]="null">Select equipment</option>
+                    @for (equipment of sport()!.equipment; track equipment.id) {
+                      <option [ngValue]="equipment.id">
+                        {{ equipment.name }} - available {{ equipment.quantity }}
+                      </option>
+                    }
+                  </select>
+                </label>
+
+                <button type="button" class="secondary" (click)="addEquipmentFromPanel()">
+                  Add
+                </button>
+              </div>
+              <h3>Selected equipment</h3>
+
+              @if (selectedEquipmentItems.length === 0) {
+                <p>No equipment selected yet.</p>
+              } @else {
+                @for (item of selectedEquipmentItems; track item.equipmentId) {
+                  <div class="selected-equipment-row">
+                    <div>
+                      <span>{{ getEquipmentName(item.equipmentId) }}</span>
+
+                      @if (getEquipmentAvailability(item.equipmentId); as availability) {
+                        <small>
+                          Available:
+                          {{ availability.availableQuantity }} / {{ availability.totalQuantity }}
+                        </small>
+                      }
+                    </div>
+
+                    <input
+                      type="number"
+                      min="1"
+                      [ngModel]="item.quantity"
+                      (ngModelChange)="updateEquipmentQuantity(item.equipmentId, $event)"
+                      [name]="'quantity-' + item.equipmentId">
+
+                    <button type="button" class="danger" (click)="removeEquipmentItem(item.equipmentId)">
+                      Remove
+                    </button>
+                  </div>
+                }
+              }
+            </section>
+          }
+          <!-- MULTI-EQUIPMENT BOOKING END -->
+          @if (bookingType === 1 || bookingType === 3) {
+            @if (bookingType === 3) {
+              <div class="date-section-label">
+                <span>Facility time</span>
+                <small>When the field or court is reserved.</small>
+              </div>
+            }
+            <label>
+              Booking day
+            <input type="date" name="bookingDate" [(ngModel)]="bookingDate" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">            </label>
+
+            <label>
+              Start time
+              <select name="startTime" [(ngModel)]="startTime" (ngModelChange)="loadEquipmentAvailability()">
+                <option value="">Select time</option>
+                @for (slot of availabilitySlots; track slot.time) {
+                  <option [value]="slot.time" [disabled]="!slot.available">
+                    {{ slot.label }} - {{ slot.available ? 'Available' : 'Occupied' }}
+                  </option>
+                }
+              </select>
+            </label>
+
+            <label>
+              Duration
+              <select name="durationHours" [(ngModel)]="durationHours" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">
+                <option [ngValue]="1">1 hour</option>
+                <option [ngValue]="2">2 hours</option>
+                <option [ngValue]="3">3 hours</option>
+                <option [ngValue]="4">4 hours</option>
+                <option [ngValue]="5">5 hours</option>
+                <option [ngValue]="6">6 hours</option>
+              </select>
+            </label>
+          }
+
+
+          @if (bookingType === 2 || bookingType === 3) {
+            @if (bookingType === 3) {
+              <div class="date-section-label equipment-label">
+                <span>Equipment rental</span>
+                <small>When equipment is picked up and returned.</small>
+              </div>
+            }
+            @if (bookingType === 2) {
+              <label>
+                Pickup day
+                <input type="date" name="pickupDate" [(ngModel)]="pickupDate" (ngModelChange)="loadEquipmentAvailability()">
+              </label>
+
+              <label>
+                Pickup time
+                <select name="pickupTime" [(ngModel)]="pickupTime">
+                  <option value="">Select time</option>
+                  @for (time of timeSlots; track time.value) {
+                    <option [value]="time.value">{{ time.label }}</option>
+                  }
+                </select>
+              </label>
+
+              <p class="panel-hint">
+                Return date will be set automatically to the same time next day.
+              </p>
+            }
+
+            @if (bookingType === 3) {
+              <p class="panel-hint">
+                Equipment follows the facility time in package bookings.
+              </p>
+            }
+          }
+
+          @if (error()) {
+            <p class="error">{{ error() }}</p>
+          }
+
+          @if (success()) {
+            <p class="success">{{ success() }}</p>
+          }
+
+          <button type="submit">Create booking</button>
+        </form>
+      </aside>
+    </section>
+  }
+</main>

@@ -115,7 +115,8 @@ public class AppDbContext : DbContext
                 SportId = 1,
                 Name = "Football",
                 Quantity = 20,
-                RentalPrice = 30
+                DailyRentalPrice = 30,
+                PackageHourlyPrice = 10
             },
             new Equipment
             {
@@ -123,7 +124,8 @@ public class AppDbContext : DbContext
                 SportId = 2,
                 Name = "Tennis Racket",
                 Quantity = 12,
-                RentalPrice = 50
+                DailyRentalPrice = 50,
+                PackageHourlyPrice = 15
             },
             new Equipment
             {
@@ -131,15 +133,16 @@ public class AppDbContext : DbContext
                 SportId = 3,
                 Name = "Padel Racket",
                 Quantity = 10,
-                RentalPrice = 70
+                DailyRentalPrice = 70,
+                PackageHourlyPrice = 20
             },
             new Equipment
             {
                 Id = 4,
                 SportId = 4,
                 Name = "Basketball",
-                Quantity = 15,
-                RentalPrice = 35
+                DailyRentalPrice = 35,
+                PackageHourlyPrice = 10
             }
         );
     }

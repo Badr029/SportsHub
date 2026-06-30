@@ -12,7 +12,8 @@ public class Equipment
 
     public int Quantity { get; set; }
 
-    public decimal RentalPrice { get; set; }
+    public decimal DailyRentalPrice { get; set; }
+    public decimal PackageHourlyPrice { get; set; }
 
     public ICollection<BookingEquipment> BookingEquipment { get; set; } = new List<BookingEquipment>();
 }

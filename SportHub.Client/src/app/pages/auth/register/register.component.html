@@ -1,0 +1,50 @@
+<main class="auth-page">
+  <section class="auth-panel">
+    <h1>SportHub</h1>
+    <h2>Create account</h2>
+
+    <form (ngSubmit)="register()">
+      <label>
+        Name
+        <input type="text" name="name" [(ngModel)]="name">
+      </label>
+
+      <label>
+        Email
+        <input type="email" name="email" [(ngModel)]="email">
+      </label>
+
+      <label>
+        Phone number
+        <input type="tel" name="phoneNumber" [(ngModel)]="phoneNumber">
+      </label>
+
+      <label>
+        Password
+        <input type="password" name="password" [(ngModel)]="password">
+      </label>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <label>
+        Confirm password
+        <input type="password" name="confirmPassword" [(ngModel)]="confirmPassword">
+      </label>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Creating account...' : 'Register' }}
+      </button>
+    </form>
+
+    <p>
+      Already have an account?
+      <a routerLink="/login">Login</a>
+    </p>
+  </section>
+</main>
