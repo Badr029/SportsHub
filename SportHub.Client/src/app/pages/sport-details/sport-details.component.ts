@@ -4,6 +4,7 @@ import {FormsModule} from '@angular/forms';
 
 import { SportsService } from '../../core/services/sports.service';
 import { BookingService } from '../../core/services/booking.service';
+import { resolveImageUrl } from '../../core/services/api.config';
 import {SportDetails} from '../../models/sport.model';
 import {BookingType, CreateBooking, FacilityAvailabilitySlot, EquipmentAvailability} from '../../models/booking.model';
 import {NavbarComponent} from '../../shared/navbar/navbar.component';
@@ -295,6 +296,13 @@ export class SportDetailsComponent implements OnInit {
   }
 
   selectFacilityBooking(facilityId: number){
+    const facility = this.sport()?.facilities.find(facility => facility.id === facilityId);
+
+    if (facility?.isOutOfService) {
+      this.error.set('This facility is currently out of service.');
+      return;
+    }
+
     this.bookingType = 1;
     this.facilityId = facilityId;
     this.selectedEquipmentItems = [];
@@ -311,6 +319,13 @@ export class SportDetailsComponent implements OnInit {
   }
 
   startPackageWithFacility(facilityId: number){
+    const facility = this.sport()?.facilities.find(facility => facility.id === facilityId);
+
+    if (facility?.isOutOfService) {
+      this.error.set('This facility is currently out of service.');
+      return;
+    }
+
     this.bookingType = 3;
     this.facilityId = facilityId;
     this.loadFacilityAvailability();
@@ -321,6 +336,10 @@ export class SportDetailsComponent implements OnInit {
   addEquipmentToPackage(equipmentId: number) {
     this.bookingType = 3;
     this.addEquipmentItem(equipmentId);
+  }
+
+  getImageUrl(imageUrl?: string | null) {
+    return resolveImageUrl(imageUrl);
   }
 
 timeSlots = [

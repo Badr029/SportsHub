@@ -19,14 +19,45 @@ public class AdminBookingsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllBookings()
+    public async Task<IActionResult> GetAllBookings(int page = 1, int pageSize = 6, string status = "All")
     {
-        var bookings = await _context.Bookings
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize < 1 || pageSize > 50)
+        {
+            pageSize = 6;
+        }
+
+        var query = _context.Bookings
             .Include(booking => booking.User)
             .Include(booking => booking.Facility)
             .Include(booking => booking.BookingEquipment)
                 .ThenInclude(item => item.Equipment)
-            .OrderByDescending(booking => booking.CreatedAt)
+            .AsQueryable();
+
+        if (!string.Equals(status, "All", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!Enum.TryParse<BookingStatus>(status, true, out var parsedStatus))
+            {
+                return BadRequest("Invalid booking status.");
+            }
+
+            query = query.Where(booking => booking.Status == parsedStatus);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var bookings = await query
+            .OrderBy(booking => booking.Status == BookingStatus.Pending ? 1 :
+                booking.Status == BookingStatus.Confirmed ? 2 :
+                booking.Status == BookingStatus.Cancelled ? 3 :
+                booking.Status == BookingStatus.Completed ? 4 : 5)
+            .ThenByDescending(booking => booking.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(booking => new
             {
                 booking.Id,
@@ -57,12 +88,14 @@ public class AdminBookingsController : ControllerBase
             })
             .ToListAsync();
 
-        if (bookings.Count == 0)
+        return Ok(new
         {
-            return NotFound("No bookings found.");
-        }
-
-        return Ok(bookings);
+            Items = bookings,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+        });
     }
 
     [HttpPost("{id}/confirm")]
@@ -152,5 +185,32 @@ public class AdminBookingsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok("Booking completed.");
+    }
+
+    [HttpPost("{id}/cancel")]
+    public async Task<IActionResult> CancelBooking(int id)
+    {
+        var booking = await _context.Bookings.FindAsync(id);
+
+        if (booking == null)
+        {
+            return NotFound("Booking not found.");
+        }
+
+        if (booking.Status == BookingStatus.Cancelled)
+        {
+            return BadRequest("Booking is already cancelled.");
+        }
+
+        if (booking.Status == BookingStatus.Completed)
+        {
+            return BadRequest("Completed bookings cannot be cancelled.");
+        }
+
+        booking.Status = BookingStatus.Cancelled;
+
+        await _context.SaveChangesAsync();
+
+        return Ok("Booking cancelled.");
     }
 }

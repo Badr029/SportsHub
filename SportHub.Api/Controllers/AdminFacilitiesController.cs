@@ -30,6 +30,8 @@ public class AdminFacilitiesController : ControllerBase
                 facility.Id,
                 facility.Name,
                 facility.PricePerHour,
+                facility.ImageUrl,
+                facility.IsOutOfService,
                 Sport = new
                 {
                     facility.Sport!.Id,
@@ -65,7 +67,9 @@ public class AdminFacilitiesController : ControllerBase
         {
             SportId = dto.SportId,
             Name = dto.Name,
-            PricePerHour = dto.PricePerHour
+            PricePerHour = dto.PricePerHour,
+            ImageUrl = dto.ImageUrl,
+            IsOutOfService = dto.IsOutOfService
         };
 
         _context.Facilities.Add(facility);
@@ -104,6 +108,8 @@ public class AdminFacilitiesController : ControllerBase
         facility.SportId = dto.SportId;
         facility.Name = dto.Name;
         facility.PricePerHour = dto.PricePerHour;
+        facility.ImageUrl = dto.ImageUrl;
+        facility.IsOutOfService = dto.IsOutOfService;
 
         await _context.SaveChangesAsync();
 

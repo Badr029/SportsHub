@@ -42,10 +42,10 @@ export class LoginComponent {
         error: error => {
           if (error.status === 0) {
             this.error.set('Cannot connect to the server.');
-            console.log(error);
+          } else if (error.status === 401) {
+            this.error.set('Invalid email or password.');
           } else {
             this.error.set(error.error || 'Login failed.');
-            console.log(error);
           }
 
           this.loading.set(false);

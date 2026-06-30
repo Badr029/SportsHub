@@ -12,5 +12,9 @@ public class Facility
 
     public decimal PricePerHour { get; set; }
 
+    public string? ImageUrl { get; set; }
+
+    public bool IsOutOfService { get; set; }
+
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

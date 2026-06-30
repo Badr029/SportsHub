@@ -24,10 +24,6 @@
         <input type="password" name="password" [(ngModel)]="password">
       </label>
 
-      @if (error()) {
-        <p class="error">{{ error() }}</p>
-      }
-
       <label>
         Confirm password
         <input type="password" name="confirmPassword" [(ngModel)]="confirmPassword">

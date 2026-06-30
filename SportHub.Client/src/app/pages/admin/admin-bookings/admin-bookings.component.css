@@ -1,0 +1,210 @@
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.header-actions label {
+  display: grid;
+  gap: 6px;
+  color: #153655;
+  font-weight: 700;
+}
+
+.header-actions select {
+  padding: 10px 12px;
+  border: 1px solid #c8d4df;
+  border-radius: 6px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px;
+  color: #153655;
+}
+
+.page-header p {
+  margin: 0;
+  color: #5c6b78;
+}
+
+.bookings-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  color: #5c6b78;
+  font-weight: 700;
+}
+
+.pagination-bar.bottom {
+  margin-top: 14px;
+  margin-bottom: 0;
+}
+
+.pagination-bar div {
+  display: flex;
+  gap: 8px;
+}
+
+.booking-card,
+.message {
+  display: grid;
+  gap: 16px;
+  border: 1px solid #dfe7ef;
+  border-radius: 8px;
+  background: white;
+  padding: 18px;
+}
+
+.booking-content {
+  display: grid;
+  gap: 10px;
+}
+
+.booking-title-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.booking-title-row h2 {
+  margin: 0;
+  color: #153655;
+}
+
+.status-badge {
+  border-radius: 999px;
+  background: #eef3f8;
+  color: #153655;
+  padding: 4px 9px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.status-badge.rental {
+  background: #f2faf7;
+  color: #20584a;
+}
+
+.customer-block,
+.time-block,
+.equipment-list {
+  border: 1px solid #dfe7ef;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.customer-block strong,
+.time-block strong,
+.equipment-list strong {
+  color: #153655;
+}
+
+.customer-block p,
+.time-block p,
+.message p {
+  margin: 4px 0;
+  color: #5c6b78;
+}
+
+.equipment-list {
+  display: grid;
+  gap: 8px;
+}
+
+.equipment-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #edf2f7;
+  padding-top: 8px;
+}
+
+.equipment-row:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.equipment-row span {
+  color: #153655;
+  font-weight: 700;
+}
+
+.equipment-row small {
+  color: #5c6b78;
+}
+
+.total-price {
+  margin: 0;
+  color: #153655;
+  font-weight: 800;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+button {
+  border: 0;
+  border-radius: 6px;
+  background: #153655;
+  color: white;
+  padding: 10px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.secondary {
+  background: #eef3f8;
+  color: #153655;
+}
+
+.danger {
+  background: #b42318;
+}
+
+.success {
+  color: #067647;
+  font-weight: 700;
+}
+
+@media (max-width: 820px) {
+  .page-header {
+    display: grid;
+  }
+
+  .bookings-list {
+    grid-template-columns: 1fr;
+  }
+}

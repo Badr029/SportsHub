@@ -82,3 +82,11 @@ export interface AdminBookingResponse {
   totalPrice: number;
   equipment: AdminBookingEquipment[];
 }
+
+export interface AdminBookingsPage {
+  items: AdminBookingResponse[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SportHub.Api.Data;
 using SportHub.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -95,6 +96,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+var webRootPath = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+Directory.CreateDirectory(webRootPath);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -102,6 +106,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(webRootPath)
+});
 app.UseCors();
 
 app.UseAuthentication();

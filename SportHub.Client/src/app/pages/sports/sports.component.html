@@ -17,9 +17,12 @@
     <section class="sports-grid">
       @for (sport of sports(); track sport.id) {
         <article class="sport-card">
+          @if (sport.imageUrl) {
+            <img [src]="getImageUrl(sport.imageUrl)" [alt]="sport.name">
+          }
           <h2>{{ sport.name }}</h2>
           <p>{{ sport.description }}</p>
-          <a [routerLink]="['/sport', sport.id]">View details</a>
+          <a [routerLink]="['/sports', sport.id]">View details</a>
         </article>
       }
     </section>

@@ -76,11 +76,16 @@ namespace SportHub.Api.Controllers
                 return BadRequest("Duration must be between 1 and 6 hours.");
             }
 
-            var facilityExists = await _context.Facilities.AnyAsync(facility => facility.Id == facilityId);
+            var facility = await _context.Facilities.FirstOrDefaultAsync(facility => facility.Id == facilityId);
 
-            if (!facilityExists)
+            if (facility == null)
             {
                 return NotFound("Facility not found.");
+            }
+
+            if (facility.IsOutOfService)
+            {
+                return BadRequest("Facility is currently out of service.");
             }
 
             var dayStart = date.Date;
@@ -166,10 +171,15 @@ namespace SportHub.Api.Controllers
                 {
                     return BadRequest("Facility is required.");
                 }
-                var facilityExists = await _context.Facilities.AnyAsync(f => f.Id == dto.FacilityId);
-                if (!facilityExists)
+                var facility = await _context.Facilities.FirstOrDefaultAsync(f => f.Id == dto.FacilityId);
+                if (facility == null)
                 {
                     return BadRequest("Facility does not exist.");
+                }
+
+                if (facility.IsOutOfService)
+                {
+                    return BadRequest("Facility is currently out of service.");
                 }
 
                 var overlapExists = await _context.Bookings.AnyAsync(b =>

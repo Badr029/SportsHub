@@ -7,4 +7,8 @@ public class FacilityDto
     public string Name { get; set; } = string.Empty;
 
     public decimal PricePerHour { get; set; }
+
+    public string? ImageUrl { get; set; }
+
+    public bool IsOutOfService { get; set; }
 }

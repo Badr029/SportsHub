@@ -1,0 +1,207 @@
+<app-navbar></app-navbar>
+
+<main class="page">
+  <header class="page-header">
+    <div>
+      <a routerLink="/admin/sports">Back to admin sports</a>
+      <h1>{{ sport()?.name || 'Sport details' }}</h1>
+      <p>Customize sport details, facilities, and equipment.</p>
+    </div>
+
+    <button type="button" class="secondary" (click)="loadPageData()">Refresh</button>
+  </header>
+
+  @if (loading()) {
+    <p>Loading sport management...</p>
+  } @else {
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    @if (success()) {
+      <p class="success">{{ success() }}</p>
+    }
+
+    <section class="sport-summary">
+      @if (sport()?.imageUrl) {
+        <img [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name">
+      }
+
+      <div>
+        <h2>{{ sport()?.name }}</h2>
+        <p>{{ sport()?.description }}</p>
+        <button type="button" (click)="openSportEditor()">Edit sport</button>
+      </div>
+    </section>
+
+    <section class="management-grid">
+      <section class="manager-section">
+        <div class="section-header">
+          <h2>Facilities</h2>
+          <button type="button" (click)="openAddFacility()">Add facility</button>
+        </div>
+
+        <div class="cards-list">
+          @for (facility of facilities(); track facility.id) {
+            <article class="item-card" [class.out-of-service]="facility.isOutOfService">
+              @if (facility.imageUrl) {
+                <img [src]="getImageUrl(facility.imageUrl)" [alt]="facility.name">
+              }
+
+              <h3>{{ facility.name }}</h3>
+
+              @if (facility.isOutOfService) {
+                <p class="service-label">Out of service</p>
+              }
+
+              <p>{{ facility.pricePerHour }} EGP / hour</p>
+
+              <div class="card-actions">
+                <button type="button" class="secondary" (click)="editFacility(facility)">Edit</button>
+                <button type="button" class="danger" (click)="deleteFacility(facility.id)">Delete</button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+
+      <section class="manager-section">
+        <div class="section-header">
+          <h2>Equipment</h2>
+          <button type="button" (click)="openAddEquipment()">Add equipment</button>
+        </div>
+
+        <div class="cards-list">
+          @for (item of equipment(); track item.id) {
+            <article class="item-card">
+              @if (item.imageUrl) {
+                <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name">
+              }
+
+              <h3>{{ item.name }}</h3>
+              <p>Stock: {{ item.quantity }}</p>
+              <p>{{ item.dailyRentalPrice }} EGP / day</p>
+              <p>{{ item.packageHourlyPrice }} EGP / package hour</p>
+
+              <div class="card-actions">
+                <button type="button" class="secondary" (click)="editEquipment(item)">Edit</button>
+                <button type="button" class="danger" (click)="deleteEquipment(item.id)">Delete</button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    </section>
+  }
+
+  @if (sportEditorOpen()) {
+    <section class="modal-backdrop">
+      <form class="modal-panel" (ngSubmit)="saveSport()">
+        <h2>Edit sport</h2>
+
+        <label>
+          Name
+          <input type="text" name="sportName" [(ngModel)]="sportForm.name">
+        </label>
+
+        <label>
+          Description
+          <textarea name="sportDescription" rows="3" [(ngModel)]="sportForm.description"></textarea>
+        </label>
+
+        <label>
+          Photo
+          <input type="file" accept="image/*" (change)="uploadSportImage($event)">
+        </label>
+
+        @if (sportForm.imageUrl) {
+          <img class="image-preview" [src]="getImageUrl(sportForm.imageUrl)" alt="Sport preview">
+        }
+
+        <div class="form-actions">
+          <button type="submit">Save sport</button>
+          <button type="button" class="secondary" (click)="closeSportEditor()">Cancel</button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (facilityEditorOpen()) {
+    <section class="modal-backdrop">
+      <form class="modal-panel" (ngSubmit)="saveFacility()">
+        <h2>{{ editingFacilityId ? 'Edit facility' : 'Add facility' }}</h2>
+
+        <label>
+          Name
+          <input type="text" name="facilityName" [(ngModel)]="facilityForm.name">
+        </label>
+
+        <label>
+          Price per hour
+          <input type="number" name="facilityPrice" min="1" [(ngModel)]="facilityForm.pricePerHour">
+        </label>
+
+        <label>
+          Photo
+          <input type="file" accept="image/*" (change)="uploadFacilityImage($event)">
+        </label>
+
+        @if (facilityForm.imageUrl) {
+          <img class="image-preview" [src]="getImageUrl(facilityForm.imageUrl)" alt="Facility preview">
+        }
+
+        <label class="checkbox-row">
+          <input type="checkbox" name="facilityOutOfService" [(ngModel)]="facilityForm.isOutOfService">
+          Out of service
+        </label>
+
+        <div class="form-actions">
+          <button type="submit">{{ editingFacilityId ? 'Update facility' : 'Create facility' }}</button>
+          <button type="button" class="secondary" (click)="resetFacilityForm()">Cancel</button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (equipmentEditorOpen()) {
+    <section class="modal-backdrop">
+      <form class="modal-panel" (ngSubmit)="saveEquipment()">
+        <h2>{{ editingEquipmentId ? 'Edit equipment' : 'Add equipment' }}</h2>
+
+        <label>
+          Name
+          <input type="text" name="equipmentName" [(ngModel)]="equipmentForm.name">
+        </label>
+
+        <label>
+          Total stock
+          <input type="number" name="equipmentQuantity" min="0" [(ngModel)]="equipmentForm.quantity">
+        </label>
+
+        <label>
+          Daily rental price
+          <input type="number" name="dailyRentalPrice" min="1" [(ngModel)]="equipmentForm.dailyRentalPrice">
+        </label>
+
+        <label>
+          Package hourly price
+          <input type="number" name="packageHourlyPrice" min="1" [(ngModel)]="equipmentForm.packageHourlyPrice">
+        </label>
+
+        <label>
+          Photo
+          <input type="file" accept="image/*" (change)="uploadEquipmentImage($event)">
+        </label>
+
+        @if (equipmentForm.imageUrl) {
+          <img class="image-preview" [src]="getImageUrl(equipmentForm.imageUrl)" alt="Equipment preview">
+        }
+
+        <div class="form-actions">
+          <button type="submit">{{ editingEquipmentId ? 'Update equipment' : 'Create equipment' }}</button>
+          <button type="button" class="secondary" (click)="resetEquipmentForm()">Cancel</button>
+        </div>
+      </form>
+    </section>
+  }
+</main>

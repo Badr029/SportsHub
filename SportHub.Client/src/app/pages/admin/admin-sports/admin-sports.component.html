@@ -1,0 +1,79 @@
+<app-navbar></app-navbar>
+
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Admin Sports</h1>
+      <p>Manage sports and open each sport to customize its facilities and equipment.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" (click)="openAddSport()">Add sport</button>
+      <button type="button" class="secondary" (click)="loadSports()">Refresh</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p>Loading sports...</p>
+  } @else {
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    @if (success()) {
+      <p class="success">{{ success() }}</p>
+    }
+
+    <section class="sports-grid">
+      @for (sport of sports(); track sport.id) {
+        <article class="sport-card">
+          @if (sport.imageUrl) {
+            <img [src]="getImageUrl(sport.imageUrl)" [alt]="sport.name">
+          }
+
+          <div class="sport-body">
+            <h2>{{ sport.name }}</h2>
+            <p>{{ sport.description }}</p>
+
+            <div class="card-actions">
+              <a [routerLink]="['/admin/sports', sport.id]">Manage</a>
+              <button type="button" class="danger" (click)="deleteSport(sport.id)">Delete</button>
+            </div>
+          </div>
+        </article>
+      }
+    </section>
+  }
+
+  @if (editorOpen()) {
+    <section class="modal-backdrop">
+      <form class="modal-panel" (ngSubmit)="saveSport()">
+        <h2>{{ editingId ? 'Edit sport' : 'Add sport' }}</h2>
+
+        <label>
+          Name
+          <input type="text" name="name" [(ngModel)]="form.name">
+        </label>
+
+        <label>
+          Description
+          <textarea name="description" rows="4" [(ngModel)]="form.description"></textarea>
+        </label>
+
+        <label>
+          Photo
+          <input type="file" accept="image/*" (change)="uploadSportImage($event)">
+        </label>
+
+        @if (form.imageUrl) {
+          <img class="image-preview" [src]="getImageUrl(form.imageUrl)" alt="Sport preview">
+        }
+
+        <div class="form-actions">
+          <button type="submit">{{ editingId ? 'Update sport' : 'Create sport' }}</button>
+          <button type="button" class="secondary" (click)="resetForm()">Cancel</button>
+        </div>
+      </form>
+    </section>
+  }
+</main>

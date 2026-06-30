@@ -1,0 +1,134 @@
+<app-navbar></app-navbar>
+
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Admin Bookings</h1>
+      <p>Confirm bookings and manage equipment pickup and return.</p>
+    </div>
+
+    <div class="header-actions">
+      <label>
+        Status
+        <select [ngModel]="statusFilter()" (ngModelChange)="changeStatusFilter($event)">
+          <option value="All">All</option>
+          <option value="Pending">Pending</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </label>
+
+      <button type="button" class="secondary" (click)="loadBookings()">Refresh</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p>Loading bookings...</p>
+  } @else if (error()) {
+    <section class="message">
+      <p>{{ error() }}</p>
+      <button type="button" (click)="loadBookings()">Try again</button>
+    </section>
+  } @else {
+    @if (success()) {
+      <p class="success">{{ success() }}</p>
+    }
+
+    @if (filteredBookings().length === 0) {
+      <section class="message">
+        <p>No bookings found.</p>
+      </section>
+    } @else {
+      <div class="pagination-bar">
+        <span>
+          Page {{ page() }} of {{ totalPages() }} - {{ totalCount() }} bookings
+        </span>
+
+        <div>
+          <button type="button" class="secondary" [disabled]="page() <= 1" (click)="previousPage()">Previous</button>
+          <button type="button" class="secondary" [disabled]="page() >= totalPages()" (click)="nextPage()">Next</button>
+        </div>
+      </div>
+
+      <section class="bookings-list">
+        @for (booking of filteredBookings(); track booking.id) {
+          <article class="booking-card">
+            <div class="booking-content">
+              <div class="booking-title-row">
+                <h2>#{{ booking.id }} {{ booking.bookingType }}</h2>
+                <span class="status-badge">{{ booking.status }}</span>
+                @if (booking.rentalStatus) {
+                  <span class="status-badge rental">{{ booking.rentalStatus }}</span>
+                }
+              </div>
+
+              <section class="customer-block">
+                <strong>{{ booking.user.name }}</strong>
+                <p>{{ booking.user.phoneNumber }}</p>
+                <p>{{ booking.user.email }}</p>
+              </section>
+
+              @if (isFacilityBooking(booking) && booking.facility) {
+                <section class="time-block">
+                  <strong>{{ booking.facility.name }}</strong>
+                  <p>{{ formatDateTime(booking.startDate) }} - {{ formatTime(booking.endDate) }}</p>
+                </section>
+              }
+
+              @if (isEquipmentBooking(booking) && booking.equipment.length > 0) {
+                <section class="equipment-list">
+                  <strong>Equipment</strong>
+
+                  @for (item of booking.equipment; track item.equipmentId) {
+                    <div class="equipment-row">
+                      <span>{{ item.name }}</span>
+                      <small>Quantity: {{ item.quantity }}</small>
+                    </div>
+                  }
+                </section>
+              }
+
+              <p class="total-price">Total price: {{ booking.totalPrice }} EGP</p>
+            </div>
+
+            <div class="card-actions">
+              @if (!isClosedBooking(booking)) {
+                @if (canConfirm(booking)) {
+                  <button type="button" (click)="confirmBooking(booking.id)">Confirm</button>
+                }
+
+                @if (canPickup(booking)) {
+                  <button type="button" (click)="markPickedUp(booking.id)">Picked up</button>
+                }
+
+                @if (canReturn(booking)) {
+                  <button type="button" (click)="markReturned(booking.id)">Returned</button>
+                }
+
+                @if (canComplete(booking)) {
+                  <button type="button" class="secondary" (click)="completeBooking(booking.id)">Complete</button>
+                }
+
+                @if (canCancel(booking)) {
+                  <button type="button" class="danger" (click)="cancelBooking(booking.id)">Cancel</button>
+                }
+              }
+            </div>
+          </article>
+        }
+      </section>
+
+      <div class="pagination-bar bottom">
+        <span>
+          Showing {{ filteredBookings().length }} bookings
+        </span>
+
+        <div>
+          <button type="button" class="secondary" [disabled]="page() <= 1" (click)="previousPage()">Previous</button>
+          <button type="button" class="secondary" [disabled]="page() >= totalPages()" (click)="nextPage()">Next</button>
+        </div>
+      </div>
+    }
+  }
+</main>

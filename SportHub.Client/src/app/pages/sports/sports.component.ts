@@ -2,6 +2,7 @@ import { Component, signal, OnInit} from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { SportsService } from '../../core/services/sports.service';
+import { resolveImageUrl } from '../../core/services/api.config';
 import { Sport } from '../../models/sport.model';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 
@@ -40,5 +41,9 @@ export class SportsComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  getImageUrl(imageUrl?: string | null) {
+    return resolveImageUrl(imageUrl);
   }
 }

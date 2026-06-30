@@ -8,6 +8,8 @@ public class EquipmentDto
 
     public int Quantity { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public decimal DailyRentalPrice { get; set; }
     
     public decimal PackageHourlyPrice { get; set; }

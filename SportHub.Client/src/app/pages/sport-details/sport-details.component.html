@@ -10,6 +10,9 @@
     </section>
   } @else if (sport()) {
     <header class="page-header">
+      @if (sport()!.imageUrl) {
+        <img class="sport-hero" [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name">
+      }
       <a routerLink="/sports">Back to sports</a>
       <h1>{{ sport()!.name }}</h1>
       <p>{{ sport()!.description }}</p>
@@ -21,17 +24,23 @@
 
         <div class="list">
           @for (facility of sport()!.facilities; track facility.id) {
-            <article class="item-card">
+            <article class="item-card" [class.out-of-service]="facility.isOutOfService">
+              @if (facility.imageUrl) {
+                <img class="item-image" [src]="getImageUrl(facility.imageUrl)" [alt]="facility.name">
+              }
               <h3>{{ facility.name }}</h3>
+              @if (facility.isOutOfService) {
+                <p class="service-label">Out of service</p>
+              }
               <p>{{ facility.pricePerHour }} / hour</p>
 
               <!-- MULTI-EQUIPMENT BOOKING START -->
               <div class="card-actions">
-                <button type="button" (click)="selectFacilityBooking(facility.id)">
+                <button type="button" [disabled]="facility.isOutOfService" (click)="selectFacilityBooking(facility.id)">
                   Book facility
                 </button>
 
-                <button type="button" class="secondary" (click)="startPackageWithFacility(facility.id)">
+                <button type="button" class="secondary" [disabled]="facility.isOutOfService" (click)="startPackageWithFacility(facility.id)">
                   Start package
                 </button>
               </div>
@@ -45,6 +54,9 @@
         <div class="list">
           @for (equipment of sport()!.equipment; track equipment.id) {
             <article class="item-card">
+              @if (equipment.imageUrl) {
+                <img class="item-image" [src]="getImageUrl(equipment.imageUrl)" [alt]="equipment.name">
+              }
               <h3>{{ equipment.name }}</h3>
               <p>Total stock: {{ equipment.quantity }}</p>
               @if (getEquipmentAvailability(equipment.id); as availability) {
@@ -95,8 +107,8 @@
               <select name="facilityId" [(ngModel)]="facilityId" (ngModelChange)="loadFacilityAvailability()">
                 <option [ngValue]="null">Select facility</option>
                 @for (facility of sport()!.facilities; track facility.id) {
-                  <option [ngValue]="facility.id">
-                    {{ facility.name }} - {{ facility.pricePerHour }} / hour
+                  <option [ngValue]="facility.id" [disabled]="facility.isOutOfService">
+                    {{ facility.name }} - {{ facility.isOutOfService ? 'Out of service' : facility.pricePerHour + ' / hour' }}
                   </option>
                 }
               </select>

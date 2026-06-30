@@ -1,12 +1,19 @@
 <header class="navbar">
-  <a class="brand" routerLink="/sports">SportHub</a>
-
+    @if (authService.isAdmin()) {
+      <a class="brand" routerLink="/admin/bookings">SportHub Admin</a>
+    } @else {
+      <a class="brand" routerLink="/sports">SportHub</a>
+    }
   <nav>
-    <a routerLink="/sports">Sports</a>
-    <a routerLink="/bookings">My Bookings</a>
+    @if (!authService.isAdmin()) {
+      <a routerLink="/sports">Sports</a>
+      <a routerLink="/bookings">My Bookings</a>
+    }
 
     @if (authService.isAdmin()) {
-      <a routerLink="/admin/bookings">Admin</a>
+      <a routerLink="/admin/bookings">Admin Bookings</a>
+      <a routerLink="/admin/sports">Admin Sports</a>
+      <a routerLink="/admin/equipment">Admin Equipment</a>
     }
 
     <button type="button" (click)="logout()">Logout</button>

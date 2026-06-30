@@ -30,6 +30,7 @@ public class AdminEquipmentController : ControllerBase
                 equipment.Id,
                 equipment.Name,
                 equipment.Quantity,
+                equipment.ImageUrl,
                 equipment.DailyRentalPrice,
                 equipment.PackageHourlyPrice,
                 Sport = new
@@ -70,6 +71,7 @@ public class AdminEquipmentController : ControllerBase
             SportId = dto.SportId,
             Name = dto.Name,
             Quantity = dto.Quantity,
+            ImageUrl = dto.ImageUrl,
             DailyRentalPrice = dto.DailyRentalPrice,
             PackageHourlyPrice = dto.PackageHourlyPrice
         };
@@ -110,6 +112,7 @@ public class AdminEquipmentController : ControllerBase
         equipment.SportId = dto.SportId;
         equipment.Name = dto.Name;
         equipment.Quantity = dto.Quantity;
+        equipment.ImageUrl = dto.ImageUrl;
         equipment.DailyRentalPrice = dto.DailyRentalPrice;
         equipment.PackageHourlyPrice = dto.PackageHourlyPrice;
 

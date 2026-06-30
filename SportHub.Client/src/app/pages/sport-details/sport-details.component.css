@@ -8,6 +8,15 @@
   margin-bottom: 24px;
 }
 
+.sport-hero {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
 .page-header a {
   color: #153655;
   font-weight: 700;
@@ -44,6 +53,19 @@
   padding: 18px;
 }
 
+.item-card.out-of-service {
+  opacity: 0.58;
+}
+
+.item-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
 .item-card h3 {
   margin: 0 0 8px;
   color: #153655;
@@ -57,6 +79,11 @@
 .availability-text {
   font-weight: 800;
   color: #20584a !important;
+}
+
+.service-label {
+  color: #b42318 !important;
+  font-weight: 800;
 }
 
 .booking-panel {
@@ -123,6 +150,11 @@ button {
   padding: 11px 14px;
   font-weight: 700;
   cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .error {

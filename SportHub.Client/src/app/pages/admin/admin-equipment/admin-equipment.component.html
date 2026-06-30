@@ -1,0 +1,117 @@
+<app-navbar></app-navbar>
+
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Admin Equipment</h1>
+      <p>Manage stock and rental prices for each sport.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" (click)="openAddEquipment()">Add equipment</button>
+      <button type="button" class="secondary" (click)="loadPageData()">Refresh</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p>Loading equipment...</p>
+  } @else {
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    @if (success()) {
+      <p class="success">{{ success() }}</p>
+    }
+
+    <section class="equipment-list">
+      @if (equipment().length === 0) {
+        <section class="message">
+          <p>No equipment found.</p>
+        </section>
+      } @else {
+        @for (item of equipment(); track item.id) {
+          <article class="equipment-card">
+            @if (item.imageUrl) {
+              <img class="equipment-image" [src]="getImageUrl(item.imageUrl)" [alt]="item.name">
+            }
+            <div>
+              <h2>{{ item.name }}</h2>
+              <p>{{ item.sport.name }}</p>
+            </div>
+
+            <div class="details-grid">
+              <span>Stock</span>
+              <strong>{{ item.quantity }}</strong>
+
+              <span>Daily</span>
+              <strong>{{ item.dailyRentalPrice }} EGP</strong>
+
+              <span>Package/hour</span>
+              <strong>{{ item.packageHourlyPrice }} EGP</strong>
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="secondary" (click)="editEquipment(item)">Edit</button>
+              <button type="button" class="danger" (click)="deleteEquipment(item.id)">Delete</button>
+            </div>
+          </article>
+        }
+      }
+    </section>
+  }
+
+  @if (editorOpen()) {
+    <section class="modal-backdrop">
+      <form class="modal-panel" (ngSubmit)="saveEquipment()">
+        <h2>{{ editingId ? 'Edit equipment' : 'Add equipment' }}</h2>
+
+        <label>
+          Sport
+          <select name="sportId" [(ngModel)]="form.sportId">
+            <option [ngValue]="null">Select sport</option>
+            @for (sport of sports(); track sport.id) {
+              <option [ngValue]="sport.id">{{ sport.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Name
+          <input type="text" name="name" [(ngModel)]="form.name">
+        </label>
+
+        <label>
+          Total stock
+          <input type="number" name="quantity" min="0" [(ngModel)]="form.quantity">
+        </label>
+
+        <label>
+          Photo
+          <input type="file" accept="image/*" (change)="uploadEquipmentImage($event)">
+        </label>
+
+        @if (form.imageUrl) {
+          <img class="image-preview" [src]="getImageUrl(form.imageUrl)" alt="Equipment preview">
+        }
+
+        <label>
+          Daily rental price
+          <input type="number" name="dailyRentalPrice" min="1" [(ngModel)]="form.dailyRentalPrice">
+        </label>
+
+        <label>
+          Package hourly price
+          <input type="number" name="packageHourlyPrice" min="1" [(ngModel)]="form.packageHourlyPrice">
+        </label>
+
+        <div class="form-actions">
+          <button type="submit">
+            {{ editingId ? 'Update equipment' : 'Create equipment' }}
+          </button>
+          <button type="button" class="secondary" (click)="resetForm()">Cancel</button>
+        </div>
+      </form>
+    </section>
+  }
+</main>

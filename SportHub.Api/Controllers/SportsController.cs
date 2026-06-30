@@ -48,12 +48,15 @@ public class SportsController : ControllerBase
                     f.Id,
                     f.Name,
                     f.PricePerHour,
+                    f.ImageUrl,
+                    f.IsOutOfService,
                 }),
                 Equipment = s.Equipment.Select(e => new
                 {
                     e.Id,
                     e.Name,
                     e.Quantity,
+                    e.ImageUrl,
                     e.DailyRentalPrice,
                     e.PackageHourlyPrice
                 })
