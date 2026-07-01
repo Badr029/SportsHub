@@ -88,20 +88,43 @@ Example:
   }
 }
 ```
-
-2. Create/update the database:
+2. build the backend:
 
 ```powershell
+dotnet build --project SportHub.Api
+```
+If there is an error check that the .NET SDK version matches ur used .NET version used in the project 
+
+```powershell
+dotnet --list-sdk
+```
+based on the version update the target framework in this file
+
+```text
+SportHub.Api\SportHub.Api.csproj
+```
+```code
+  <PropertyGroup>
+    <TargetFramework> CHANGE THIS TO THE SDK VERSION YOU HAVE </TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+```
+
+3. Create/update the database:
+
+```powershell
+dotnet tool install --global dotnet-ef
 dotnet ef database update --project SportHub.Api/SportHub.Api.csproj
 ```
 
-3. Run the API:
+4. Run the API:
 
 ```powershell
 dotnet run --project SportHub.Api/SportHub.Api.csproj
 ```
 
-4. Swagger opens from the API launch URL:
+5. Swagger opens from the API launch URL:
 
 ```text
 https://localhost:{port}/swagger
