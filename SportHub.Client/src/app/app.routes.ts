@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './pages/auth/login/login.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
+import { HomeComponent } from './pages/home/home.component';
 import { SportsComponent } from './pages/sports/sports.component';
 import { SportDetailsComponent } from './pages/sport-details/sport-details.component';
 import { EquipmentBookingComponent } from './pages/equipment-booking/equipment-booking.component';
@@ -14,6 +15,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
+  { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'sports', component: SportsComponent, canActivate: [authGuard] },
@@ -24,6 +26,4 @@ export const routes: Routes = [
   { path: 'admin/sports', component: AdminSportsComponent, canActivate: [adminGuard] },
   { path: 'admin/sports/:id', component: AdminSportDetailsComponent, canActivate: [adminGuard] },
   { path: 'admin/equipment', component: AdminEquipmentComponent, canActivate: [adminGuard] },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-
 ];

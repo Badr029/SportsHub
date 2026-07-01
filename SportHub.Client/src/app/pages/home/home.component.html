@@ -1,0 +1,162 @@
+<main class="landing-page">
+  <nav class="landing-nav">
+    <a class="landing-brand" routerLink="/">SportHub</a>
+
+    <div class="nav-links">
+      <a href="#sports">Sports</a>
+      <a href="#equipment-terms">Equipment Terms</a>
+      <a href="#help">Help Center</a>
+      <a class="register-link" routerLink="/register">Create Account</a>
+      <a class="login-link" routerLink="/login">Login</a>
+    </div>
+  </nav>
+
+  <section class="hero-section">
+    <div class="hero-copy">
+      <p class="eyebrow">Courts, fields, and gear ready when you are</p>
+      <h1>Book Your Game Faster.</h1>
+      <p class="hero-text">
+        Find available sports facilities, add the equipment you need, and reserve everything in one simple booking.
+      </p>
+
+      <div class="hero-actions">
+        <a class="primary-action" routerLink="/register">Start Booking</a>
+      </div>
+    </div>
+
+    <div class="live-panel" aria-label="Live SportHub activity">
+      <div class="landing-panel-header">
+        <span>Available Today</span>
+        <strong>Online</strong>
+      </div>
+
+      <div class="pulse-row">
+        <span></span>
+        <p>{{ loading() ? 'Checking what is available' : 'Fresh availability from SportHub' }}</p>
+      </div>
+
+      <div class="panel-metrics">
+        <div>
+          <strong>{{ openFacilities() }}</strong>
+          <span>places to play</span>
+        </div>
+        <div>
+          <strong>{{ equipmentStock() }}</strong>
+          <span>items ready to rent</span>
+        </div>
+        <div>
+          <strong>{{ sportCount() }}</strong>
+          <span>sports to choose from</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section" id="sports">
+    <div class="landing-section-heading">
+      <p>Popular picks</p>
+      <h2>See what you can book now</h2>
+    </div>
+
+    <div class="showcase-grid">
+      @if (loading()) {
+        <article class="showcase-card skeleton">
+          <div></div>
+          <span></span>
+          <span></span>
+        </article>
+        <article class="showcase-card skeleton">
+          <div></div>
+          <span></span>
+          <span></span>
+        </article>
+        <article class="showcase-card skeleton">
+          <div></div>
+          <span></span>
+          <span></span>
+        </article>
+      } @else if (error()) {
+        <article class="showcase-card status-card">
+          <div class="image-fallback">Live data</div>
+          <div class="landing-card-body">
+            <h3>Availability is taking longer than expected</h3>
+            <p>{{ error() }}</p>
+            <a routerLink="/register">Create Account</a>
+          </div>
+        </article>
+      } @else {
+        @for (item of showcase(); track item.name) {
+          <article class="showcase-card">
+            @if (item.imageUrl) {
+              <img [src]="item.imageUrl" [alt]="item.name">
+            } @else {
+              <div class="image-fallback">{{ item.name }}</div>
+            }
+
+            <div class="landing-card-body">
+              <div class="landing-card-topline">
+                <h3>{{ item.name }}</h3>
+                <span>{{ item.metric }}</span>
+              </div>
+              <p>{{ item.description }}</p>
+              <strong class="stock-line">{{ item.detailMetric }}</strong>
+              <a routerLink="/register">Start Booking</a>
+            </div>
+          </article>
+        }
+      }
+    </div>
+  </section>
+
+  <section class="trust-section">
+    <article>
+      <strong>Book in Minutes</strong>
+      <span>Choose your sport, time, and equipment without calling around.</span>
+    </article>
+    <article>
+      <strong>Easy Arrival</strong>
+      <span>Your booking details are ready when you arrive at the facility.</span>
+    </article>
+    <article>
+      <strong>Know What Is Available</strong>
+      <span>See equipment quantities before you finish your rental.</span>
+    </article>
+    <article>
+      <strong>Clear Booking Rules</strong>
+      <span>Facility times, package gear, and cancellation windows stay visible.</span>
+    </article>
+  </section>
+
+  <section class="terms-strip" id="equipment-terms">
+    <div>
+      <strong>Rent for the Day</strong>
+      <span>Equipment-only rentals use a simple daily price per item.</span>
+    </div>
+    <div>
+      <strong>Add Gear to Your Facility</strong>
+      <span>Packages let you book a place to play and rent matching equipment for the same time.</span>
+    </div>
+    <div>
+      <strong>Simple Pickup</strong>
+      <span>Pick up your rented equipment when you arrive and return it when you are done.</span>
+    </div>
+  </section>
+
+  <section class="help-band" id="help">
+    <div>
+      <p>Ready to play?</p>
+      <h2>Reserve a facility, rent equipment, or build a full package.</h2>
+    </div>
+    <a routerLink="/register">Create Account</a>
+  </section>
+</main>
+
+<footer class="landing-footer">
+  <a routerLink="/">SportHub</a>
+  <div>
+    <a href="#">Terms of Use</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Legal Resources</a>
+    <a routerLink="/login">Staff Portal Login</a>
+  </div>
+</footer>
