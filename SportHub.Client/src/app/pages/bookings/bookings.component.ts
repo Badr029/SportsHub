@@ -89,23 +89,7 @@ export class BookingsComponent  implements OnInit {
   }
 
   canClearBooking(booking: BookingResponse) {
-    if (booking.status === 'Cancelled') {
-      return true;
-    }
-
-    if (booking.status !== 'Confirmed') {
-      return false;
-    }
-
-    const endDate = booking.bookingType === 'Equipment'
-      ? booking.returnDate
-      : booking.endDate;
-
-    if (!endDate) {
-      return false;
-    }
-
-    return new Date(endDate).getTime() < Date.now();
+    return booking.status === 'Cancelled' || booking.status === 'Completed';
   }
 
   canCancelBooking(booking: BookingResponse) {
@@ -174,6 +158,8 @@ export class BookingsComponent  implements OnInit {
     return Number.isInteger(hours) ? hours.toString() : hours.toFixed(1);
   }
 
+  
+
   getErrorMessage(error: any, fallback: string) {
     if (typeof error.error === 'string') {
       return error.error;
@@ -190,3 +176,5 @@ export class BookingsComponent  implements OnInit {
     return fallback;
   }
 }
+
+

@@ -48,6 +48,9 @@ public class AdminBookingsController : ControllerBase
             query = query.Where(booking => booking.Status == parsedStatus);
         }
 
+        var bookingsToUpdate = await query.ToListAsync();
+        await UpdateExpiredBookings(bookingsToUpdate);
+
         var totalCount = await query.CountAsync();
 
         var bookings = await query
@@ -106,6 +109,18 @@ public class AdminBookingsController : ControllerBase
         if (booking == null)
         {
             return NotFound("Booking not found.");
+        }
+
+        var expiryDate = booking.BookingType == BookingType.Equipment
+            ? booking.ReturnDate
+            : booking.EndDate;
+
+        if (expiryDate <= DateTime.UtcNow)
+        {
+            booking.Status = BookingStatus.Completed;
+            await _context.SaveChangesAsync();
+
+            return BadRequest("This booking has already ended and cannot be confirmed.");
         }
 
         if (booking.Status != BookingStatus.Pending)
@@ -187,6 +202,36 @@ public class AdminBookingsController : ControllerBase
         return Ok("Booking completed.");
     }
 
+    private async Task UpdateExpiredBookings(List<SportHub.Api.Models.Booking> bookings)
+    {
+        var now = DateTime.UtcNow;
+        var changed = false;
+
+        foreach (var booking in bookings)
+        {
+            if (booking.Status == BookingStatus.Cancelled ||
+                booking.Status == BookingStatus.Completed)
+            {
+                continue;
+            }
+
+            var expiryDate = booking.BookingType == BookingType.Equipment
+                ? booking.ReturnDate
+                : booking.EndDate;
+
+            if (expiryDate <= now)
+            {
+                booking.Status = BookingStatus.Completed;
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            await _context.SaveChangesAsync();
+        }
+    }
+
     [HttpPost("{id}/cancel")]
     public async Task<IActionResult> CancelBooking(int id)
     {
@@ -214,3 +259,6 @@ public class AdminBookingsController : ControllerBase
         return Ok("Booking cancelled.");
     }
 }
+
+
+

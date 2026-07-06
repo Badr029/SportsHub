@@ -28,6 +28,12 @@ namespace SportHub.Api.Controllers
         {
             var userId = GetUserId();
 
+            var bookingsToUpdate = await _context.Bookings
+                .Where(b => b.UserId == userId && !b.HiddenFromCustomer)
+                .ToListAsync();
+
+            await UpdateExpiredBookings(bookingsToUpdate);
+
             var bookings = await _context.Bookings
                 .Where(b => b.UserId == userId && !b.HiddenFromCustomer)
                 .Include(b => b.Facility)
@@ -56,13 +62,18 @@ namespace SportHub.Api.Controllers
                         item.Equipment!.Name,
                         item.Quantity,
                     })
+
+                    
                 })
                 .ToListAsync();
+
+            
 
             if (bookings.Count == 0)
             {
                 return NotFound("No bookings found.");
             }
+            
 
             return Ok(bookings);
         }
@@ -322,6 +333,18 @@ namespace SportHub.Api.Controllers
                 return BadRequest("Booking is already cancelled.");
             }
 
+            var expiryDate = booking.BookingType == BookingType.Equipment
+                ? booking.ReturnDate
+                : booking.EndDate;
+
+            if (expiryDate <= DateTime.UtcNow)
+            {
+                booking.Status = BookingStatus.Completed;
+                await _context.SaveChangesAsync();
+
+                return BadRequest("This booking has already ended.");
+            }
+
             if (booking.StartDate <= DateTime.UtcNow.AddHours(2))
             {
                 return BadRequest("Cannot cancel booking less than 2 hours before start date.");
@@ -352,9 +375,7 @@ namespace SportHub.Api.Controllers
 
             var canClear =
                 booking.Status == BookingStatus.Cancelled ||
-                booking.Status == BookingStatus.Confirmed &&
-                clearDate != null &&
-                clearDate < DateTime.UtcNow;
+                booking.Status == BookingStatus.Completed;
 
             if (!canClear)
             {
@@ -424,6 +445,41 @@ namespace SportHub.Api.Controllers
             }
             return total;
         }
+
+        private async Task UpdateExpiredBookings(List<Booking> bookings)
+        {
+            var now = DateTime.UtcNow;
+            var changed = false;
+
+            foreach (var booking in bookings)
+            {
+                if (booking.Status == BookingStatus.Cancelled ||
+                    booking.Status == BookingStatus.Completed)
+                {
+                    continue;
+                }
+
+                var expiryDate = booking.BookingType == BookingType.Equipment
+                    ? booking.ReturnDate
+                    : booking.EndDate;
+
+                if (expiryDate <= now)
+                {
+                    booking.Status = BookingStatus.Completed;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                await _context.SaveChangesAsync();
+            }
+        }
     }
     
+
+    
+
 }
+
+
