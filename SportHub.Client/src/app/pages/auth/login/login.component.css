@@ -2,10 +2,7 @@
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background:
-    radial-gradient(circle at 18% 78%, rgba(20, 184, 166, 0.2), transparent 9rem),
-    radial-gradient(circle at 84% 24%, rgba(255, 255, 255, 0.18), transparent 8rem),
-    linear-gradient(135deg, #31465a 0%, #203246 42%, #0b1320 100%);
+  background: transparent;
   padding: 24px;
 }
 

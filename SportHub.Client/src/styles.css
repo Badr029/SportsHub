@@ -28,13 +28,156 @@ body {
 }
 
 body {
-  background:
-    radial-gradient(circle at 18% 4%, rgba(20, 184, 166, 0.18), transparent 24rem),
-    radial-gradient(circle at 88% 28%, rgba(37, 99, 235, 0.16), transparent 26rem),
-    linear-gradient(135deg, #31465a 0%, #203246 36%, #0f172a 100%);
+  --bg-base: #0f172a;
+  --bg-mid: #172235;
+  --bg-line: rgba(20, 184, 166, 0.14);
+  --bg-line-strong: rgba(20, 184, 166, 0.3);
+  --bg-a: rgba(13, 148, 136, 0.34);
+  --bg-b: rgba(37, 99, 235, 0.26);
+  --bg-c: rgba(217, 119, 6, 0.12);
+  --bg-speed: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, var(--bg-mid) 0%, var(--bg-base) 58%, #020617 100%);
   color: var(--text);
   font-family: Inter, Arial, sans-serif;
   letter-spacing: 0;
+  overflow-x: hidden;
+}
+
+body.sporthub-home-bg {
+  --bg-base: #08111f;
+  --bg-mid: #183249;
+  --bg-line: rgba(20, 184, 166, 0.16);
+  --bg-line-strong: rgba(45, 212, 191, 0.34);
+  --bg-a: rgba(20, 184, 166, 0.42);
+  --bg-b: rgba(37, 99, 235, 0.34);
+  --bg-c: rgba(217, 119, 6, 0.16);
+  --bg-speed: rgba(255, 255, 255, 0.1);
+}
+
+body.sporthub-user-bg {
+  --bg-base: #07131d;
+  --bg-mid: #12372e;
+  --bg-line: rgba(134, 239, 172, 0.12);
+  --bg-line-strong: rgba(20, 184, 166, 0.32);
+  --bg-a: rgba(5, 150, 105, 0.34);
+  --bg-b: rgba(20, 184, 166, 0.24);
+  --bg-c: rgba(37, 99, 235, 0.17);
+  --bg-speed: rgba(134, 239, 172, 0.07);
+}
+
+body.sporthub-admin-bg {
+  --bg-base: #080d19;
+  --bg-mid: #111827;
+  --bg-line: rgba(125, 211, 252, 0.11);
+  --bg-line-strong: rgba(37, 99, 235, 0.32);
+  --bg-a: rgba(37, 99, 235, 0.36);
+  --bg-b: rgba(13, 148, 136, 0.22);
+  --bg-c: rgba(71, 85, 105, 0.28);
+  --bg-speed: rgba(125, 211, 252, 0.08);
+}
+
+app-root {
+  position: relative;
+  z-index: 0;
+  display: block;
+  min-height: 100vh;
+}
+
+.site-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, var(--bg-mid) 0%, var(--bg-base) 60%, #020617 100%),
+    repeating-linear-gradient(115deg, transparent 0 44px, var(--bg-speed) 45px 46px, transparent 47px 110px);
+}
+
+.fluid-layer,
+.field-lines {
+  position: absolute;
+  inset: auto;
+  pointer-events: none;
+}
+
+.fluid-layer {
+  width: 92vw;
+  height: 82vh;
+  filter: blur(18px);
+  opacity: 0.74;
+  transform-origin: center;
+  animation: fluid-morph 14s ease-in-out infinite alternate;
+}
+
+.layer-a {
+  top: -20vh;
+  right: -18vw;
+  background: linear-gradient(135deg, var(--bg-a), transparent 68%);
+  clip-path: polygon(8% 0, 100% 0, 92% 72%, 58% 100%, 18% 78%, 0 34%);
+}
+
+.layer-b {
+  left: -24vw;
+  bottom: -22vh;
+  background: linear-gradient(35deg, var(--bg-b), transparent 70%);
+  clip-path: polygon(0 8%, 56% 0, 100% 42%, 72% 100%, 0 88%);
+  animation-delay: -5s;
+  animation-duration: 18s;
+}
+
+.layer-c {
+  top: 22vh;
+  left: 8vw;
+  width: 72vw;
+  height: 58vh;
+  background: linear-gradient(90deg, transparent 0%, var(--bg-c) 44%, transparent 92%);
+  clip-path: polygon(0 28%, 42% 0, 100% 18%, 82% 78%, 28% 100%);
+  opacity: 0.5;
+  animation-delay: -9s;
+  animation-duration: 20s;
+}
+
+.field-lines {
+  inset: 0;
+  opacity: 0.75;
+  background:
+    linear-gradient(90deg, transparent 0 12%, var(--bg-line) 12.1% 12.25%, transparent 12.35% 87.65%, var(--bg-line) 87.75% 87.9%, transparent 88%),
+    linear-gradient(0deg, transparent 0 16%, var(--bg-line) 16.1% 16.25%, transparent 16.35% 83.65%, var(--bg-line) 83.75% 83.9%, transparent 84%),
+    linear-gradient(115deg, transparent 0 47%, var(--bg-line-strong) 47.08% 47.22%, transparent 47.32%),
+    repeating-linear-gradient(115deg, transparent 0 90px, var(--bg-speed) 91px 92px, transparent 93px 170px);
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+  animation: court-drift 22s linear infinite;
+}
+
+@keyframes fluid-morph {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) skewX(0deg);
+    border-radius: 22% 78% 40% 60%;
+  }
+  50% {
+    transform: translate3d(-3vw, 2vh, 0) scale(1.06) skewX(-4deg);
+    border-radius: 68% 32% 62% 38%;
+  }
+  100% {
+    transform: translate3d(3vw, -2vh, 0) scale(0.98) skewX(3deg);
+    border-radius: 36% 64% 30% 70%;
+  }
+}
+
+@keyframes court-drift {
+  from {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: 0 0, 0 0, 120px 0, 180px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fluid-layer,
+  .field-lines {
+    animation: none;
+  }
 }
 
 button,
@@ -469,7 +612,6 @@ button:disabled {
 
 .landing-page {
   min-height: 100vh;
-  background: linear-gradient(rgba(15,23,42,.8),rgba(15,23,42,.96)), radial-gradient(circle at 75% 18%,rgba(20,184,166,.24),transparent 22rem), radial-gradient(circle at 18% 12%,rgba(37,99,235,.28),transparent 26rem), var(--canvas);
   padding-bottom: 35px;
 }
 

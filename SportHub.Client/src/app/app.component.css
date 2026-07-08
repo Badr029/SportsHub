@@ -1,0 +1,41 @@
+.route-shell {
+  min-height: 100vh;
+  overflow-x: clip;
+  will-change: opacity, transform, filter;
+}
+
+.route-shell.route-changing {
+  opacity: 0.45;
+  transform: translateY(-10px) scale(0.985);
+  filter: blur(3px);
+  transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
+}
+
+.route-shell.route-entering {
+  animation: route-enter 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.985);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-shell {
+    animation: none;
+  }
+
+  .route-shell.route-changing {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
