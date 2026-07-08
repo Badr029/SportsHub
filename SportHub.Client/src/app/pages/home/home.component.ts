@@ -17,8 +17,7 @@ interface ShowcaseCard {
 @Component({
   selector: 'app-home',
   imports: [RouterLink],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
   showcase = signal<ShowcaseCard[]>([]);

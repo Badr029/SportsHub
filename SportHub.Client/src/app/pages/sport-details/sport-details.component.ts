@@ -29,8 +29,6 @@ export class SportDetailsComponent implements OnInit {
   bookingDate = '';
   startTime = '';
   selectedSlotCount = 0;
-  pickupDate = '';
-  pickupTime = '';
   availabilitySlots: FacilityAvailabilitySlot[] = [];
   equipmentAvailability: EquipmentAvailability[] = [];
   pendingBookingRequest: CreateBooking | null = null;
@@ -145,13 +143,6 @@ export class SportDetailsComponent implements OnInit {
       }
     }
 
-    if (this.bookingType === 2) {
-      for (const item of this.selectedEquipmentItems) {
-        const equipment = sport.equipment.find(equipment => equipment.id === item.equipmentId);
-        total += (equipment?.dailyRentalPrice ?? 0) * item.quantity;
-      }
-    }
-
     return total;
   }
 
@@ -172,10 +163,6 @@ export class SportDetailsComponent implements OnInit {
     const endDate = new Date(startDate);
     endDate.setMinutes(endDate.getMinutes() + this.selectedSlotCount * 30);
     return endDate;
-  }
-
-  buildPickupDate(): Date {
-    return new Date(`${this.pickupDate}T${this.pickupTime}`);
   }
 
   loadFacilityAvailability() {
@@ -225,17 +212,7 @@ export class SportDetailsComponent implements OnInit {
     let startDate: Date;
     let endDate: Date;
 
-    if (this.bookingType === 2) {
-      if (!this.pickupDate) {
-        return;
-      }
-
-      startDate = new Date(this.pickupDate);
-      startDate.setHours(0, 0, 0, 0);
-
-      endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 1);
-    } else if (this.bookingType === 3) {
+    if (this.bookingType === 3) {
       if (!this.bookingDate || !this.startTime || this.selectedSlotCount === 0) {
         return;
       }
@@ -277,18 +254,12 @@ export class SportDetailsComponent implements OnInit {
     return;
   }
 
-  if (this.bookingType === 2 && (!this.pickupDate || !this.pickupTime)) {
-    this.error.set('Pickup date and time are required.');
-    return;
-  }
-
   if ((this.bookingType === 1 || this.bookingType === 3) && !this.facilityId) {
     this.error.set('Please select a facility.');
     return;
   }
 
-  if ((this.bookingType === 2 || this.bookingType === 3) &&
-      this.selectedEquipmentItems.length === 0) {
+  if (this.bookingType === 3 && this.selectedEquipmentItems.length === 0) {
     this.error.set('Please select at least one equipment item.');
     return;
   }
@@ -301,8 +272,8 @@ export class SportDetailsComponent implements OnInit {
     return;
   }
 
-  let startDate: Date;
-  let endDate: Date;
+  let startDate!: Date;
+  let endDate!: Date;
   let pickupDate: Date | null = null;
   let returnDate: Date | null = null;
 
@@ -314,23 +285,15 @@ export class SportDetailsComponent implements OnInit {
       pickupDate = startDate;
       returnDate = endDate;
     }
-  } else {
-    pickupDate = this.buildPickupDate();
-    startDate = pickupDate;
-
-    endDate = new Date(pickupDate);
-    endDate.setDate(endDate.getDate() + 1);
-
-    returnDate = endDate;
   }
 
   const request: CreateBooking = {
     bookingType: this.bookingType,
-    facilityId: this.bookingType === 2 ? null : this.facilityId,
-    startDate: this.bookingType === 2 ? startDate.toISOString() : this.formatLocalDateTime(startDate),
-    endDate: this.bookingType === 2 ? endDate.toISOString() : this.formatLocalDateTime(endDate),
-    pickupDate: pickupDate ? (this.bookingType === 2 ? pickupDate.toISOString() : this.formatLocalDateTime(pickupDate)) : null,
-    returnDate: returnDate ? (this.bookingType === 2 ? returnDate.toISOString() : this.formatLocalDateTime(returnDate)) : null,
+    facilityId: this.facilityId,
+    startDate: this.formatLocalDateTime(startDate),
+    endDate: this.formatLocalDateTime(endDate),
+    pickupDate: pickupDate ? this.formatLocalDateTime(pickupDate) : null,
+    returnDate: returnDate ? this.formatLocalDateTime(returnDate) : null,
     equipmentItems: this.bookingType === 1 ? [] : this.selectedEquipmentItems
   };
 
@@ -379,13 +342,6 @@ export class SportDetailsComponent implements OnInit {
     this.loadFacilityAvailability();
     this.success.set('');
     this.error.set('');
-  }
-
-
-  selectEquipmentBooking(equipmentId: number){
-    this.bookingType = 2;
-    this.facilityId = null;
-    this.addEquipmentItem(equipmentId);
   }
 
   startPackageWithFacility(facilityId: number){
@@ -555,39 +511,6 @@ export class SportDetailsComponent implements OnInit {
   getImageUrl(imageUrl?: string | null) {
     return resolveImageUrl(imageUrl);
   }
-
-timeSlots = [
-  { value: '08:00', label: '8:00 AM' },
-  { value: '08:30', label: '8:30 AM' },
-  { value: '09:00', label: '9:00 AM' },
-  { value: '09:30', label: '9:30 AM' },
-  { value: '10:00', label: '10:00 AM' },
-  { value: '10:30', label: '10:30 AM' },
-  { value: '11:00', label: '11:00 AM' },
-  { value: '11:30', label: '11:30 AM' },
-  { value: '12:00', label: '12:00 PM' },
-  { value: '12:30', label: '12:30 PM' },
-  { value: '13:00', label: '1:00 PM' },
-  { value: '13:30', label: '1:30 PM' },
-  { value: '14:00', label: '2:00 PM' },
-  { value: '14:30', label: '2:30 PM' },
-  { value: '15:00', label: '3:00 PM' },
-  { value: '15:30', label: '3:30 PM' },
-  { value: '16:00', label: '4:00 PM' },
-  { value: '16:30', label: '4:30 PM' },
-  { value: '17:00', label: '5:00 PM' },
-  { value: '17:30', label: '5:30 PM' },
-  { value: '18:00', label: '6:00 PM' },
-  { value: '18:30', label: '6:30 PM' },
-  { value: '19:00', label: '7:00 PM' },
-  { value: '19:30', label: '7:30 PM' },
-  { value: '20:00', label: '8:00 PM' },
-  { value: '20:30', label: '8:30 PM' },
-  { value: '21:00', label: '9:00 PM' },
-  { value: '21:30', label: '9:30 PM' },
-  { value: '22:00', label: '10:00 PM' }
-  ];
-
 }
 
 

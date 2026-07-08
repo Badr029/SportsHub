@@ -1,32 +1,6 @@
-.page {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 30px 20px 52px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
-
 .page-header a {
   color: var(--teal-bright);
   font-weight: 900;
-}
-
-.back-button {
-  display: inline-flex;
-  width: max-content;
-  border: 1px solid rgba(20, 184, 166, 0.5);
-  border-radius: 6px;
-  background: rgba(20, 184, 166, 0.12);
-  color: var(--teal-bright);
-  padding: 9px 12px;
-  margin-bottom: 10px;
-  text-decoration: none;
 }
 
 .page-header h1,
@@ -35,10 +9,6 @@
 .item-card h3 {
   margin: 0;
   color: white;
-}
-
-.page-header h1 {
-  font-size: 38px;
 }
 
 .page-header p,
@@ -69,13 +39,6 @@
   );
 }
 
-.sport-media {
-  aspect-ratio: 16 / 10;
-  min-height: 220px;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
 .sport-summary img,
 .item-card img {
   width: 100%;
@@ -89,40 +52,11 @@
 }
 
 .sport-info {
-  display: grid;
   grid-template-rows: auto auto auto 1fr auto;
-  gap: 8px;
-  padding: 4px 0;
-}
-
-.eyebrow {
-  margin: 0;
-  color: var(--teal-bright) !important;
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
 }
 
 .sport-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   align-self: end;
-}
-
-.sport-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.sport-metrics span {
-  border-radius: 999px;
-  background: rgba(20, 184, 166, 0.14);
-  color: var(--teal-bright);
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 900;
 }
 
 .management-grid {
@@ -204,19 +138,7 @@
 }
 
 .card-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   align-content: start;
-}
-
-.card-metrics span {
-  border-radius: 999px;
-  background: rgba(20, 184, 166, 0.14);
-  color: var(--teal-bright);
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 900;
 }
 
 .service-label {
@@ -297,13 +219,6 @@ textarea {
   height: 150px;
   object-fit: cover;
   border-radius: 6px;
-}
-
-.form-actions,
-.card-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 .card-actions {

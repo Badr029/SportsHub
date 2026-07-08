@@ -513,6 +513,145 @@ button:disabled {
   color: #bbf7d0;
 }
 
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 30px 20px 52px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0 0 6px;
+  color: white;
+  font-size: 38px;
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.back-button {
+  width: max-content;
+  padding: 9px 12px;
+  margin-bottom: 10px;
+}
+
+.form-actions,
+.card-actions,
+.sport-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--teal-bright) !important;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sport-metrics,
+.metric-row,
+.card-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sport-metrics span,
+.metric-row span,
+.card-metrics span {
+  border-radius: 999px;
+  background: rgba(20, 184, 166, 0.14);
+  color: var(--teal-bright);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sport-media {
+  aspect-ratio: 16 / 10;
+  min-height: 220px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.sport-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sport-info {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  min-height: 100%;
+  overflow: hidden;
+  padding: 18px;
+}
+
+
+.sport-info .eyebrow {
+  width: max-content;
+  border: 1px solid rgba(45, 212, 191, 0.28);
+  border-radius: 999px;
+  background: rgba(20, 184, 166, 0.12);
+  padding: 6px 10px;
+}
+
+.sport-info h1,
+.sport-info h2 {
+  margin: 0;
+  color: white;
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.sport-info > p:not(.eyebrow) {
+  max-width: 68ch;
+  margin: 0;
+  border-left: 1px solid rgba(45, 212, 191, 0.24);
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.65;
+  padding-left: 12px;
+}
+
+.sport-info .sport-metrics {
+  align-self: end;
+  margin-top: 8px;
+}
+
+.sport-info .sport-metrics span {
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(37, 99, 235, 0.12));
+  padding: 8px 12px;
+}
+
+.sport-info .sport-actions {
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .page-header {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;

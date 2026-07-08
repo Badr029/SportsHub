@@ -48,7 +48,6 @@
               }
               <p class="price-line">{{ facility.pricePerHour }} EGP / hour</p>
 
-              <!-- MULTI-EQUIPMENT BOOKING START -->
               <div class="card-actions">
                 <button type="button" class="action-booking" [disabled]="facility.isOutOfService" (click)="selectFacilityBooking(facility.id)">
                   Book facility
@@ -58,7 +57,6 @@
                   Start package
                 </button>
               </div>
-              <!-- MULTI-EQUIPMENT BOOKING END -->
             </article>
           }
         </div>
@@ -133,7 +131,6 @@
             </label>
           }
 
-          <!-- MULTI-EQUIPMENT BOOKING START -->
           @if (bookingType === 3 && facilityId) {
             <section class="selected-equipment">
               <div class="package-header">
@@ -189,7 +186,6 @@
               }
             </section>
           }
-          <!-- MULTI-EQUIPMENT BOOKING END -->
           @if (bookingType === 1 || bookingType === 3) {
             @if (bookingType === 3) {
               <div class="date-section-label">
@@ -296,7 +292,7 @@
               <div class="confirmation-equipment">
                 <span>Equipment</span>
                 @for (item of selectedEquipmentDetails(); track item.equipmentId) {
-                  <strong>{{ item.name }} × {{ item.quantity }}</strong>
+                  <strong>{{ item.name }} x {{ item.quantity }}</strong>
                 }
               </div>
             }
