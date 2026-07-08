@@ -6,8 +6,8 @@
       <a href="#sports">Sports</a>
       <a href="#equipment-terms">Equipment Terms</a>
       <a href="#help">Help Center</a>
-      <a class="register-link" routerLink="/register">Create Account</a>
-      <a class="login-link" routerLink="/login">Login</a>
+      <a class="register-link animated-button action-auth" routerLink="/register">Create Account</a>
+      <a class="login-link animated-button action-neutral" routerLink="/login">Login</a>
     </div>
   </nav>
 
@@ -20,7 +20,7 @@
       </p>
 
       <div class="hero-actions">
-        <a class="primary-action" routerLink="/register">Start Booking</a>
+        <a class="primary-action animated-button action-booking" routerLink="/register">Start Booking</a>
       </div>
     </div>
 
@@ -81,7 +81,7 @@
           <div class="landing-card-body">
             <h3>Availability is taking longer than expected</h3>
             <p>{{ error() }}</p>
-            <a routerLink="/register">Create Account</a>
+            <a class="animated-button action-auth" routerLink="/register">Create Account</a>
           </div>
         </article>
       } @else {
@@ -100,7 +100,7 @@
               </div>
               <p>{{ item.description }}</p>
               <strong class="stock-line">{{ item.detailMetric }}</strong>
-              <a routerLink="/register">Start Booking</a>
+              <a class="animated-button action-booking" routerLink="/register">Start Booking</a>
             </div>
           </article>
         }
@@ -147,7 +147,7 @@
       <p>Ready to play?</p>
       <h2>Reserve a facility, rent equipment, or build a full package.</h2>
     </div>
-    <a routerLink="/register">Create Account</a>
+    <a class="animated-button action-auth" routerLink="/register">Create Account</a>
   </section>
 </main>
 

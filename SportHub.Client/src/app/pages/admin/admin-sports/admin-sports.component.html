@@ -8,8 +8,8 @@
     </div>
 
     <div class="header-actions">
-      <button type="button" (click)="openAddSport()">Add sport</button>
-      <button type="button" class="secondary" (click)="loadSports()">Refresh</button>
+      <button type="button" class="action-admin" (click)="openAddSport()">Add sport</button>
+      <button type="button" class="secondary action-refresh" (click)="loadSports()">Refresh</button>
     </div>
   </header>
 
@@ -36,7 +36,7 @@
             <p>{{ sport.description }}</p>
 
             <div class="card-actions">
-              <a [routerLink]="['/admin/sports', sport.id]">Manage</a>
+              <a class="button-link action-admin" [routerLink]="['/admin/sports', sport.id]">Manage</a>
             </div>
           </div>
         </article>
@@ -70,7 +70,7 @@
         </label>
 
         <div class="form-actions">
-          <button type="submit">{{ editingId ? 'Update sport' : 'Create sport' }}</button>
+          <button type="submit" class="action-admin">{{ editingId ? 'Update sport' : 'Create sport' }}</button>
           <button type="button" class="secondary" (click)="resetForm()">Cancel</button>
         </div>
       </form>

@@ -6,10 +6,10 @@
   } @else if (error() && !sport()) {
     <section class="message">
       <p>{{ error() }}</p>
-      <a routerLink="/sports">Back to sports</a>
+      <a class="button-link back-button" routerLink="/sports">Back to sports</a>
     </section>
   } @else if (sport()) {
-    <a class="back-button" routerLink="/sports">Back to sports</a>
+    <a class="button-link back-button" routerLink="/sports">Back to sports</a>
     <header class="sport-card">
       <div class="sport-media">
         @if (sport()!.imageUrl) {
@@ -50,11 +50,11 @@
 
               <!-- MULTI-EQUIPMENT BOOKING START -->
               <div class="card-actions">
-                <button type="button" [disabled]="facility.isOutOfService" (click)="selectFacilityBooking(facility.id)">
+                <button type="button" class="action-booking" [disabled]="facility.isOutOfService" (click)="selectFacilityBooking(facility.id)">
                   Book facility
                 </button>
 
-                <button type="button" class="secondary" [disabled]="facility.isOutOfService" (click)="startPackageWithFacility(facility.id)">
+                <button type="button" class="secondary action-package" [disabled]="facility.isOutOfService" (click)="startPackageWithFacility(facility.id)">
                   Start package
                 </button>
               </div>
@@ -93,7 +93,7 @@
                 <p class="price-line package-price">{{ equipment.packageHourlyPrice }} EGP / package hour</p>
 
                 <div class="card-actions">
-                  <button type="button" class="secondary" (click)="addEquipmentToPackage(equipment.id)">
+                  <button type="button" class="secondary action-package" (click)="addEquipmentToPackage(equipment.id)">
                     Add to package
                   </button>
                 </div>
@@ -154,7 +154,7 @@
                   </select>
                 </label>
 
-                <button type="button" class="secondary" (click)="addEquipmentFromPanel()">
+                <button type="button" class="secondary action-package" (click)="addEquipmentFromPanel()">
                   Add
                 </button>
               </div>
@@ -254,7 +254,7 @@
             <p class="success">{{ success() }}</p>
           }
 
-          <button type="submit">Create booking</button>
+          <button type="submit" class="action-booking">Create booking</button>
         </form>
       </aside>
     </section>
@@ -308,7 +308,7 @@
           </div>
 
           <div class="form-actions">
-            <button type="button" (click)="confirmCreateBooking()">Confirm booking</button>
+            <button type="button" class="action-booking" (click)="confirmCreateBooking()">Confirm booking</button>
             <button type="button" class="secondary" (click)="closeBookingConfirmation()">Cancel</button>
           </div>
         </div>

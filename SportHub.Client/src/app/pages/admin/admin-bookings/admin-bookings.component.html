@@ -19,7 +19,7 @@
         </select>
       </label>
 
-      <button type="button" class="secondary" (click)="loadBookings()">Refresh</button>
+      <button type="button" class="secondary action-refresh" (click)="loadBookings()">Refresh</button>
     </div>
   </header>
 
@@ -28,7 +28,7 @@
   } @else if (error()) {
     <section class="message">
       <p>{{ error() }}</p>
-      <button type="button" (click)="loadBookings()">Try again</button>
+      <button type="button" class="action-refresh" (click)="loadBookings()">Try again</button>
     </section>
   } @else {
     @if (success()) {
@@ -46,8 +46,8 @@
         </span>
 
         <div>
-          <button type="button" class="secondary" [disabled]="page() <= 1" (click)="previousPage()">Previous</button>
-          <button type="button" class="secondary" [disabled]="page() >= totalPages()" (click)="nextPage()">Next</button>
+          <button type="button" class="secondary action-neutral" [disabled]="page() <= 1" (click)="previousPage()">Previous</button>
+          <button type="button" class="secondary action-neutral" [disabled]="page() >= totalPages()" (click)="nextPage()">Next</button>
         </div>
       </div>
 
@@ -95,19 +95,19 @@
             <div class="card-actions">
               @if (!isClosedBooking(booking)) {
                 @if (canConfirm(booking)) {
-                  <button type="button" (click)="confirmBooking(booking.id)">Confirm</button>
+                  <button type="button" class="action-admin" (click)="confirmBooking(booking.id)">Confirm</button>
                 }
 
                 @if (canPickup(booking)) {
-                  <button type="button" (click)="markPickedUp(booking.id)">Picked up</button>
+                  <button type="button" class="action-package" (click)="markPickedUp(booking.id)">Picked up</button>
                 }
 
                 @if (canReturn(booking)) {
-                  <button type="button" (click)="markReturned(booking.id)">Returned</button>
+                  <button type="button" class="action-booking" (click)="markReturned(booking.id)">Returned</button>
                 }
 
                 @if (canComplete(booking)) {
-                  <button type="button" class="secondary" (click)="completeBooking(booking.id)">Complete</button>
+                  <button type="button" class="secondary action-neutral" (click)="completeBooking(booking.id)">Complete</button>
                 }
 
                 @if (canCancel(booking)) {

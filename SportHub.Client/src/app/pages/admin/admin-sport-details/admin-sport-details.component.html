@@ -3,12 +3,12 @@
 <main class="page">
   <header class="page-header">
     <div>
-      <a class="back-button" routerLink="/admin/sports">Back to admin sports</a>
+      <a class="button-link back-button" routerLink="/admin/sports">Back to admin sports</a>
       <h1>{{ sport()?.name || 'Sport details' }}</h1>
       <p>Customize sport details, facilities, and equipment.</p>
     </div>
 
-    <button type="button" class="secondary" (click)="loadPageData()">Refresh</button>
+    <button type="button" class="secondary action-refresh" (click)="loadPageData()">Refresh</button>
   </header>
 
   @if (loading()) {
@@ -38,7 +38,7 @@
           <span>{{ equipment().length }} equipment items</span>
         </div>
         <div class="sport-actions">
-          <button type="button" (click)="openSportEditor()">Edit sport</button>
+          <button type="button" class="action-admin" (click)="openSportEditor()">Edit sport</button>
           <button type="button" class="danger" (click)="deleteSport()">Delete sport</button>
         </div>
       </div>
@@ -48,7 +48,7 @@
       <section class="manager-section">
         <div class="section-header">
           <h2>Facilities</h2>
-          <button type="button" (click)="openAddFacility()">Add facility</button>
+          <button type="button" class="action-admin" (click)="openAddFacility()">Add facility</button>
         </div>
 
         <div class="cards-list">
@@ -87,7 +87,7 @@
               </div>
 
               <div class="card-actions">
-                <button type="button" class="secondary" (click)="editFacility(facility)">Edit</button>
+                <button type="button" class="secondary action-neutral" (click)="editFacility(facility)">Edit</button>
                 <button type="button" class="danger" (click)="deleteFacility(facility.id)">Delete</button>
               </div>
             </article>
@@ -98,7 +98,7 @@
       <section class="manager-section">
         <div class="section-header">
           <h2>Equipment</h2>
-          <button type="button" (click)="openAddEquipment()">Add equipment</button>
+          <button type="button" class="action-admin" (click)="openAddEquipment()">Add equipment</button>
         </div>
 
         <div class="cards-list">
@@ -123,7 +123,7 @@
               </div>
 
               <div class="card-actions">
-                <button type="button" class="secondary" (click)="editEquipment(item)">Edit</button>
+                <button type="button" class="secondary action-neutral" (click)="editEquipment(item)">Edit</button>
                 <button type="button" class="danger" (click)="deleteEquipment(item.id)">Delete</button>
               </div>
             </article>
@@ -132,11 +132,11 @@
 
         @if (equipment().length > equipmentPageSize) {
           <div class="pager">
-            <button type="button" class="secondary" (click)="previousEquipmentPage()" [disabled]="equipmentPage === 1">
+            <button type="button" class="secondary action-neutral" (click)="previousEquipmentPage()" [disabled]="equipmentPage === 1">
               Previous
             </button>
             <span>Page {{ equipmentPage }} / {{ equipmentTotalPages() }}</span>
-            <button type="button" class="secondary" (click)="nextEquipmentPage()" [disabled]="equipmentPage === equipmentTotalPages()">
+            <button type="button" class="secondary action-neutral" (click)="nextEquipmentPage()" [disabled]="equipmentPage === equipmentTotalPages()">
               Next
             </button>
           </div>
@@ -171,7 +171,7 @@
         </label>
 
         <div class="form-actions">
-          <button type="submit">Save sport</button>
+          <button type="submit" class="action-admin">Save sport</button>
           <button type="button" class="secondary" (click)="closeSportEditor()">Cancel</button>
         </div>
       </form>
@@ -216,7 +216,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit">{{ editingFacilityId ? 'Update facility' : 'Create facility' }}</button>
+          <button type="submit" class="action-admin">{{ editingFacilityId ? 'Update facility' : 'Create facility' }}</button>
           <button type="button" class="secondary" (click)="resetFacilityForm()">Cancel</button>
         </div>
       </form>
@@ -259,7 +259,7 @@
         </label>
 
         <div class="form-actions">
-          <button type="submit">{{ editingEquipmentId ? 'Update equipment' : 'Create equipment' }}</button>
+          <button type="submit" class="action-admin">{{ editingEquipmentId ? 'Update equipment' : 'Create equipment' }}</button>
           <button type="button" class="secondary" (click)="resetEquipmentForm()">Cancel</button>
         </div>
       </form>
@@ -273,7 +273,7 @@
         <p>{{ confirmMessage() }}</p>
 
         <div class="form-actions">
-          <button type="button" (click)="confirmAction()">Confirm</button>
+          <button type="button" class="action-admin" (click)="confirmAction()">Confirm</button>
           <button type="button" class="secondary" (click)="closeConfirm()">Cancel</button>
         </div>
       </div>

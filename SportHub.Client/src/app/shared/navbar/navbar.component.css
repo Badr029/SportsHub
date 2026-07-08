@@ -1,22 +1,18 @@
 .navbar {
-  min-height: 52px;
+  width: min(1180px, calc(100% - 32px));
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  max-width: 1180px;
-  margin: 26px auto 0;
-  padding: 0 24px;
-  border: 1px solid rgba(20, 184, 166, 0.35);
-  border-radius: 8px 8px 0 0;
-  background: linear-gradient(90deg, #0d9488, #14b8a6);
-  box-shadow: var(--shadow);
+  gap: 22px;
+  margin: 0 auto;
+  padding: 22px 0;
 }
 
 .brand {
-  color: #09252c;
-  font-size: 24px;
-  font-weight: 900;
+  color: var(--teal-bright);
+  font-size: 28px;
+  font-weight: 950;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -25,43 +21,34 @@ nav {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 18px;
   flex-wrap: wrap;
 }
 
 a {
   border-bottom: 2px solid transparent;
-  color: white;
-  font-weight: 800;
+  color: var(--muted);
+  font-weight: 850;
   text-decoration: none;
-  text-transform: uppercase;
-  padding: 14px 8px 12px;
+  padding: 9px 0;
 }
 
-a:hover {
-  border-bottom-color: white;
-}
-
+a:hover,
 a.active {
-  border-bottom-color: white;
+  border-bottom-color: var(--teal-bright);
+  color: white;
 }
 
-button {
-  border: 0;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.22);
-  color: white;
-  padding: 8px 13px;
-  font-weight: 800;
-  cursor: pointer;
+.logout-button {
+  padding: 11px 16px;
+  --button-start: ;
 }
 
 @media (max-width: 760px) {
   .navbar {
-    display: grid;
-    margin-top: 0;
-    padding: 14px 18px;
-    border-radius: 0;
+    flex-direction: column;
+    align-items: stretch;
+    width: min(100% - 32px, 1180px);
   }
 
   nav {

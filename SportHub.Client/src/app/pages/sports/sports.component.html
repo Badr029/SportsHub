@@ -11,7 +11,7 @@
   } @else if (error()) {
     <section class="message">
       <p>{{ error() }}</p>
-      <button type="button" (click)="loadSports()">Try again</button>
+      <button type="button" class="action-refresh" (click)="loadSports()">Try again</button>
     </section>
   } @else {
     <section class="sports-grid">
@@ -22,7 +22,7 @@
           }
           <h2>{{ sport.name }}</h2>
           <p>{{ sport.description }}</p>
-          <a [routerLink]="['/sports', sport.id]">View details</a>
+          <a class="button-link action-view" [routerLink]="['/sports', sport.id]">View details</a>
         </article>
       }
     </section>

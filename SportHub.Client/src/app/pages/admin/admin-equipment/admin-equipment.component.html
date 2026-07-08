@@ -8,8 +8,8 @@
     </div>
 
     <div class="header-actions">
-      <button type="button" (click)="openAddEquipment()">Add equipment</button>
-      <button type="button" class="secondary" (click)="loadPageData()">Refresh</button>
+      <button type="button" class="action-admin" (click)="openAddEquipment()">Add equipment</button>
+      <button type="button" class="secondary action-refresh" (click)="loadPageData()">Refresh</button>
     </div>
   </header>
 
@@ -52,7 +52,7 @@
             </div>
 
             <div class="card-actions">
-              <button type="button" class="secondary" (click)="editEquipment(item)">Edit</button>
+              <button type="button" class="secondary action-neutral" (click)="editEquipment(item)">Edit</button>
               <button type="button" class="danger" (click)="deleteEquipment(item.id)">Delete</button>
             </div>
           </article>
@@ -107,7 +107,7 @@
         </label>
 
         <div class="form-actions">
-          <button type="submit">
+          <button type="submit" class="action-admin">
             {{ editingId ? 'Update equipment' : 'Create equipment' }}
           </button>
           <button type="button" class="secondary" (click)="resetForm()">Cancel</button>

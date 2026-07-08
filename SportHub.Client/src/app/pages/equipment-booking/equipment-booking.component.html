@@ -61,6 +61,7 @@
 
               <button
                 type="button"
+                class="action-booking"
                 (click)="addEquipment(item.id)"
                 [disabled]="getAvailability(item.id)?.availableQuantity === 0">
                 {{ isSelected(item.id) ? 'Add another' : 'Add to rental' }}
@@ -112,7 +113,7 @@
           </div>
         }
 
-        <button type="button" (click)="createBooking()">Create equipment booking</button>
+        <button type="button" class="action-booking" (click)="createBooking()">Create equipment booking</button>
       </aside>
     </section>
   }

@@ -11,7 +11,7 @@
   } @else if (error()) {
     <section class="message">
       <p>{{ error() }}</p>
-      <button type="button" (click)="loadBookings()">Try again</button>
+      <button type="button" class="action-refresh" (click)="loadBookings()">Try again</button>
     </section>
   } @else {
     @if (success()) {
@@ -74,7 +74,7 @@
 
             <div class="card-actions">
               @if (canCancelBooking(booking)) {
-                <button type="button" (click)="cancelBooking(booking.id)">
+                <button type="button" class="danger" (click)="cancelBooking(booking.id)">
                   Cancel
                 </button>
               } @else if (booking.status !== 'Cancelled' && booking.status !== 'Completed') {
@@ -82,7 +82,7 @@
               }
 
               @if (canClearBooking(booking)) {
-                <button type="button" class="secondary" (click)="clearBooking(booking.id)">
+                <button type="button" class="secondary action-neutral" (click)="clearBooking(booking.id)">
                   Clear
                 </button>
               }
