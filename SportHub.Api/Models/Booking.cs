@@ -26,6 +26,12 @@ public class Booking
 
     public decimal TotalPrice { get; set; }
 
+    public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.PayOnSite;
+
+    public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.NotRequired;
+
+    public Payment? Payment { get; set; }
+
     public DateTime? PickupDate { get; set; }
 
     public DateTime? ReturnDate { get; set; }

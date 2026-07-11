@@ -36,6 +36,7 @@ public class AdminBookingsController : ControllerBase
             .Include(booking => booking.Facility)
             .Include(booking => booking.BookingEquipment)
                 .ThenInclude(item => item.Equipment)
+            .Include(booking => booking.Payment)
             .AsQueryable();
 
         if (!string.Equals(status, "All", StringComparison.OrdinalIgnoreCase))
@@ -82,6 +83,9 @@ public class AdminBookingsController : ControllerBase
                 booking.StartDate,
                 booking.EndDate,
                 booking.TotalPrice,
+                PaymentMethod = booking.PaymentMethod.ToString(),
+                PaymentStatus = booking.PaymentStatus.ToString(),
+                PaymentId = booking.Payment == null ? null : (int?)booking.Payment.Id,
                 Equipment = booking.BookingEquipment.Select(item => new
                 {
                     item.EquipmentId,
@@ -115,7 +119,7 @@ public class AdminBookingsController : ControllerBase
             ? booking.ReturnDate
             : booking.EndDate;
 
-        if (expiryDate <= DateTime.UtcNow)
+        if (expiryDate <= DateTime.Now)
         {
             booking.Status = BookingStatus.Completed;
             await _context.SaveChangesAsync();
@@ -128,6 +132,11 @@ public class AdminBookingsController : ControllerBase
             return BadRequest("Only pending bookings can be confirmed.");
         }
 
+        if (booking.PaymentMethod == PaymentMethod.Online && booking.PaymentStatus != PaymentStatus.Paid)
+        {
+            return BadRequest("Online booking must be paid before confirmation.");
+        }
+
         booking.Status = BookingStatus.Confirmed;
 
         await _context.SaveChangesAsync();
@@ -138,7 +147,9 @@ public class AdminBookingsController : ControllerBase
     [HttpPost("{id}/pickup")]
     public async Task<IActionResult> MarkPickedUp(int id)
     {
-        var booking = await _context.Bookings.FindAsync(id);
+        var booking = await _context.Bookings
+            .Include(item => item.Payment)
+            .FirstOrDefaultAsync(item => item.Id == id);
 
         if (booking == null)
         {
@@ -148,6 +159,11 @@ public class AdminBookingsController : ControllerBase
         if (booking.RentalStatus != RentalStatus.PendingPickup)
         {
             return BadRequest("Only pending pickup rentals can be picked up.");
+        }
+
+        if (booking.PaymentMethod == PaymentMethod.Online && booking.PaymentStatus != PaymentStatus.Paid)
+        {
+            return BadRequest("Online booking must be paid before pickup.");
         }
 
         booking.RentalStatus = RentalStatus.Active;
@@ -235,7 +251,9 @@ public class AdminBookingsController : ControllerBase
     [HttpPost("{id}/cancel")]
     public async Task<IActionResult> CancelBooking(int id)
     {
-        var booking = await _context.Bookings.FindAsync(id);
+        var booking = await _context.Bookings
+            .Include(item => item.Payment)
+            .FirstOrDefaultAsync(item => item.Id == id);
 
         if (booking == null)
         {
@@ -253,6 +271,15 @@ public class AdminBookingsController : ControllerBase
         }
 
         booking.Status = BookingStatus.Cancelled;
+
+        if (booking.Payment != null)
+        {
+            booking.Payment.Status = booking.Payment.Status == PaymentStatus.Paid
+                ? PaymentStatus.Refunded
+                : PaymentStatus.Cancelled;
+            booking.PaymentStatus = booking.Payment.Status;
+            booking.Payment.UpdatedAt = DateTime.UtcNow;
+        }
 
         await _context.SaveChangesAsync();
 

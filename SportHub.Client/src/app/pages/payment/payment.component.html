@@ -1,0 +1,124 @@
+<app-navbar></app-navbar>
+
+<main class="payment-page">
+  <a class="button-link back-button" routerLink="/bookings">Back to my bookings</a>
+
+  @if (loading()) {
+    <section class="payment-card message-card">Loading payment...</section>
+  } @else if (!payment()) {
+    <section class="payment-card message-card">
+      <p class="error">{{ error() }}</p>
+      <button type="button" class="action-refresh" (click)="loadPayment()">Try again</button>
+    </section>
+  } @else {
+    @if (payment(); as item) {
+      <section class="payment-card">
+      <header class="payment-header">
+        <div>
+          <p class="eyebrow">Secure checkout</p>
+          <h1>Complete payment</h1>
+          <p>Offline demo payment. Card data is validated on this page only.</p>
+        </div>
+
+        <span class="payment-status" [class.paid]="item.status === 'Paid'" [class.failed]="item.status === 'Failed'" [class.pending]="item.status === 'Pending' || item.status === 'Processing'">
+          {{ item.status }}
+        </span>
+      </header>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      @if (success()) {
+        <p class="success">{{ success() }}</p>
+      }
+
+      <div class="payment-details">
+        <div><span>Booking</span><strong>#{{ item.bookingId }}</strong></div>
+        <div><span>Payment reference</span><strong>#{{ item.paymentId }}</strong></div>
+        <div><span>Method</span><strong>{{ item.method }}</strong></div>
+        <div class="amount-row"><span>Amount</span><strong>{{ item.amount }} {{ item.currency }}</strong></div>
+        @if (item.providerReference) {
+          <div><span>Provider reference</span><strong>{{ item.providerReference }}</strong></div>
+        }
+      </div>
+
+      @if (canAttemptPayment()) {
+        <form class="card-form" (ngSubmit)="pay()">
+          <div class="card-preview">
+            <div>
+              <span>{{ getCardBrand() }}</span>
+              <strong>{{ cardNumber || '•••• •••• •••• ••••' }}</strong>
+            </div>
+            <div>
+              <small>{{ cardName || 'CARDHOLDER NAME' }}</small>
+              <small>{{ expiry || 'MM/YY' }}</small>
+            </div>
+          </div>
+
+          <label class="field full">
+            Cardholder name
+            <input
+              type="text"
+              name="cardName"
+              autocomplete="cc-name"
+              placeholder="Name on card"
+              [(ngModel)]="cardName"
+              >
+          </label>
+
+          <label class="field full">
+            Card number
+            <input
+              type="text"
+              name="cardNumber"
+              inputmode="numeric"
+              autocomplete="cc-number"
+              placeholder="4242 4242 4242 4242"
+              [(ngModel)]="cardNumber"
+              maxlength="19"
+              pattern="^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}$"
+              required
+              (input)="formatCardNumber()">
+          </label>
+
+          <label class="field">
+            Expiry date
+            <input
+              type="text"
+              name="expiry"
+              inputmode="numeric"
+              autocomplete="cc-exp"
+              placeholder="MM/YY"
+              [(ngModel)]="expiry"
+              maxlength="5"
+              pattern="^(0[1-9]|1[0-2])\/?([0-9]{2})$"
+              required
+              (input)="formatExpiry()">
+          </label>
+
+          <label class="field">
+            CVV
+            <input
+              type="password"
+              name="cvv"
+              inputmode="numeric"
+              autocomplete="cc-csc"
+              placeholder="123"
+              [(ngModel)]="cvv"
+              maxlength="3"
+              pattern="^[0-9]{3,4}$"
+              required
+              (input)="formatCvv()">
+          </label>
+
+
+          <button type="submit" class="action-booking" [disabled]="paying()">
+            {{ paying() ? 'Authorizing...' : 'Pay ' + item.amount + ' ' + item.currency }}
+          </button>
+        </form>
+      }
+      </section>
+    }
+  }
+</main>

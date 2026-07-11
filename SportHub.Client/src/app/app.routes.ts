@@ -10,6 +10,7 @@ import { AdminBookingsComponent } from './pages/admin/admin-bookings/admin-booki
 import { AdminEquipmentComponent } from './pages/admin/admin-equipment/admin-equipment.component';
 import { AdminSportsComponent } from './pages/admin/admin-sports/admin-sports.component';
 import { AdminSportDetailsComponent } from './pages/admin/admin-sport-details/admin-sport-details.component';
+import { PaymentComponent } from './pages/payment/payment.component';
 
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'sports/:id', component: SportDetailsComponent, canActivate: [authGuard] },
   { path: 'equipment', component: EquipmentBookingComponent, canActivate: [authGuard] },
   { path: 'bookings', component: BookingsComponent, canActivate: [authGuard] },
+  { path: 'payment/:id', component: PaymentComponent, canActivate: [authGuard] },
   { path: 'admin/bookings', component: AdminBookingsComponent, canActivate: [adminGuard] },
   { path: 'admin/sports', component: AdminSportsComponent, canActivate: [adminGuard] },
   { path: 'admin/sports/:id', component: AdminSportDetailsComponent, canActivate: [adminGuard] },

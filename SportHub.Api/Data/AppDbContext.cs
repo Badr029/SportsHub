@@ -22,6 +22,8 @@ public class AppDbContext : DbContext
 
     public DbSet<BookingEquipment> BookingEquipment { get; set; }
 
+    public DbSet<Payment> Payments { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -45,6 +47,50 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Booking>()
             .Property(booking => booking.RentalStatus)
             .HasConversion<string>();
+
+        modelBuilder.Entity<Booking>()
+            .Property(booking => booking.PaymentMethod)
+            .HasConversion<string>()
+            .HasDefaultValue(PaymentMethod.PayOnSite);
+
+        modelBuilder.Entity<Booking>()
+            .Property(booking => booking.PaymentStatus)
+            .HasConversion<string>()
+            .HasDefaultValue(PaymentStatus.NotRequired);
+
+        modelBuilder.Entity<Payment>()
+            .Property(payment => payment.Method)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Payment>()
+            .Property(payment => payment.Status)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Payment>()
+            .Property(payment => payment.Amount)
+            .HasPrecision(10, 2);
+
+        modelBuilder.Entity<Payment>()
+            .Property(payment => payment.Currency)
+            .HasMaxLength(3);
+
+        modelBuilder.Entity<Payment>()
+            .Property(payment => payment.IdempotencyKey)
+            .HasMaxLength(64);
+
+        modelBuilder.Entity<Payment>()
+            .HasOne(payment => payment.Booking)
+            .WithOne(booking => booking.Payment)
+            .HasForeignKey<Payment>(payment => payment.BookingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Payment>()
+            .HasIndex(payment => payment.BookingId)
+            .IsUnique();
+
+        modelBuilder.Entity<Payment>()
+            .HasIndex(payment => payment.IdempotencyKey)
+            .IsUnique();
 
         modelBuilder.Entity<Sport>().HasData(
             new Sport { Id = 1, Name = "Football", Description = "Football fields for 5-a-side, 7-a-side, and full matches with training equipment.", ImageUrl = "/uploads/seed/football/sport-image.png" },

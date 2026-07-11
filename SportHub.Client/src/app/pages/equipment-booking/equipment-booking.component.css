@@ -148,6 +148,41 @@ select {
   padding: 16px;
 }
 
+.payment-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  border: 0;
+  padding: 0;
+}
+
+.payment-choice legend {
+  grid-column: 1 / -1;
+  color: white;
+  font-weight: 900;
+}
+
+.payment-choice label {
+  display: flex;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.48);
+  padding: 10px;
+  cursor: pointer;
+}
+
+.payment-choice label.selected {
+  border-color: var(--teal-bright);
+  background: rgba(13, 148, 136, 0.18);
+}
+
+.payment-choice input {
+  width: auto;
+}
+
 .selected-list {
   display: grid;
   gap: 10px;

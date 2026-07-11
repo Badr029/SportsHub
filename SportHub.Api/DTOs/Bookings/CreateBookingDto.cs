@@ -6,6 +6,8 @@ public class CreateBookingDto
 {
     public BookingType BookingType { get; set; }
 
+    public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.PayOnSite;
+
     public int? FacilityId { get; set; }
 
     public DateTime StartDate { get; set; }

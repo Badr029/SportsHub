@@ -76,7 +76,7 @@
         <p class="panel-hint">Return date is automatically set to the same time next day.</p>
         <label>
         Pickup day
-        <input type="date" name="pickupDate" [(ngModel)]="pickupDate" (ngModelChange)="loadAvailability()">
+        <input type="date" name="pickupDate" [min]="todayDate" [(ngModel)]="pickupDate" (ngModelChange)="loadAvailability()">
       </label>
 
       <label>
@@ -112,6 +112,18 @@
             }
           </div>
         }
+
+        <fieldset class="payment-choice">
+          <legend>Payment method</legend>
+          <label [class.selected]="paymentMethod === 'PayOnSite'">
+            <input type="radio" name="equipmentPaymentMethod" value="PayOnSite" [(ngModel)]="paymentMethod">
+            <span>Pay onsite</span>
+          </label>
+          <label [class.selected]="paymentMethod === 'Online'">
+            <input type="radio" name="equipmentPaymentMethod" value="Online" [(ngModel)]="paymentMethod">
+            <span>Pay online</span>
+          </label>
+        </fieldset>
 
         <button type="button" class="action-booking" (click)="createBooking()">Create equipment booking</button>
       </aside>

@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { Router } from '@angular/router';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 import { SportsService } from '../../core/services/sports.service';
 import { BookingService } from '../../core/services/booking.service';
 import { resolveImageUrl } from '../../core/services/api.config';
 import { Equipment, Sport, SportDetails } from '../../models/sport.model';
-import { BookingEquipmentItem, CreateBooking, EquipmentAvailability } from '../../models/booking.model';
+import { BookingEquipmentItem, CreateBooking, EquipmentAvailability, PaymentMethod } from '../../models/booking.model';
 
 interface EquipmentCard extends Equipment {
   sportId: number;
@@ -30,6 +31,8 @@ export class EquipmentBookingComponent implements OnInit {
   selectedSportId = 0;
   pickupDate = '';
   pickupTime = '08:00';
+  todayDate = this.formatDateInput(new Date());
+  paymentMethod: PaymentMethod = 'PayOnSite';
   selectedEquipmentItems: BookingEquipmentItem[] = [];
 
   filteredEquipment() {
@@ -44,7 +47,8 @@ export class EquipmentBookingComponent implements OnInit {
 
   constructor(
     private sportsService: SportsService,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -165,6 +169,11 @@ export class EquipmentBookingComponent implements OnInit {
       return;
     }
 
+    if (this.pickupDate < this.todayDate) {
+      this.error.set('Pickup date cannot be in the past.');
+      return;
+    }
+
     for (const item of this.selectedEquipmentItems) {
       const availability = this.getAvailability(item.equipmentId);
 
@@ -185,14 +194,21 @@ export class EquipmentBookingComponent implements OnInit {
       endDate: returnDate.toISOString(),
       pickupDate: pickupDate.toISOString(),
       returnDate: returnDate.toISOString(),
-      equipmentItems: this.selectedEquipmentItems
+      equipmentItems: this.selectedEquipmentItems,
+      paymentMethod: this.paymentMethod
     };
 
     this.bookingService.createBooking(request).subscribe({
       next: booking => {
-        this.success.set(`Equipment booking created. Status: ${booking.status}`);
         this.selectedEquipmentItems = [];
         this.loadAvailability();
+
+        if (booking.paymentMethod === 'Online' && booking.paymentId) {
+          this.router.navigate(['/payment', booking.paymentId]);
+          return;
+        }
+
+        this.success.set('Equipment booking created. Payment will be collected onsite.');
       },
       error: error => {
         this.error.set(this.getErrorMessage(error, 'Failed to create equipment booking.'));
@@ -242,6 +258,11 @@ export class EquipmentBookingComponent implements OnInit {
 
   getImageUrl(imageUrl?: string | null) {
     return resolveImageUrl(imageUrl);
+  }
+
+  formatDateInput(date: Date) {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   getErrorMessage(error: any, fallback: string) {

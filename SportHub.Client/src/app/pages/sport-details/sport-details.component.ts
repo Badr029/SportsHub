@@ -1,12 +1,12 @@
 import { Component, signal , OnInit } from '@angular/core';
-import {ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {FormsModule} from '@angular/forms';
 
 import { SportsService } from '../../core/services/sports.service';
 import { BookingService } from '../../core/services/booking.service';
 import { resolveImageUrl } from '../../core/services/api.config';
 import {SportDetails} from '../../models/sport.model';
-import {BookingType, CreateBooking, FacilityAvailabilitySlot, EquipmentAvailability} from '../../models/booking.model';
+import { BookingType, CreateBooking, FacilityAvailabilitySlot, EquipmentAvailability, PaymentMethod } from '../../models/booking.model';
 import {NavbarComponent} from '../../shared/navbar/navbar.component';
 
 @Component({
@@ -32,9 +32,12 @@ export class SportDetailsComponent implements OnInit {
   availabilitySlots: FacilityAvailabilitySlot[] = [];
   equipmentAvailability: EquipmentAvailability[] = [];
   pendingBookingRequest: CreateBooking | null = null;
+  paymentMethod: PaymentMethod = 'PayOnSite';
+  todayDate = this.formatDateInput(new Date());
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private sportsService: SportsService,
     private bookingService: BookingService
   ) { }
@@ -281,6 +284,11 @@ export class SportDetailsComponent implements OnInit {
     startDate = this.buildFacilityStartDate();
     endDate = this.buildFacilityEndDate(startDate);
 
+    if (startDate <= new Date()) {
+      this.error.set('You cannot book a time that has already passed.');
+      return;
+    }
+
     if (this.bookingType === 3) {
       pickupDate = startDate;
       returnDate = endDate;
@@ -294,7 +302,8 @@ export class SportDetailsComponent implements OnInit {
     endDate: this.formatLocalDateTime(endDate),
     pickupDate: pickupDate ? this.formatLocalDateTime(pickupDate) : null,
     returnDate: returnDate ? this.formatLocalDateTime(returnDate) : null,
-    equipmentItems: this.bookingType === 1 ? [] : this.selectedEquipmentItems
+    equipmentItems: this.bookingType === 1 ? [] : this.selectedEquipmentItems,
+    paymentMethod: this.paymentMethod
   };
 
   this.pendingBookingRequest = request;
@@ -306,10 +315,21 @@ export class SportDetailsComponent implements OnInit {
       return;
     }
 
+    this.pendingBookingRequest = {
+      ...this.pendingBookingRequest,
+      paymentMethod: this.paymentMethod
+    };
+
     this.bookingService.createBooking(this.pendingBookingRequest).subscribe({
       next: booking => {
-        this.success.set('Booking created successfully. Status: ' + booking.status);
         this.closeBookingConfirmation();
+
+        if (booking.paymentMethod === 'Online' && booking.paymentId) {
+          this.router.navigate(['/payment', booking.paymentId]);
+          return;
+        }
+
+        this.success.set('Booking created successfully. Payment will be collected onsite.');
       },
       error: error => {
         if (error.status === 0) {
@@ -506,6 +526,11 @@ export class SportDetailsComponent implements OnInit {
   formatLocalDateTime(date: Date) {
     const pad = (value: number) => value.toString().padStart(2, '0');
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+  }
+
+  formatDateInput(date: Date) {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   getImageUrl(imageUrl?: string | null) {

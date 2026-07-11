@@ -70,6 +70,16 @@
               }
 
               <p class="total-price">Total price: {{ booking.totalPrice }} EGP</p>
+
+              <section class="payment-block">
+                <div>
+                  <span>Payment</span>
+                  <strong>{{ booking.paymentMethod === 'PayOnSite' ? 'Pay onsite' : 'Online' }}</strong>
+                </div>
+                <span class="payment-badge" [class.paid]="booking.paymentStatus === 'Paid'" [class.failed]="booking.paymentStatus === 'Failed'" [class.pending]="booking.paymentStatus === 'Pending' || booking.paymentStatus === 'Processing'">
+                  {{ booking.paymentStatus }}
+                </span>
+              </section>
             </div>
 
             <div class="card-actions">
@@ -85,6 +95,10 @@
                 <button type="button" class="secondary action-neutral" (click)="clearBooking(booking.id)">
                   Clear
                 </button>
+              }
+
+              @if (canPayOnline(booking)) {
+                <a class="button-link action-booking" [routerLink]="['/payment', booking.paymentId]">Pay now</a>
               }
             </div>
           </article>

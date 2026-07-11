@@ -115,7 +115,9 @@ export class AdminBookingsComponent implements OnInit {
   }
 
   canConfirm(booking: AdminBookingResponse) {
-    return !this.isClosedBooking(booking) && booking.status === 'Pending';
+    return !this.isClosedBooking(booking) &&
+      booking.status === 'Pending' &&
+      (booking.paymentMethod === 'PayOnSite' || booking.paymentStatus === 'Paid');
   }
 
   canPickup(booking: AdminBookingResponse) {

@@ -30,6 +30,7 @@ namespace SportHub.Api.Controllers
 
             var bookingsToUpdate = await _context.Bookings
                 .Where(b => b.UserId == userId && !b.HiddenFromCustomer)
+                .Include(b => b.Payment)
                 .ToListAsync();
 
             await UpdateExpiredBookings(bookingsToUpdate);
@@ -39,6 +40,7 @@ namespace SportHub.Api.Controllers
                 .Include(b => b.Facility)
                 .Include(b => b.BookingEquipment)
                     .ThenInclude(item => item.Equipment)
+                .Include(b => b.Payment)
                 .OrderByDescending(b => b.CreatedAt)
                 .Select(b => new
                 {
@@ -51,6 +53,9 @@ namespace SportHub.Api.Controllers
                     b.Status,
                     b.RentalStatus,
                     b.TotalPrice,
+                    PaymentMethod = b.PaymentMethod.ToString(),
+                    PaymentStatus = b.PaymentStatus.ToString(),
+                    PaymentId = b.Payment == null ? null : (int?)b.Payment.Id,
                     Facility = b.Facility == null ? null : new
                     {
                         b.Facility.Id,
@@ -99,6 +104,7 @@ namespace SportHub.Api.Controllers
                 return BadRequest("Facility is currently out of service.");
             }
 
+            var now = DateTime.Now;
             var dayStart = date.Date;
             var dayEnd = dayStart.AddDays(1);
 
@@ -125,12 +131,13 @@ namespace SportHub.Api.Controllers
                 var overlaps = existingBookings.Any(booking =>
                     slotStart < booking.EndDate &&
                     slotEnd > booking.StartDate);
+                var isPastSlot = slotStart <= now;
 
                 slots.Add(new FacilityAvailabilitySlotDto
                 {
                     Time = slotStart.ToString("HH:mm"),
                     Label = slotStart.ToString("h:mm tt"),
-                    Available = !overlaps
+                    Available = !overlaps && !isPastSlot
                 });
             }
 
@@ -143,11 +150,18 @@ namespace SportHub.Api.Controllers
         {
             var userId = GetUserId();
 
+            var now = DateTime.Now;
+
             if (dto.BookingType is BookingType.Facility or BookingType.Package)
             {
                 if (dto.EndDate <= dto.StartDate)
                 {
                     return BadRequest("End date must be greater than start date.");
+                }
+
+                if (dto.StartDate <= now)
+                {
+                    return BadRequest("You cannot book a time that has already passed.");
                 }
 
                 var durationHours = (dto.EndDate - dto.StartDate).TotalHours;
@@ -163,6 +177,11 @@ namespace SportHub.Api.Controllers
                 if (dto.PickupDate == null)
                 {
                     return BadRequest("Pickup date is required for equipment rental.");
+                }
+
+                if (dto.PickupDate.Value.Date < now.Date)
+                {
+                    return BadRequest("Pickup date cannot be in the past.");
                 }
 
                 dto.StartDate = dto.PickupDate.Value.Date;
@@ -258,6 +277,10 @@ namespace SportHub.Api.Controllers
                 Status = BookingStatus.Pending,
                 RentalStatus = dto.BookingType == BookingType.Facility ? null : RentalStatus.PendingPickup,
                 TotalPrice = totalPrice,
+                PaymentMethod = dto.PaymentMethod,
+                PaymentStatus = dto.PaymentMethod == PaymentMethod.Online
+                    ? PaymentStatus.Pending
+                    : PaymentStatus.NotRequired,
                 PickupDate = dto.PickupDate,
                 ReturnDate = dto.ReturnDate,
                 BookingEquipment = dto.EquipmentItems.Select(item => new BookingEquipment
@@ -266,6 +289,16 @@ namespace SportHub.Api.Controllers
                     Quantity = item.Quantity
                 }).ToList()
             };
+
+            if (dto.PaymentMethod == PaymentMethod.Online)
+            {
+                booking.Payment = new Payment
+                {
+                    Amount = totalPrice,
+                    Method = PaymentMethod.Online,
+                    Status = PaymentStatus.Pending
+                };
+            }
 
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
@@ -277,7 +310,10 @@ namespace SportHub.Api.Controllers
                 BookingType = booking.BookingType.ToString(),
                 Status = booking.Status.ToString(),
                 RentalStatus = booking.RentalStatus?.ToString(),
-                booking.TotalPrice
+                booking.TotalPrice,
+                PaymentMethod = booking.PaymentMethod.ToString(),
+                PaymentStatus = booking.PaymentStatus.ToString(),
+                PaymentId = booking.Payment?.Id
             });
 
         }
@@ -320,7 +356,9 @@ namespace SportHub.Api.Controllers
         public async Task<IActionResult> CancelBooking(int id)
         {
             var userId = GetUserId();
-            var booking = await _context.Bookings.FirstOrDefaultAsync(b => 
+            var booking = await _context.Bookings
+                .Include(b => b.Payment)
+                .FirstOrDefaultAsync(b => 
                 b.Id == id &&
                 b.UserId == userId);
             if (booking == null)
@@ -350,6 +388,7 @@ namespace SportHub.Api.Controllers
                 return BadRequest("Cannot cancel booking less than 2 hours before start date.");
             }
             booking.Status = BookingStatus.Cancelled;
+            UpdatePaymentForCancelledBooking(booking);
             await _context.SaveChangesAsync();
             return Ok("Booking cancelled.");
 
@@ -466,6 +505,12 @@ namespace SportHub.Api.Controllers
                 if (expiryDate <= now)
                 {
                     booking.Status = BookingStatus.Completed;
+                    if (booking.Payment is { Status: not PaymentStatus.Paid })
+                    {
+                        booking.Payment.Status = PaymentStatus.Cancelled;
+                        booking.Payment.UpdatedAt = now;
+                        booking.PaymentStatus = PaymentStatus.Cancelled;
+                    }
                     changed = true;
                 }
             }
@@ -474,6 +519,29 @@ namespace SportHub.Api.Controllers
             {
                 await _context.SaveChangesAsync();
             }
+        }
+
+        private static void UpdatePaymentForCancelledBooking(Booking booking)
+        {
+            if (booking.Payment == null)
+            {
+                return;
+            }
+
+            var now = DateTime.UtcNow;
+
+            if (booking.Payment.Status == PaymentStatus.Paid)
+            {
+                booking.Payment.Status = PaymentStatus.Refunded;
+                booking.PaymentStatus = PaymentStatus.Refunded;
+            }
+            else
+            {
+                booking.Payment.Status = PaymentStatus.Cancelled;
+                booking.PaymentStatus = PaymentStatus.Cancelled;
+            }
+
+            booking.Payment.UpdatedAt = now;
         }
     }
     

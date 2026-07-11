@@ -195,7 +195,7 @@
             }
             <label>
               Booking day
-              <input type="date" name="bookingDate" [(ngModel)]="bookingDate" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">
+              <input type="date" name="bookingDate" [min]="todayDate" [(ngModel)]="bookingDate" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">
             </label>
 
             <section class="slot-section">
@@ -302,6 +302,18 @@
               <strong>{{ estimatedTotal() }} EGP</strong>
             </div>
           </div>
+
+          <fieldset class="payment-choice">
+            <legend>Payment method</legend>
+            <label [class.selected]="paymentMethod === 'PayOnSite'">
+              <input type="radio" name="paymentMethod" value="PayOnSite" [(ngModel)]="paymentMethod">
+              <span><strong>Pay onsite</strong><small>Pay when you arrive.</small></span>
+            </label>
+            <label [class.selected]="paymentMethod === 'Online'">
+              <input type="radio" name="paymentMethod" value="Online" [(ngModel)]="paymentMethod">
+              <span><strong>Pay online</strong><small>Continue to secure mock checkout.</small></span>
+            </label>
+          </fieldset>
 
           <div class="form-actions">
             <button type="button" class="action-booking" (click)="confirmCreateBooking()">Confirm booking</button>

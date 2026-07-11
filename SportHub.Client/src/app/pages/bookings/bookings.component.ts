@@ -1,4 +1,5 @@
 import { Component, signal , OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 
 import {BookingService} from '../../core/services/booking.service';
@@ -7,7 +8,7 @@ import {NavbarComponent} from '../../shared/navbar/navbar.component';
 
 @Component({
   selector: 'app-bookings',
-  imports: [NavbarComponent],
+  imports: [NavbarComponent, RouterLink],
   templateUrl: './bookings.component.html',
   styleUrl: './bookings.component.css'
 })
@@ -55,7 +56,15 @@ export class BookingsComponent  implements OnInit {
     this.bookingService.cancelBooking(id).subscribe({
       next: () =>{
         this.bookings.set(this.bookings().map(booking =>
-          booking.id === id ? { ...booking, status: 'Cancelled' } : booking
+          booking.id === id
+            ? {
+                ...booking,
+                status: 'Cancelled',
+                paymentStatus: booking.paymentStatus === 'Paid'
+                  ? 'Refunded'
+                  : booking.paymentMethod === 'Online' ? 'Cancelled' : booking.paymentStatus
+              }
+            : booking
         ));
         this.success.set('Booking cancelled successfully.');
       },
@@ -90,6 +99,14 @@ export class BookingsComponent  implements OnInit {
 
   canClearBooking(booking: BookingResponse) {
     return booking.status === 'Cancelled' || booking.status === 'Completed';
+  }
+
+  canPayOnline(booking: BookingResponse) {
+    return booking.paymentMethod === 'Online' &&
+      !!booking.paymentId &&
+      !['Paid', 'Processing', 'Refunded'].includes(booking.paymentStatus) &&
+      booking.status !== 'Cancelled' &&
+      booking.status !== 'Completed';
   }
 
   canCancelBooking(booking: BookingResponse) {

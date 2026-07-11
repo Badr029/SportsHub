@@ -1,5 +1,16 @@
 export type BookingType = 1 | 2 | 3 ;
 
+export type PaymentMethod = 'PayOnSite' | 'Online';
+
+export type PaymentStatus =
+  | 'NotRequired'
+  | 'Pending'
+  | 'Processing'
+  | 'Paid'
+  | 'Failed'
+  | 'Cancelled'
+  | 'Refunded';
+
 export interface BookingEquipmentItem {
   equipmentId: number;
   quantity: number;
@@ -19,6 +30,7 @@ export interface CreateBooking {
   pickupDate?: string | null;
   returnDate?: string | null;
   equipmentItems: BookingEquipmentItem[];
+  paymentMethod: PaymentMethod;
 }
 
 export interface BookingResponse {
@@ -31,6 +43,9 @@ export interface BookingResponse {
   status: string;
   rentalStatus?: string | null;
   totalPrice: number;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  paymentId?: number | null;
   equipment: BookingEquipmentResponse[];
 }
 
@@ -80,7 +95,25 @@ export interface AdminBookingResponse {
   startDate: string;
   endDate: string;
   totalPrice: number;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  paymentId?: number | null;
   equipment: AdminBookingEquipment[];
+}
+
+export interface PaymentDetails {
+  paymentId: number;
+  bookingId: number;
+  amount: number;
+  currency: string;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  providerReference?: string | null;
+  failureReason?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
+  paidAt?: string | null;
+  message?: string | null;
 }
 
 export interface AdminBookingsPage {
