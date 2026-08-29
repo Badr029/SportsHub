@@ -151,26 +151,25 @@ select {
 .payment-choice {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
   border: 0;
   padding: 0;
 }
 
 .payment-choice legend {
-  grid-column: 1 / -1;
+  margin-bottom: 9px;
   color: white;
   font-weight: 900;
 }
 
 .payment-choice label {
   display: flex;
-  grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 7px;
   background: rgba(15, 23, 42, 0.48);
-  padding: 10px;
+  padding: 12px;
   cursor: pointer;
 }
 
@@ -183,6 +182,19 @@ select {
   width: auto;
 }
 
+.payment-choice span,
+.payment-choice small {
+  display: block;
+}
+
+.payment-choice strong {
+  color: white;
+}
+
+.payment-choice small {
+  margin-top: 4px;
+  color: var(--muted);
+}
 .selected-list {
   display: grid;
   gap: 10px;
@@ -221,6 +233,40 @@ button:disabled {
   border: 1px solid var(--cancelled);
   background: transparent;
   color: #fecaca;
+}
+
+.rental-total {
+  margin: 14px 0 0;
+  color: var(--teal-bright);
+  font-size: 18px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 20px;
+  background: rgba(2, 6, 23, 0.78);
+}
+
+.modal-panel.booking-confirmation {
+  position: relative;
+  z-index: 1001;
+  display: grid;
+  visibility: visible;
+  opacity: 1;
+  width: min(520px, calc(100vw - 40px));
+  min-height: 280px;
+  max-height: calc(100vh - 40px);
+  overflow: hidden;
 }
 
 .error,

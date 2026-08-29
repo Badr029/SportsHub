@@ -5,7 +5,7 @@ using SportHub.Api.DTOs.Auth;
 using SportHub.Api.Models;
 using SportHub.Api.Models.Enums;
 using SportHub.Api.Services;
-
+using Microsoft.AspNetCore.Authorization;
 
 namespace SportHub.Api.Controllers;
 
@@ -121,6 +121,62 @@ public class AuthController : ControllerBase
             Email = user.Email,
             Role = user.Role ,
             Token = token 
+        });
+    }
+
+    [HttpDelete("test-users/{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteTestUser(
+        int id,
+        [FromServices] IWebHostEnvironment environment)
+    {
+        if (!environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        var user = await _context.Users.FindAsync(id);
+
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        if (user.Role == UserRole.Admin)
+        {
+            return BadRequest("Admin accounts cannot be deleted.");
+        }
+
+        var bookingIds = await _context.Bookings
+            .Where(booking => booking.UserId == id)
+            .Select(booking => booking.Id)
+            .ToListAsync();
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        await _context.Payments
+            .Where(payment => bookingIds.Contains(payment.BookingId))
+            .ExecuteDeleteAsync();
+
+        await _context.BookingEquipment
+            .Where(item => bookingIds.Contains(item.BookingId))
+            .ExecuteDeleteAsync();
+
+        await _context.Bookings
+            .Where(booking => booking.UserId == id)
+            .ExecuteDeleteAsync();
+
+        await _context.Users
+            .Where(item => item.Id == id)
+            .ExecuteDeleteAsync();
+
+        await transaction.CommitAsync();
+
+        return Ok(new
+        {
+            Message = "Test user and related test data deleted.",
+            DeletedUserId = id,
+            DeletedBookings = bookingIds.Count
         });
     }
 

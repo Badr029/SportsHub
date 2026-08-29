@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
@@ -20,7 +20,7 @@ interface EquipmentCard extends Equipment {
   templateUrl: './equipment-booking.component.html',
   styleUrl: './equipment-booking.component.css'
 })
-export class EquipmentBookingComponent implements OnInit {
+export class EquipmentBookingComponent implements OnInit, OnDestroy {
   sports = signal<Sport[]>([]);
   equipment = signal<EquipmentCard[]>([]);
   availability = signal<EquipmentAvailability[]>([]);
@@ -34,6 +34,8 @@ export class EquipmentBookingComponent implements OnInit {
   todayDate = this.formatDateInput(new Date());
   paymentMethod: PaymentMethod = 'PayOnSite';
   selectedEquipmentItems: BookingEquipmentItem[] = [];
+  confirmationOpen = false;
+  pendingBookingRequest: CreateBooking | null = null;
 
   filteredEquipment() {
     const items = this.equipment();
@@ -53,6 +55,11 @@ export class EquipmentBookingComponent implements OnInit {
 
   ngOnInit() {
     this.loadEquipment();
+  }
+
+  ngOnDestroy() {
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
   }
 
   loadEquipment() {
@@ -115,9 +122,7 @@ export class EquipmentBookingComponent implements OnInit {
   }
 
   updateQuantity(equipmentId: number, quantity: number) {
-    const availability = this.getAvailability(equipmentId);
-    const maxQuantity = availability?.availableQuantity ?? this.getEquipment(equipmentId)?.quantity ?? 1;
-    const nextQuantity = Math.max(1, Math.min(Number(quantity) || 1, maxQuantity));
+    const nextQuantity = Math.max(1, Number(quantity) || 1);
 
     this.selectedEquipmentItems = this.selectedEquipmentItems.map(item =>
       item.equipmentId === equipmentId ? { ...item, quantity: nextQuantity } : item
@@ -148,7 +153,6 @@ export class EquipmentBookingComponent implements OnInit {
     )).subscribe({
       next: availability => {
         this.availability.set(availability);
-        this.clampSelectedQuantities();
       },
       error: error => {
         this.error.set(this.getErrorMessage(error, 'Failed to load equipment availability.'));
@@ -174,13 +178,20 @@ export class EquipmentBookingComponent implements OnInit {
       return;
     }
 
+    const equipmentErrors: string[] = [];
     for (const item of this.selectedEquipmentItems) {
       const availability = this.getAvailability(item.equipmentId);
 
-      if (availability && item.quantity > availability.availableQuantity) {
-        this.error.set(`${this.getEquipmentName(item.equipmentId)} has only ${availability.availableQuantity} available.`);
-        return;
+      if (!availability) {
+        equipmentErrors.push(`Availability is still loading for ${this.getEquipmentName(item.equipmentId)}.`);
+      } else if (item.quantity > availability.availableQuantity) {
+        equipmentErrors.push(`${this.getEquipmentName(item.equipmentId)} has only ${availability.availableQuantity} available.`);
       }
+    }
+
+    if (equipmentErrors.length > 0) {
+      this.error.set(equipmentErrors.join(' '));
+      return;
     }
 
     const pickupDate = new Date(`${this.pickupDate}T${this.pickupTime}`);
@@ -198,8 +209,26 @@ export class EquipmentBookingComponent implements OnInit {
       paymentMethod: this.paymentMethod
     };
 
-    this.bookingService.createBooking(request).subscribe({
+    this.pendingBookingRequest = request;
+    this.confirmationOpen = true;
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
+  }
+
+  confirmCreateBooking() {
+    if (!this.pendingBookingRequest) return;
+
+    this.pendingBookingRequest = {
+      ...this.pendingBookingRequest,
+      paymentMethod: this.paymentMethod
+    };
+
+    this.bookingService.createBooking(this.pendingBookingRequest).subscribe({
       next: booking => {
+        this.confirmationOpen = false;
+        this.pendingBookingRequest = null;
+        document.body.style.overflow = '';
+        document.body.classList.remove('modal-open');
         this.selectedEquipmentItems = [];
         this.loadAvailability();
 
@@ -216,6 +245,20 @@ export class EquipmentBookingComponent implements OnInit {
     });
   }
 
+  closeBookingConfirmation() {
+    this.confirmationOpen = false;
+    this.pendingBookingRequest = null;
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
+  }
+
+  selectedRentalTotal() {
+    return this.selectedEquipmentItems.reduce((total, item) => {
+      const equipment = this.getEquipment(item.equipmentId);
+      return total + (equipment?.dailyRentalPrice ?? 0) * item.quantity;
+    }, 0);
+  }
+
   clampSelectedQuantities() {
     this.selectedEquipmentItems = this.selectedEquipmentItems.map(item => {
       const availability = this.getAvailability(item.equipmentId);
@@ -224,10 +267,7 @@ export class EquipmentBookingComponent implements OnInit {
         return item;
       }
 
-      return {
-        ...item,
-        quantity: Math.max(1, Math.min(item.quantity, availability.availableQuantity))
-      };
+      return item;
     });
   }
 
@@ -263,6 +303,13 @@ export class EquipmentBookingComponent implements OnInit {
   formatDateInput(date: Date) {
     const pad = (value: number) => value.toString().padStart(2, '0');
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  }
+
+  formatDateTime(value: string | null | undefined) {
+    if (!value) return '';
+    return new Date(value).toLocaleString([], {
+      weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
   }
 
   getErrorMessage(error: any, fallback: string) {

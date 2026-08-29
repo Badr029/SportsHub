@@ -46,6 +46,7 @@ export interface BookingResponse {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   paymentId?: number | null;
+  facility?: { id: number; name: string } | null;
   equipment: BookingEquipmentResponse[];
 }
 

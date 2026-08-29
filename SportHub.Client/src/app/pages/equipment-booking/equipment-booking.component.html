@@ -12,14 +12,6 @@
   @if (loading()) {
     <p>Loading equipment...</p>
   } @else {
-    @if (error()) {
-      <p class="error">{{ error() }}</p>
-    }
-
-    @if (success()) {
-      <p class="success">{{ success() }}</p>
-    }
-
     <section class="toolbar">
       <label>
         Sport
@@ -111,22 +103,69 @@
               </div>
             }
           </div>
+          <p class="rental-total">Rental total: {{ selectedRentalTotal() }} EGP</p>
         }
 
-        <fieldset class="payment-choice">
-          <legend>Payment method</legend>
-          <label [class.selected]="paymentMethod === 'PayOnSite'">
-            <input type="radio" name="equipmentPaymentMethod" value="PayOnSite" [(ngModel)]="paymentMethod">
-            <span>Pay onsite</span>
-          </label>
-          <label [class.selected]="paymentMethod === 'Online'">
-            <input type="radio" name="equipmentPaymentMethod" value="Online" [(ngModel)]="paymentMethod">
-            <span>Pay online</span>
-          </label>
-        </fieldset>
+        @if (error()) {
+          <p class="error booking-feedback" role="alert">{{ error() }}</p>
+        }
+
+        @if (success()) {
+          <p class="success booking-feedback" role="status">{{ success() }}</p>
+        }
 
         <button type="button" class="action-booking" (click)="createBooking()">Create equipment booking</button>
       </aside>
     </section>
+
+    @if (confirmationOpen && pendingBookingRequest) {
+      <section class="modal-backdrop" role="dialog" aria-modal="true">
+        <div class="modal-panel booking-confirmation equipment-rental-confirmation">
+          <h2>Confirm booking</h2>
+
+          <div class="confirmation-list">
+            <div>
+              <span>Type</span>
+              <strong>Equipment rental</strong>
+            </div>
+            <div>
+              <span>Pickup</span>
+              <strong>{{ formatDateTime(pendingBookingRequest.pickupDate) }}</strong>
+            </div>
+            <div>
+              <span>Return</span>
+              <strong>{{ formatDateTime(pendingBookingRequest.returnDate) }}</strong>
+            </div>
+            <div class="confirmation-equipment">
+              <span>Equipment</span>
+              @for (item of pendingBookingRequest.equipmentItems; track item.equipmentId) {
+                <strong>{{ getEquipmentName(item.equipmentId) }} x {{ item.quantity }}</strong>
+              }
+            </div>
+            <div class="confirmation-total">
+              <span>Estimated total</span>
+              <strong>{{ selectedRentalTotal() }} EGP</strong>
+            </div>
+          </div>
+
+          <fieldset class="payment-choice">
+            <legend>Payment method</legend>
+            <label [class.selected]="paymentMethod === 'PayOnSite'">
+              <input type="radio" name="confirmationEquipmentPaymentMethod" value="PayOnSite" [(ngModel)]="paymentMethod">
+              <span><strong>Pay onsite</strong><small>Pay when you arrive.</small></span>
+            </label>
+            <label [class.selected]="paymentMethod === 'Online'">
+              <input type="radio" name="confirmationEquipmentPaymentMethod" value="Online" [(ngModel)]="paymentMethod">
+              <span><strong>Pay online</strong><small>Continue to secure mock checkout.</small></span>
+            </label>
+          </fieldset>
+
+          <div class="form-actions">
+            <button type="button" class="action-booking" (click)="confirmCreateBooking()">Confirm booking</button>
+            <button type="button" class="secondary" (click)="closeBookingConfirmation()">Cancel</button>
+          </div>
+        </div>
+      </section>
+    }
   }
 </main>

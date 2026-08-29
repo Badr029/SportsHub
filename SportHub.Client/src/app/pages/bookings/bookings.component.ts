@@ -8,7 +8,7 @@ import {NavbarComponent} from '../../shared/navbar/navbar.component';
 
 @Component({
   selector: 'app-bookings',
-  imports: [NavbarComponent, RouterLink],
+  imports: [NavbarComponent, RouterLink, ],
   templateUrl: './bookings.component.html',
   styleUrl: './bookings.component.css'
 })
@@ -110,12 +110,14 @@ export class BookingsComponent  implements OnInit {
   }
 
   canCancelBooking(booking: BookingResponse) {
-    if (booking.status === 'Cancelled' || booking.status === 'Completed' || !booking.startDate) {
+    if (booking.status === 'Cancelled' || booking.status === 'Completed') {
       return false;
     }
 
+    const cancellationStart = booking.bookingType === 'Equipment' ? booking.pickupDate : booking.startDate;
+    if (!cancellationStart) return false;
     const twoHoursFromNow = Date.now() + 2 * 60 * 60 * 1000;
-    return new Date(booking.startDate).getTime() > twoHoursFromNow;
+    return new Date(cancellationStart).getTime() > twoHoursFromNow;
   }
 
   isFacilityBooking(booking: BookingResponse) {
@@ -175,7 +177,7 @@ export class BookingsComponent  implements OnInit {
     return Number.isInteger(hours) ? hours.toString() : hours.toFixed(1);
   }
 
-  
+
 
   getErrorMessage(error: any, fallback: string) {
     if (typeof error.error === 'string') {
@@ -192,6 +194,8 @@ export class BookingsComponent  implements OnInit {
 
     return fallback;
   }
+
+
 }
 
 

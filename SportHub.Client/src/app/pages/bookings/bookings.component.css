@@ -231,6 +231,17 @@ button {
   font-weight: 800;
 }
 
+.button-link{
+  border: 0;
+  border-radius: 6px;
+  background: var(--teal);
+  color: white;
+  padding: 10px 12px;
+  font-weight: 900;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 @media (max-width: 820px) {
   .bookings-list {
     grid-template-columns: 1fr;

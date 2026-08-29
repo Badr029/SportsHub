@@ -37,6 +37,9 @@
               }
 
               @if (isFacilityBooking(booking)) {
+                @if (booking.facility) {
+                  <p class="facility-name"><strong>Facility:</strong> {{ booking.facility.name }}</p>
+                }
                 @if (booking.startDate && booking.endDate) {
                   <section class="time-block">
                     <strong>Facility time</strong>

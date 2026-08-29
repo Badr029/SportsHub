@@ -146,12 +146,22 @@ namespace SportHub.Api.Controllers
     
         
         [HttpPost]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CreateBooking(CreateBookingDto dto)
         {
             var userId = GetUserId();
-
+            
             var now = DateTime.Now;
+            if (User is null)
+            {
+                return Unauthorized();
+            }
 
+            if (!Enum.IsDefined(typeof(PaymentMethod), dto.PaymentMethod))
+            {
+                return BadRequest("A valid payment method is required.");
+            }
+            
             if (dto.BookingType is BookingType.Facility or BookingType.Package)
             {
                 if (dto.EndDate <= dto.StartDate)
@@ -383,7 +393,11 @@ namespace SportHub.Api.Controllers
                 return BadRequest("This booking has already ended.");
             }
 
-            if (booking.StartDate <= DateTime.UtcNow.AddHours(2))
+            var cancellationStart = booking.BookingType == BookingType.Equipment
+                ? booking.PickupDate ?? booking.StartDate
+                : booking.StartDate;
+
+            if (cancellationStart <= DateTime.UtcNow.AddHours(2))
             {
                 return BadRequest("Cannot cancel booking less than 2 hours before start date.");
             }
@@ -398,7 +412,7 @@ namespace SportHub.Api.Controllers
         public async Task<IActionResult> ClearBooking(int id)
         {
             var userId = GetUserId();
-
+            
             var booking = await _context.Bookings.FirstOrDefaultAsync(b =>
                 b.Id == id &&
                 b.UserId == userId);

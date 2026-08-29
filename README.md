@@ -96,7 +96,7 @@ dotnet build --project SportHub.Api
 If there is an error check that the .NET SDK version matches ur used .NET version used in the project 
 
 ```powershell
-dotnet --list-sdk
+dotnet --list-sdks
 ```
 based on the version update the target framework in this file
 

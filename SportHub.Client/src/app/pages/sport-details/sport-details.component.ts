@@ -1,4 +1,4 @@
-import { Component, signal , OnInit } from '@angular/core';
+import { Component, OnDestroy, signal , OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {FormsModule} from '@angular/forms';
 
@@ -15,7 +15,7 @@ import {NavbarComponent} from '../../shared/navbar/navbar.component';
   templateUrl: './sport-details.component.html',
   styleUrl: './sport-details.component.css'
 })
-export class SportDetailsComponent implements OnInit {
+export class SportDetailsComponent implements OnInit, OnDestroy {
   sport = signal<SportDetails | null>(null);
   loading = signal(true);
   error = signal('');
@@ -34,6 +34,11 @@ export class SportDetailsComponent implements OnInit {
   pendingBookingRequest: CreateBooking | null = null;
   paymentMethod: PaymentMethod = 'PayOnSite';
   todayDate = this.formatDateInput(new Date());
+
+  ngOnDestroy() {
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -96,13 +101,21 @@ export class SportDetailsComponent implements OnInit {
       return;
     }
 
-    item.quantity = quantity < 1 ? 1 : quantity;
+    item.quantity = Number.isFinite(quantity) ? quantity : 1;
 
     const availability = this.getEquipmentAvailability(equipmentId);
 
     if (availability && item.quantity > availability.availableQuantity) {
-      item.quantity = availability.availableQuantity;
+      this.error.set(`Only ${availability.availableQuantity} available for ${this.getEquipmentName(equipmentId)}.`);
+      return;
     }
+
+    if (item.quantity < 1) {
+      this.error.set('Equipment quantity must be at least 1.');
+      return;
+    }
+
+    this.error.set('');
   }
 
   getEquipmentName(equipmentId: number) {
@@ -267,6 +280,39 @@ export class SportDetailsComponent implements OnInit {
     return;
   }
 
+  if (this.bookingType === 3) {
+    const equipmentErrors: string[] = [];
+
+    for (const item of this.selectedEquipmentItems) {
+      const availability = this.getEquipmentAvailability(item.equipmentId);
+
+      if (!availability) {
+        equipmentErrors.push(
+          `Availability is still loading for ${this.getEquipmentName(item.equipmentId)}.`
+        );
+        continue;
+      }
+
+      if (item.quantity < 1) {
+        equipmentErrors.push(
+          `Quantity for ${this.getEquipmentName(item.equipmentId)} must be at least 1.`
+        );
+        continue;
+      }
+
+      if (item.quantity > availability.availableQuantity) {
+        equipmentErrors.push(
+          `Only ${availability.availableQuantity} available for ${this.getEquipmentName(item.equipmentId)}.`
+        );
+      }
+    }
+
+    if (equipmentErrors.length > 0) {
+      this.error.set(equipmentErrors.join(' '));
+      return;
+    }
+  }
+
   const selectedSlot = this.availabilitySlots.find(slot => slot.time === this.startTime);
 
   if ((this.bookingType === 1 || this.bookingType === 3) &&
@@ -308,6 +354,8 @@ export class SportDetailsComponent implements OnInit {
 
   this.pendingBookingRequest = request;
   this.confirmBookingOpen.set(true);
+  document.body.style.overflow = 'hidden';
+  document.body.classList.add('modal-open');
   }
 
   confirmCreateBooking() {
@@ -344,6 +392,8 @@ export class SportDetailsComponent implements OnInit {
   closeBookingConfirmation() {
     this.confirmBookingOpen.set(false);
     this.pendingBookingRequest = null;
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
   }
 
   selectFacilityBooking(facilityId: number){

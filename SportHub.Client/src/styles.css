@@ -680,6 +680,25 @@ button:disabled {
   width: min(620px, 100%);
 }
 
+.equipment-rental-confirmation {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: min(520px, calc(100vw - 40px)) !important;
+  max-height: calc(100vh - 40px) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  z-index: 1001 !important;
+  transform: none !important;
+}
+
+body.modal-open .route-shell {
+  transform: none !important;
+  filter: none !important;
+  animation: none !important;
+  will-change: auto !important;
+}
+
 .photo-upload {
   display: grid;
   place-items: center;
