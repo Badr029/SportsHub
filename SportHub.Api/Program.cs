@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SportHub.Api.Data;
 using SportHub.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -109,9 +109,47 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+// Serve the WebP variant of an uploaded image when the browser accepts it.
+// The stored ImageUrl still points at the original file, so no database
+// migration and no API contract change is needed: the swap happens in
+// transport only, and browsers without WebP support fall through to the
+// original untouched.
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value;
+
+    if (path is not null &&
+        path.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) &&
+        (path.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+         path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+         path.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) &&
+        context.Request.Headers.Accept.ToString().Contains("image/webp", StringComparison.OrdinalIgnoreCase))
+    {
+        var webpPath = Path.ChangeExtension(path, ".webp");
+        var candidate = Path.Combine(webRootPath, webpPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+
+        if (File.Exists(candidate))
+        {
+            context.Request.Path = webpPath;
+            // Caches must not reuse this response for a client that cannot
+            // decode WebP.
+            context.Response.Headers.Vary = "Accept";
+        }
+    }
+
+    await next();
+});
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(webRootPath)
+    FileProvider = new PhysicalFileProvider(webRootPath),
+    OnPrepareResponse = ctx =>
+    {
+        // Uploaded files are written under a fresh GUID name, so a given URL
+        // never changes content. Seed assets are fixed at build time. Both are
+        // safe to cache aggressively; replacing an image produces a new URL.
+        ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+    }
 });
 app.UseCors();
 

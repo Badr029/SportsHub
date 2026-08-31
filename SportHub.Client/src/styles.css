@@ -1,24 +1,173 @@
-:root {
-  --teal: #0d9488;
-  --teal-bright: #14b8a6;
-  --canvas: #0f172a;
-  --surface: #111827;
-  --surface-2: #1f2937;
-  --surface-3: #273444;
-  --line: rgba(148, 163, 184, 0.2);
-  --text: #f8fafc;
-  --muted: #cbd5e1;
-  --blue: #2563eb;
-  --pending: #d97706;
-  --confirmed: #059669;
-  --cancelled: #dc2626;
-  --completed: #475569;
-  --radius: 8px;
-  --shadow: 0 18px 46px rgba(0, 0, 0, 0.34);
+/* ==========================================================================
+   SportHub design system
+   Typography: Archivo (display) + Inter (interface), self-hosted.
+   Palette follows the documented dark dashboard language:
+   Deep Slate, Teal, Blue, with amber/emerald/crimson/slate status colors.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-latin-var.woff2') format('woff2-variations');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
 }
 
-* {
+@font-face {
+  font-family: 'Archivo';
+  src: url('/fonts/archivo-latin-var.woff2') format('woff2-variations');
+  font-weight: 500 900;
+  font-stretch: 100% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Surfaces, from deepest to nearest */
+  --canvas: #070d16;
+  --surface-1: #0e1622;
+  --surface-2: #131e2c;
+  --surface-3: #1c2836;
+  --surface-raised: #22303f;
+
+  --hairline: rgba(148, 163, 184, 0.16);
+  --hairline-strong: rgba(148, 163, 184, 0.28);
+  --hairline-accent: rgba(45, 212, 191, 0.32);
+
+  /* Accent: teal is the single action color */
+  --teal-700: #0f766e;
+  --teal-600: #0d9488;
+  --teal-500: #14b8a6;
+  --teal-400: #2dd4bf;
+  --teal-300: #5eead4;
+  --teal-wash: rgba(20, 184, 166, 0.12);
+  --teal-wash-strong: rgba(20, 184, 166, 0.2);
+
+  /* Support: blue carries packages, admin and informational weight */
+  --blue-700: #1d4ed8;
+  --blue-600: #2563eb;
+  --blue-400: #60a5fa;
+  --blue-wash: rgba(37, 99, 235, 0.14);
+
+  /* Status */
+  --pending: #d97706;
+  --pending-ink: #fcd34d;
+  --pending-wash: rgba(217, 119, 6, 0.16);
+  --confirmed: #059669;
+  --confirmed-ink: #6ee7b7;
+  --confirmed-wash: rgba(5, 150, 105, 0.16);
+  --cancelled: #dc2626;
+  --cancelled-ink: #fca5a5;
+  --cancelled-wash: rgba(220, 38, 38, 0.15);
+  --completed: #475569;
+  --completed-ink: #cbd5e1;
+  --completed-wash: rgba(71, 85, 105, 0.28);
+
+  /* Text */
+  --text: #f1f5f9;
+  --text-2: #a8b8cb;
+  --text-3: #8496ab;
+  --text-on-accent: #04231f;
+
+  /* Type */
+  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-display: 'Archivo', 'Inter', system-ui, 'Segoe UI', Arial, sans-serif;
+
+  --fs-2xs: 0.6875rem;
+  --fs-xs: 0.78125rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 0.96875rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 2rem;
+  --fs-3xl: 2.625rem;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 32px;
+  --s-8: 40px;
+  --s-9: 56px;
+  --s-10: 72px;
+  --s-11: 96px;
+
+  /* Radii */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-full: 999px;
+
+  /* Depth: every shadow carries an offset and a soft blur. Bigger surfaces
+     read as thicker — more blur and a deeper drop, not just a darker one. */
+  --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.4), 0 2px 8px rgba(2, 6, 23, 0.26);
+  --shadow-md: 0 4px 12px rgba(2, 6, 23, 0.36), 0 12px 30px rgba(2, 6, 23, 0.3);
+  --shadow-lg: 0 8px 20px rgba(2, 6, 23, 0.42), 0 28px 60px rgba(2, 6, 23, 0.4);
+  --shadow-xl: 0 12px 28px rgba(2, 6, 23, 0.46), 0 44px 96px rgba(2, 6, 23, 0.5);
+
+  /* A 1px light edge along the top reads as a real surface catching light.
+     Applied as an inset shadow so it never eats into the border box. */
+  --edge-top: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --edge-top-strong: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  /* Translucent chrome. Weight encodes hierarchy: heavier separates regions,
+     lighter draws attention. Never stack two light layers. */
+  --glass-heavy: rgba(9, 15, 25, 0.76);
+  --glass-light: rgba(24, 36, 52, 0.6);
+  --glass-blur: blur(18px) saturate(150%);
+
+  --glow-teal: 0 0 0 1px rgba(45, 212, 191, 0.24), 0 8px 32px rgba(20, 184, 166, 0.22);
+
+  /* Motion.
+     Stronger-than-stock curves: the built-in CSS easings read as mush.
+     ease-in is deliberately absent — it delays the first frame, which is
+     exactly the moment the user is watching. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 110ms;
+  --dur-1: 140ms;
+  --dur-2: 190ms;
+  --dur-3: 260ms;
+  --dur-4: 380ms;
+  --stagger: 42ms;
+
+  --shell: 1180px;
+
+  /* Compatibility aliases for existing component stylesheets */
+  --teal: var(--teal-600);
+  --teal-bright: var(--teal-400);
+  --surface: var(--surface-1);
+  --line: var(--hairline);
+  --muted: var(--text-2);
+  --blue: var(--blue-600);
+  --radius: var(--r-sm);
+  --shadow: var(--shadow-md);
+}
+
+/* --------------------------------------------------------------------------
+   2. Base
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Reserve the scrollbar lane so opening a modal does not shift the page. */
+  scrollbar-gutter: stable;
 }
 
 html,
@@ -28,52 +177,219 @@ body {
 }
 
 body {
-  --bg-base: #0f172a;
-  --bg-mid: #172235;
-  --bg-line: rgba(20, 184, 166, 0.14);
-  --bg-line-strong: rgba(20, 184, 166, 0.3);
-  --bg-a: rgba(13, 148, 136, 0.34);
-  --bg-b: rgba(37, 99, 235, 0.26);
-  --bg-c: rgba(217, 119, 6, 0.12);
-  --bg-speed: rgba(255, 255, 255, 0.08);
-  background: linear-gradient(135deg, var(--bg-mid) 0%, var(--bg-base) 58%, #020617 100%);
+  background: var(--canvas);
   color: var(--text);
-  font-family: Inter, Arial, sans-serif;
-  letter-spacing: 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-base);
+  font-feature-settings: 'cv05' 1, 'ss01' 1;
+  line-height: 1.55;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Set while the mobile navigation drawer is open, so the page underneath does
+   not scroll away under the user's thumb. */
+body.nav-drawer-open {
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Sticky booking bar
+   The booking and rental panels are taller than a phone screen, so their
+   inline action sits far below the choice that enables it. On small screens
+   this bar carries the running total and the next step with the user.
+   Used by the facility/package booking panel and the equipment rental panel.
+   -------------------------------------------------------------------------- */
+
+.book-bar {
+  display: none;
+}
+
+@media (max-width: 940px) {
+  .book-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    border-top: 1px solid var(--hairline-strong);
+    background: rgba(7, 13, 22, 0.94);
+    padding: var(--s-3) var(--s-5);
+    padding-bottom: calc(var(--s-3) + env(safe-area-inset-bottom, 0px));
+    backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 -8px 24px rgba(3, 8, 15, 0.5);
+  }
+
+  .book-bar-summary {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .book-bar-summary strong {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .book-bar-summary strong small {
+    color: var(--text-3);
+    font-family: var(--font-ui);
+    font-size: var(--fs-2xs);
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  /* Until there is something to price, the bar is guidance rather than a total. */
+  .book-bar:not(.is-ready) .book-bar-summary strong {
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    font-weight: 650;
+  }
+
+  .book-bar-summary span {
+    overflow: hidden;
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .book-bar button {
+    flex: 0 0 auto;
+    min-height: 46px;
+    padding-inline: var(--s-6);
+    font-size: var(--fs-base);
+  }
+
+  /* Room for the bar so it never covers the end of the page. */
+  .has-book-bar {
+    padding-bottom: 92px;
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.022em;
+  line-height: 1.1;
+  text-wrap: balance;
+  color: var(--text);
+  margin: 0;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Browser surfaces are part of the design, not defaults we inherit. */
+::selection {
+  background: rgba(20, 184, 166, 0.32);
+  color: #ffffff;
+}
+
+:root {
+  scrollbar-color: var(--surface-raised) transparent;
+  scrollbar-width: thin;
+  accent-color: var(--teal-500);
+  color-scheme: dark;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--r-full);
+  background: var(--surface-raised);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #33465c;
+  background-clip: content-box;
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal-400);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+a {
+  color: var(--teal-400);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Numbers that sit in columns or update in place should not jitter. */
+.tabular,
+.total-price,
+.rental-total,
+.price-line,
+.panel-metrics strong,
+.payment-details strong,
+.details-grid strong,
+.confirmation-total strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   3. Ambient background
+   One slow, cheap gradient field. No blurred layers repainting forever.
+   -------------------------------------------------------------------------- */
+
+body {
+  --bg-deep: #060b13;
+  --bg-rise: #10202f;
+  --bg-a: rgba(13, 148, 136, 0.3);
+  --bg-b: rgba(37, 99, 235, 0.22);
+  --bg-line: rgba(45, 212, 191, 0.11);
 }
 
 body.sporthub-home-bg {
-  --bg-base: #08111f;
-  --bg-mid: #183249;
-  --bg-line: rgba(20, 184, 166, 0.16);
-  --bg-line-strong: rgba(45, 212, 191, 0.34);
-  --bg-a: rgba(20, 184, 166, 0.42);
-  --bg-b: rgba(37, 99, 235, 0.34);
-  --bg-c: rgba(217, 119, 6, 0.16);
-  --bg-speed: rgba(255, 255, 255, 0.1);
+  --bg-deep: #050c15;
+  --bg-rise: #12293c;
+  --bg-a: rgba(20, 184, 166, 0.36);
+  --bg-b: rgba(37, 99, 235, 0.28);
+  --bg-line: rgba(45, 212, 191, 0.14);
 }
 
 body.sporthub-user-bg {
-  --bg-base: #07131d;
-  --bg-mid: #12372e;
-  --bg-line: rgba(134, 239, 172, 0.12);
-  --bg-line-strong: rgba(20, 184, 166, 0.32);
-  --bg-a: rgba(5, 150, 105, 0.34);
-  --bg-b: rgba(20, 184, 166, 0.24);
-  --bg-c: rgba(37, 99, 235, 0.17);
-  --bg-speed: rgba(134, 239, 172, 0.07);
+  --bg-deep: #050f13;
+  --bg-rise: #0f2f28;
+  --bg-a: rgba(5, 150, 105, 0.3);
+  --bg-b: rgba(20, 184, 166, 0.2);
+  --bg-line: rgba(94, 234, 212, 0.1);
 }
 
 body.sporthub-admin-bg {
-  --bg-base: #080d19;
-  --bg-mid: #111827;
-  --bg-line: rgba(125, 211, 252, 0.11);
-  --bg-line-strong: rgba(37, 99, 235, 0.32);
-  --bg-a: rgba(37, 99, 235, 0.36);
-  --bg-b: rgba(13, 148, 136, 0.22);
-  --bg-c: rgba(71, 85, 105, 0.28);
-  --bg-speed: rgba(125, 211, 252, 0.08);
+  --bg-deep: #060a14;
+  --bg-rise: #111c31;
+  --bg-a: rgba(37, 99, 235, 0.3);
+  --bg-b: rgba(13, 148, 136, 0.18);
+  --bg-line: rgba(125, 211, 252, 0.1);
 }
 
 app-root {
@@ -87,98 +403,104 @@ app-root {
   position: fixed;
   inset: 0;
   z-index: -1;
-  overflow: hidden;
+  pointer-events: none;
   background:
-    linear-gradient(135deg, var(--bg-mid) 0%, var(--bg-base) 60%, #020617 100%),
-    repeating-linear-gradient(115deg, transparent 0 44px, var(--bg-speed) 45px 46px, transparent 47px 110px);
+    radial-gradient(120% 78% at 88% -12%, var(--bg-a), transparent 58%),
+    radial-gradient(110% 74% at -12% 108%, var(--bg-b), transparent 56%),
+    linear-gradient(168deg, var(--bg-rise) 0%, var(--bg-deep) 62%, #03070d 100%);
 }
 
-.fluid-layer,
+/* A single court-line motif, drawn once, animated only by a cheap
+   background-position shift on the compositor-friendly layer. */
 .field-lines {
   position: absolute;
-  inset: auto;
-  pointer-events: none;
-}
-
-.fluid-layer {
-  width: 92vw;
-  height: 82vh;
-  filter: blur(18px);
-  opacity: 0.74;
-  transform-origin: center;
-  animation: fluid-morph 14s ease-in-out infinite alternate;
-}
-
-.layer-a {
-  top: -20vh;
-  right: -18vw;
-  background: linear-gradient(135deg, var(--bg-a), transparent 68%);
-  clip-path: polygon(8% 0, 100% 0, 92% 72%, 58% 100%, 18% 78%, 0 34%);
-}
-
-.layer-b {
-  left: -24vw;
-  bottom: -22vh;
-  background: linear-gradient(35deg, var(--bg-b), transparent 70%);
-  clip-path: polygon(0 8%, 56% 0, 100% 42%, 72% 100%, 0 88%);
-  animation-delay: -5s;
-  animation-duration: 18s;
-}
-
-.layer-c {
-  top: 22vh;
-  left: 8vw;
-  width: 72vw;
-  height: 58vh;
-  background: linear-gradient(90deg, transparent 0%, var(--bg-c) 44%, transparent 92%);
-  clip-path: polygon(0 28%, 42% 0, 100% 18%, 82% 78%, 28% 100%);
-  opacity: 0.5;
-  animation-delay: -9s;
-  animation-duration: 20s;
-}
-
-.field-lines {
   inset: 0;
-  opacity: 0.75;
+  opacity: 0.9;
   background:
-    linear-gradient(90deg, transparent 0 12%, var(--bg-line) 12.1% 12.25%, transparent 12.35% 87.65%, var(--bg-line) 87.75% 87.9%, transparent 88%),
-    linear-gradient(0deg, transparent 0 16%, var(--bg-line) 16.1% 16.25%, transparent 16.35% 83.65%, var(--bg-line) 83.75% 83.9%, transparent 84%),
-    linear-gradient(115deg, transparent 0 47%, var(--bg-line-strong) 47.08% 47.22%, transparent 47.32%),
-    repeating-linear-gradient(115deg, transparent 0 90px, var(--bg-speed) 91px 92px, transparent 93px 170px);
-  mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
-  animation: court-drift 22s linear infinite;
-}
-
-@keyframes fluid-morph {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1) skewX(0deg);
-    border-radius: 22% 78% 40% 60%;
-  }
-  50% {
-    transform: translate3d(-3vw, 2vh, 0) scale(1.06) skewX(-4deg);
-    border-radius: 68% 32% 62% 38%;
-  }
-  100% {
-    transform: translate3d(3vw, -2vh, 0) scale(0.98) skewX(3deg);
-    border-radius: 36% 64% 30% 70%;
-  }
+    linear-gradient(90deg, transparent 0 11.9%, var(--bg-line) 11.9% 12.05%, transparent 12.05% 87.95%, var(--bg-line) 87.95% 88.1%, transparent 88.1%),
+    linear-gradient(0deg, transparent 0 15.9%, var(--bg-line) 15.9% 16.05%, transparent 16.05% 83.95%, var(--bg-line) 83.95% 84.1%, transparent 84.1%),
+    repeating-linear-gradient(114deg, transparent 0 118px, var(--bg-line) 119px 120px, transparent 121px 240px);
+  mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 84%, transparent);
+  animation: court-drift 34s linear infinite;
 }
 
 @keyframes court-drift {
   from {
-    background-position: 0 0, 0 0, 0 0, 0 0;
+    background-position: 0 0, 0 0, 0 0;
   }
   to {
-    background-position: 0 0, 0 0, 120px 0, 180px 0;
+    background-position: 0 0, 0 0, 240px 0;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .fluid-layer,
-  .field-lines {
-    animation: none;
+/* --------------------------------------------------------------------------
+   4. Page shell
+   -------------------------------------------------------------------------- */
+
+.page {
+  width: min(var(--shell), calc(100% - var(--s-7)));
+  max-width: none;
+  margin: 0 auto;
+  padding: var(--s-7) 0 var(--s-11);
+}
+
+.page-header {
+  display: grid;
+  gap: var(--s-4);
+  margin-bottom: var(--s-7);
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.page-header > div:first-child {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  font-stretch: 112%;
+  letter-spacing: -0.03em;
+}
+
+.page-header p {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-md);
+}
+
+/* Header actions sit on the same optical line as the title on wide screens. */
+@media (min-width: 861px) {
+  .page-header:has(> :nth-child(2)) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
   }
 }
+
+.section-heading {
+  display: grid;
+  gap: var(--s-1);
+  margin-bottom: var(--s-4);
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-stretch: 108%;
+}
+
+.section-heading p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+
+/* --------------------------------------------------------------------------
+   5. Buttons
+   One base, four intents. The sweep animation belongs to primary CTAs only.
+   -------------------------------------------------------------------------- */
 
 button,
 input,
@@ -187,377 +509,519 @@ textarea {
   font: inherit;
 }
 
-button,
-a {
-  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
-}
-
-button:hover,
-a:hover {
-  transform: translateY(-1px);
-}
-
-button:disabled {
-  transform: none;
-}
-
 button {
-  border: 0;
-  border-radius: 6px;
-  background: var(--teal);
-  color: white;
-  padding: 10px 12px;
-  font-weight: 900;
-  cursor: pointer;
-}
+  --btn-bg: linear-gradient(140deg, var(--teal-400), var(--teal-500));
+  --btn-ink: var(--text-on-accent);
+  --btn-edge: rgba(153, 246, 228, 0.5);
+  --btn-glow: rgba(13, 148, 136, 0.3);
 
-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.animated-button,
-.button-link,
-.back-button,
-button {
-  --button-start: var(--teal);
-  --button-end: var(--blue);
-  --button-shine: rgba(255, 255, 255, 0.72);
-  --button-shadow: rgba(13, 148, 136, 0.26);
-  --button-border: rgba(45, 212, 191, 0.42);
-  --button-hover-border: rgba(45, 212, 191, 0.72);
   position: relative;
   isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: var(--s-2);
+  min-height: 40px;
   overflow: hidden;
-  border: 1px solid var(--button-border) !important;
-  border-radius: 6px;
-  background: linear-gradient(135deg, var(--button-start), var(--button-end)) !important;
-  color: white !important;
-  font-weight: 950;
+  border: 1px solid var(--btn-edge);
+  border-radius: var(--r-xs);
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  padding: var(--s-2) var(--s-4);
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  letter-spacing: 0.005em;
+  line-height: 1.2;
+  white-space: nowrap;
   text-decoration: none;
-  box-shadow: 0 12px 26px var(--button-shadow);
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.32), 0 6px 16px var(--btn-glow);
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    filter var(--dur-2) var(--ease-out);
 }
 
-.animated-button::before,
-.animated-button::after,
-.button-link::before,
-.button-link::after,
-.back-button::before,
-.back-button::after,
-button::before,
-button::after {
-  content: "";
-  position: absolute;
+/* Hover is a pointer affordance. On touch it fires on tap and lies. */
+@media (hover: hover) and (pointer: fine) {
+  button:hover {
+    border-color: color-mix(in srgb, var(--btn-edge) 100%, #ffffff 22%);
+    filter: brightness(1.08);
+    box-shadow: 0 2px 4px rgba(2, 6, 23, 0.34), 0 10px 24px var(--btn-glow);
+  }
+}
+
+/* Press feedback is the cheapest signal that the interface heard you.
+   It lands on pointer-down, not on click. */
+button:active {
+  transform: scale(0.97);
+  filter: brightness(0.96);
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.34);
+}
+
+button:disabled,
+button[disabled],
+.button-link.disabled {
+  filter: none;
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: none;
   pointer-events: none;
 }
 
-.animated-button::before,
-.button-link::before,
-.back-button::before,
-button::before {
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(-75deg, transparent 30%, var(--button-shine) 50%, transparent 70%);
-  background-size: 220% 100%;
-  opacity: 0;
-  animation: none;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  padding: 1px;
+/* Links styled as buttons share the same anatomy. */
+.button-link,
+.back-button,
+.register-link,
+.login-link,
+.primary-action,
+.staff-action {
+  --btn-bg: linear-gradient(140deg, var(--teal-400), var(--teal-500));
+  --btn-ink: var(--text-on-accent);
+  --btn-edge: rgba(153, 246, 228, 0.5);
+  --btn-glow: rgba(13, 148, 136, 0.3);
+
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 40px;
+  overflow: hidden;
+  border: 1px solid var(--btn-edge);
+  border-radius: var(--r-xs);
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  padding: var(--s-2) var(--s-4);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  line-height: 1.2;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.32), 0 6px 16px var(--btn-glow);
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    filter var(--dur-2) var(--ease-out);
 }
 
-.animated-button::after,
-.button-link::after,
-.back-button::after,
-button::after {
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.22) 45%, transparent 65%);
-  translate: -140% 0;
-  animation: none;
+@media (hover: hover) and (pointer: fine) {
+  .button-link:hover,
+  .back-button:hover,
+  .register-link:hover,
+  .login-link:hover,
+  .primary-action:hover,
+  .staff-action:hover {
+    border-color: color-mix(in srgb, var(--btn-edge) 100%, #ffffff 22%);
+    filter: brightness(1.08);
+  }
 }
 
-.animated-button:hover,
-.button-link:hover,
-.back-button:hover,
-button:hover {
-  transform: translateY(-1px) scale(1.01);
-  border-color: var(--button-hover-border) !important;
-  box-shadow: 0 16px 34px var(--button-shadow);
-}
-
-.animated-button:hover::before,
-.animated-button:focus-visible::before,
-.button-link:hover::before,
-.button-link:focus-visible::before,
-.back-button:hover::before,
-.back-button:focus-visible::before,
-button:hover::before,
-button:focus-visible::before {
-  animation: button-border-shine 1.2s linear infinite;
-}
-
-.animated-button:hover::after,
-.animated-button:focus-visible::after,
-.button-link:hover::after,
-.button-link:focus-visible::after,
-.back-button:hover::after,
-.back-button:focus-visible::after,
-button:hover::after,
-button:focus-visible::after {
-  animation: button-fill-shine 1.2s linear infinite;
-}
-
-.animated-button:active,
 .button-link:active,
 .back-button:active,
-button:active {
+.register-link:active,
+.login-link:active,
+.primary-action:active,
+.staff-action:active {
   transform: scale(0.97);
 }
 
-.animated-button:disabled,
-.animated-button.disabled,
-button:disabled {
-  opacity: 0.55;
+/* Intent: quiet. Used for cancel, refresh, secondary navigation. */
+.secondary,
+.action-neutral,
+.action-refresh,
+.back-button,
+.staff-action {
+  --btn-bg: rgba(20, 184, 166, 0.09);
+  --btn-ink: var(--teal-300);
+  --btn-edge: rgba(45, 212, 191, 0.3);
+  --btn-glow: rgba(2, 6, 23, 0.18);
+}
+
+.secondary:hover,
+.action-neutral:hover,
+.action-refresh:hover,
+.back-button:hover,
+.staff-action:hover {
+  --btn-bg: rgba(20, 184, 166, 0.16);
+}
+
+/* Intent: destructive. */
+.danger {
+  --btn-bg: rgba(220, 38, 38, 0.13);
+  --btn-ink: #fda4a4;
+  --btn-edge: rgba(248, 113, 113, 0.4);
+  --btn-glow: rgba(2, 6, 23, 0.2);
+}
+
+.danger:hover {
+  --btn-bg: rgba(220, 38, 38, 0.22);
+  --btn-ink: #fecaca;
+}
+
+/* Intent: commit the booking.
+   Both gradient stops stay light enough for the dark ink to clear 4.5:1. */
+.action-booking {
+  --btn-bg: linear-gradient(140deg, var(--teal-400), var(--teal-500));
+  --btn-ink: var(--text-on-accent);
+  --btn-edge: rgba(153, 246, 228, 0.55);
+  --btn-glow: rgba(20, 184, 166, 0.32);
+  font-weight: 700;
+}
+
+/* Intent: authentication and admin write actions. */
+.action-auth,
+.action-admin,
+.action-view {
+  --btn-bg: linear-gradient(140deg, var(--blue-600), var(--blue-700));
+  --btn-ink: #ffffff;
+  --btn-edge: rgba(96, 165, 250, 0.42);
+  --btn-glow: rgba(37, 99, 235, 0.28);
+}
+
+/* Intent: package (facility + gear). Blue-tinted, quieter than booking. */
+.action-package {
+  --btn-bg: rgba(37, 99, 235, 0.14);
+  --btn-ink: var(--blue-400);
+  --btn-edge: rgba(96, 165, 250, 0.34);
+  --btn-glow: rgba(2, 6, 23, 0.18);
+}
+
+.action-package:hover {
+  --btn-bg: rgba(37, 99, 235, 0.24);
+}
+
+.action-register {
+  --btn-bg: transparent;
+  --btn-ink: var(--teal-300);
+  --btn-edge: var(--teal-500);
+  --btn-glow: rgba(2, 6, 23, 0.16);
+}
+
+/* The sweep: reserved for the primary commit action on a surface. */
+.action-booking::after,
+.action-auth::after,
+.primary-action::after,
+.register-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(105deg, transparent 34%, rgba(255, 255, 255, 0.26) 50%, transparent 66%);
+  translate: -140% 0;
   pointer-events: none;
-  box-shadow: none;
 }
 
-@keyframes button-border-shine {
-  0% {
-    background-position: 110% 0;
-    opacity: 0;
-  }
-  35% {
-    opacity: 1;
-  }
-  70%,
-  100% {
-    background-position: -110% 0;
-    opacity: 0;
-  }
+.action-booking:hover::after,
+.action-booking:focus-visible::after,
+.action-auth:hover::after,
+.action-auth:focus-visible::after,
+.primary-action:hover::after,
+.primary-action:focus-visible::after,
+.register-link:hover::after,
+.register-link:focus-visible::after {
+  animation: button-sweep 900ms var(--ease-out);
 }
 
-@keyframes button-fill-shine {
-  0%,
-  45% {
-    translate: -140% 0;
-  }
-  100% {
+@keyframes button-sweep {
+  to {
     translate: 140% 0;
   }
 }
 
-.secondary {
-  --button-start: rgba(20, 184, 166, 0.16);
-  --button-end: rgba(37, 99, 235, 0.18);
-  --button-shine: rgba(45, 212, 191, 0.58);
-  --button-shadow: rgba(20, 184, 166, 0.14);
-  --button-border: rgba(45, 212, 191, 0.36);
-  --button-hover-border: rgba(45, 212, 191, 0.64);
-  color: var(--teal-bright) !important;
+/* --------------------------------------------------------------------------
+   6. Forms
+   -------------------------------------------------------------------------- */
+
+label {
+  display: grid;
+  gap: var(--s-2);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 600;
 }
 
-.danger {
-  --button-start: rgba(127, 29, 29, 0.62);
-  --button-end: rgba(220, 38, 38, 0.74);
-  --button-shine: rgba(254, 202, 202, 0.72);
-  --button-shadow: rgba(220, 38, 38, 0.22);
-  --button-border: rgba(248, 113, 113, 0.48);
-  --button-hover-border: rgba(252, 165, 165, 0.76);
-  color: #fee2e2 !important;
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-xs);
+  background: rgba(3, 8, 15, 0.6);
+  color: var(--text);
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--fs-sm);
+  font-weight: 450;
+  transition: border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
-.toggle-password {
-  --button-start: rgba(15, 23, 42, 0.78);
-  --button-end: rgba(20, 184, 166, 0.22);
-  --button-shine: rgba(20, 184, 166, 0.5);
-  --button-shadow: rgba(2, 6, 23, 0.18);
-  --button-border: rgba(45, 212, 191, 0.34);
-  --button-hover-border: rgba(45, 212, 191, 0.6);
-  color: var(--teal-bright) !important;
+textarea {
+  min-height: 84px;
+  line-height: 1.55;
+  resize: vertical;
 }
 
-.slot-button {
-  --button-start: rgba(15, 23, 42, 0.74);
-  --button-end: rgba(30, 41, 59, 0.92);
-  --button-shine: rgba(203, 213, 225, 0.5);
-  --button-shadow: rgba(2, 6, 23, 0.16);
-  --button-border: rgba(148, 163, 184, 0.22);
-  --button-hover-border: rgba(45, 212, 191, 0.52);
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-3);
 }
 
-.slot-button.selected {
-  --button-start: var(--teal);
-  --button-end: var(--confirmed);
-  --button-shine: rgba(255, 255, 255, 0.72);
-  --button-shadow: rgba(5, 150, 105, 0.24);
-  --button-border: rgba(134, 239, 172, 0.5);
-  --button-hover-border: rgba(134, 239, 172, 0.78);
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--hairline-accent);
 }
 
-.slot-button.occupied,
-.slot-button.blocked {
-  --button-start: rgba(71, 85, 105, 0.55);
-  --button-end: rgba(30, 41, 59, 0.82);
-  --button-shine: rgba(148, 163, 184, 0.28);
-  --button-shadow: rgba(2, 6, 23, 0.08);
-  --button-border: rgba(100, 116, 139, 0.28);
-  color: #94a3b8 !important;
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--teal-400);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
 }
 
-.ios-toggle {
-  --button-start: #64748b;
-  --button-end: #475569;
-  --button-shine: rgba(255, 255, 255, 0.32);
-  --button-shadow: rgba(2, 6, 23, 0.16);
-  --button-border: rgba(148, 163, 184, 0.25);
-  --button-hover-border: rgba(203, 213, 225, 0.48);
+input[aria-invalid='true'] {
+  border-color: rgba(248, 113, 113, 0.6);
 }
 
-.ios-toggle.active {
-  --button-start: var(--teal);
-  --button-end: var(--confirmed);
-  --button-shine: rgba(255, 255, 255, 0.45);
-  --button-shadow: rgba(5, 150, 105, 0.2);
-  --button-border: rgba(20, 184, 166, 0.4);
-  --button-hover-border: rgba(45, 212, 191, 0.68);
+input[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.22);
 }
 
-.action-auth {
-  --button-start: #2563eb;
-  --button-end: #0891b2;
-  --button-shadow: rgba(37, 99, 235, 0.24);
-  --button-border: rgba(125, 211, 252, 0.42);
-  --button-hover-border: rgba(125, 211, 252, 0.74);
-}
-.action-register {
-  border: 2px solid var(--teal);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.62);
-  color: white;
+select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-2) 50%),
+    linear-gradient(135deg, var(--text-2) 50%, transparent 50%);
+  background-position: calc(100% - 17px) calc(50% + 1px), calc(100% - 12px) calc(50% + 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: var(--s-8);
 }
 
-.action-booking {
-  --button-start: #059669;
-  --button-end: #0d9488;
-  --button-shadow: rgba(5, 150, 105, 0.24);
-  --button-border: rgba(134, 239, 172, 0.44);
-  --button-hover-border: rgba(134, 239, 172, 0.76);
+select option {
+  background: var(--surface-2);
+  color: var(--text);
 }
 
-.action-package {
-
-  color: #fff7ed !important;
+/* The native date/time picker indicator is a browser surface; theme it. */
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(74%) sepia(16%) saturate(480%) hue-rotate(140deg) brightness(96%);
+  cursor: pointer;
+  opacity: 0.9;
 }
 
-.action-admin {
-  --button-start: #0f766e;
-  --button-end: #1d4ed8;
-  --button-shadow: rgba(29, 78, 216, 0.2);
-  --button-border: rgba(94, 234, 212, 0.38);
-  --button-hover-border: rgba(147, 197, 253, 0.72);
+input[type='date']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
-.action-neutral,
-.action-view,
-.button-link,
-.back-button {
-  --button-start: rgba(15, 23, 42, 0.86);
-  --button-end: rgba(20, 184, 166, 0.22);
-  --button-shine: rgba(45, 212, 191, 0.58);
-  --button-shadow: rgba(2, 6, 23, 0.2);
-  --button-border: rgba(45, 212, 191, 0.34);
-  --button-hover-border: rgba(45, 212, 191, 0.68);
-  color: var(--teal-bright) !important;
-}
-
-.action-view {
-  --button-start: #1d4ed8;
-  --button-end: #0d9488;
-  --button-shadow: rgba(37, 99, 235, 0.22);
-  color: white !important;
-}
-
-.action-refresh {
-  --button-start: rgba(71, 85, 105, 0.75);
-  --button-end: rgba(13, 148, 136, 0.28);
-  --button-shadow: rgba(15, 23, 42, 0.18);
-  --button-border: rgba(148, 163, 184, 0.34);
-  --button-hover-border: rgba(203, 213, 225, 0.58);
-}
-
-.error,
-.success {
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin: 0;
-  font-weight: 800;
-}
-
-.error {
-  border: 1px solid #fca5a5;
-  background: rgba(127, 29, 29, 0.42);
-  color: #fecaca;
-}
-
-.success {
-  border: 1px solid #86efac;
-  background: rgba(5, 150, 105, 0.18);
-  color: #bbf7d0;
-}
-
-.page {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 30px 20px 52px;
-}
-
-.page-header {
+.field-error {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
-
-.page-header h1 {
-  margin: 0 0 6px;
-  color: white;
-  font-size: 38px;
-}
-
-.page-header p {
+  align-items: center;
+  gap: var(--s-2);
   margin: 0;
-  color: var(--muted);
+  color: var(--cancelled-ink);
+  font-size: var(--fs-xs);
+  font-weight: 550;
 }
 
-.back-button {
-  width: max-content;
-  padding: 9px 12px;
-  margin-bottom: 10px;
+.field-error::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: currentColor;
 }
 
 .form-actions,
 .card-actions,
-.sport-actions {
+.sport-actions,
+.header-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--s-2);
   flex-wrap: wrap;
 }
 
-.eyebrow {
+/* A button next to a labelled field sits on the field's baseline,
+   not stretched to the label's height. */
+.header-actions {
+  align-items: flex-end;
+}
+
+/* --------------------------------------------------------------------------
+   7. Feedback
+   Status is never carried by color alone: each variant is prefixed by a mark.
+   -------------------------------------------------------------------------- */
+
+.error,
+.success,
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
   margin: 0;
-  color: var(--teal-bright) !important;
+  border: 1px solid;
+  border-radius: var(--r-xs);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+.error::before,
+.success::before,
+.notice::before {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: var(--r-full);
+  display: grid;
+  place-items: center;
   font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.error {
+  border-color: rgba(248, 113, 113, 0.42);
+  background: rgba(127, 29, 29, 0.28);
+  color: #fecaca;
+}
+
+.error::before {
+  content: '!';
+  background: rgba(220, 38, 38, 0.4);
+  color: #fff1f2;
+}
+
+.success {
+  border-color: rgba(110, 231, 183, 0.38);
+  background: rgba(5, 150, 105, 0.16);
+  color: #bbf7d0;
+}
+
+.success::before {
+  content: '\2713';
+  background: rgba(5, 150, 105, 0.44);
+  color: #ecfdf5;
+}
+
+.notice {
+  border-color: var(--hairline-strong);
+  background: rgba(15, 23, 42, 0.5);
+  color: var(--text-2);
+}
+
+.notice::before {
+  content: 'i';
+  background: rgba(148, 163, 184, 0.24);
+  color: var(--text);
+  font-family: var(--font-display);
+}
+
+/* Loading and empty states share one quiet frame. */
+.state-block {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: rgba(14, 22, 34, 0.6);
+  padding: var(--s-9) var(--s-6);
+  text-align: center;
+}
+
+.state-block h2 {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
+
+.state-block p {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--text-2);
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(148, 163, 184, 0.24);
+  border-top-color: var(--teal-400);
+  border-radius: var(--r-full);
+  animation: spin 720ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Badges and metrics
+   -------------------------------------------------------------------------- */
+
+.status-badge,
+.payment-badge,
+.sport-metrics span,
+.metric-row span,
+.card-metrics span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: max-content;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-2);
+  padding: 4px 10px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* A dot repeats the status in shape as well as hue. */
+.status-badge::before,
+.payment-badge::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: currentColor;
+}
+
+.status-badge.pending,
+.payment-badge.pending {
+  border-color: rgba(217, 119, 6, 0.4);
+  background: var(--pending-wash);
+  color: var(--pending-ink);
+}
+
+.status-badge.confirmed,
+.payment-badge.paid {
+  border-color: rgba(5, 150, 105, 0.4);
+  background: var(--confirmed-wash);
+  color: var(--confirmed-ink);
+}
+
+.status-badge.cancelled,
+.payment-badge.failed {
+  border-color: rgba(220, 38, 38, 0.4);
+  background: var(--cancelled-wash);
+  color: var(--cancelled-ink);
+}
+
+.status-badge.completed {
+  border-color: rgba(100, 116, 139, 0.44);
+  background: var(--completed-wash);
+  color: var(--completed-ink);
 }
 
 .sport-metrics,
@@ -565,151 +1029,330 @@ button:disabled {
 .card-metrics {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
 .sport-metrics span,
 .metric-row span,
 .card-metrics span {
-  border-radius: 999px;
-  background: rgba(20, 184, 166, 0.14);
-  color: var(--teal-bright);
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 900;
+  border-color: var(--hairline-accent);
+  background: var(--teal-wash);
+  color: var(--teal-300);
 }
 
-.sport-media {
-  aspect-ratio: 16 / 10;
-  min-height: 220px;
-  border-radius: 6px;
+/* --------------------------------------------------------------------------
+   9. Surfaces
+   -------------------------------------------------------------------------- */
+
+.surface {
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-md);
+}
+
+.media-frame {
+  position: relative;
   overflow: hidden;
+  border-radius: var(--r-sm);
+  background:
+    linear-gradient(140deg, rgba(20, 184, 166, 0.16), rgba(37, 99, 235, 0.1)),
+    var(--surface-2);
 }
 
-.sport-media img {
+.media-frame img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.sport-info {
-  position: relative;
+/* Fallback tile when an asset has no image (SRS UI-06). */
+.image-fallback {
   display: grid;
-  gap: 14px;
-  align-content: start;
-  min-height: 100%;
-  overflow: hidden;
-  padding: 18px;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  aspect-ratio: 16 / 9;
+  background:
+    linear-gradient(140deg, rgba(13, 148, 136, 0.3), rgba(37, 99, 235, 0.18)),
+    var(--surface-2);
+  color: rgba(241, 245, 249, 0.86);
+  padding: var(--s-4);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
-
-.sport-info .eyebrow {
-  width: max-content;
-  border: 1px solid rgba(45, 212, 191, 0.28);
-  border-radius: 999px;
-  background: rgba(20, 184, 166, 0.12);
-  padding: 6px 10px;
+.image-fallback::after {
+  content: 'No photo yet';
+  display: block;
+  margin-top: var(--s-1);
+  color: rgba(241, 245, 249, 0.6);
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.sport-info h1,
-.sport-info h2 {
-  margin: 0;
-  color: white;
-  font-size: clamp(30px, 4vw, 48px);
-  line-height: 1;
-  letter-spacing: 0;
-}
-
-.sport-info > p:not(.eyebrow) {
-  max-width: 68ch;
-  margin: 0;
-  border-left: 1px solid rgba(45, 212, 191, 0.24);
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.65;
-  padding-left: 12px;
-}
-
-.sport-info .sport-metrics {
-  align-self: end;
-  margin-top: 8px;
-}
-
-.sport-info .sport-metrics span {
-  border: 1px solid rgba(45, 212, 191, 0.22);
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(37, 99, 235, 0.12));
-  padding: 8px 12px;
-}
-
-.sport-info .sport-actions {
-  margin-top: 4px;
-}
-
-@media (max-width: 900px) {
-  .page-header {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-}
+/* --------------------------------------------------------------------------
+   10. Modals
+   -------------------------------------------------------------------------- */
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 60;
   display: grid;
   place-items: center;
-  background: rgba(15, 23, 42, 0.58);
-  backdrop-filter: blur(8px);
-  padding: 20px;
+  overflow-y: auto;
+  background: rgba(3, 7, 14, 0.7);
+  backdrop-filter: blur(12px) saturate(120%);
+  padding: var(--s-5);
+  animation: backdrop-in var(--dur-2) var(--ease-out) both;
 }
 
 .modal-panel {
   display: grid;
-  gap: 13px;
-  width: min(520px, 100%);
-  max-height: 90vh;
-  overflow: auto;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-  box-shadow: var(--shadow);
-  padding: 22px;
+  gap: var(--s-4);
+  width: min(540px, 100%);
+  max-height: min(86vh, 780px);
+  overflow-y: auto;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-lg);
+  padding: var(--s-6);
+  animation: modal-in var(--dur-3) var(--ease-out) both;
+}
+
+.modal-panel h2 {
+  font-size: var(--fs-xl);
+}
+
+.modal-panel > p {
+  margin: 0;
+  color: var(--text-2);
 }
 
 .modal-panel.editor-modal {
   width: min(620px, 100%);
 }
 
-.equipment-rental-confirmation {
-  display: grid !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: min(520px, calc(100vw - 40px)) !important;
-  max-height: calc(100vh - 40px) !important;
-  overflow: hidden !important;
-  position: relative !important;
-  z-index: 1001 !important;
-  transform: none !important;
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px) saturate(100%);
+  }
 }
 
-body.modal-open .route-shell {
-  transform: none !important;
-  filter: none !important;
-  animation: none !important;
-  will-change: auto !important;
+/* The panel materialises rather than fading: blur and scale resolve together
+   so it reads as a surface arriving, not a picture cross-fading in.
+   Origin stays centred — a modal is not anchored to a trigger. */
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    filter: blur(6px);
+  }
 }
+
+/* Set by the booking pages while a confirmation is open. */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Definition rows inside a confirmation. Flat, not nested cards. */
+.confirmation-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.confirmation-list > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-4);
+  border-bottom: 1px solid var(--hairline);
+  padding: var(--s-3) 0;
+}
+
+.confirmation-list span {
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+
+.confirmation-list strong {
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+}
+
+.confirmation-equipment {
+  display: grid !important;
+  gap: var(--s-1);
+}
+
+.confirmation-equipment strong {
+  text-align: left;
+}
+
+.confirmation-total {
+  border-bottom: 0 !important;
+  padding-top: var(--s-4) !important;
+}
+
+.confirmation-total span {
+  font-size: var(--fs-md);
+}
+
+.confirmation-total strong {
+  color: var(--teal-300);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Payment method chooser, shared by both booking confirmations. */
+.payment-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-2);
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.payment-choice legend {
+  margin-bottom: var(--s-2);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+}
+
+.payment-choice label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  background: rgba(3, 8, 15, 0.42);
+  padding: var(--s-3);
+  cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
+}
+
+.payment-choice label:hover {
+  border-color: var(--hairline-accent);
+}
+
+.payment-choice label.selected {
+  border-color: var(--teal-400);
+  background: var(--teal-wash);
+}
+
+.payment-choice input {
+  width: auto;
+  min-height: 0;
+  margin-top: 3px;
+}
+
+.payment-choice span {
+  display: grid;
+  gap: 2px;
+}
+
+.payment-choice strong {
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+}
+
+.payment-choice small {
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+}
+
+
+@media (max-width: 620px) {
+  .payment-choice {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Scroll reveal, driven by the [reveal] directive.
+   The element is fully interactive before it reveals; this only moves it. */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity var(--dur-4) var(--ease-out),
+    transform var(--dur-4) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Lists that arrive together cascade instead of popping as one block.
+   Decorative only: nothing waits on it, and it never blocks input. */
+.stagger > * {
+  animation: rise-in var(--dur-3) var(--ease-out) both;
+  animation-delay: calc(var(--stagger) * var(--i, 0));
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11. Admin controls
+   -------------------------------------------------------------------------- */
 
 .photo-upload {
   display: grid;
   place-items: center;
-  gap: 10px;
-  min-height: 230px;
-  border: 1px dashed rgba(45, 212, 191, 0.72);
-  border-radius: 10px;
-  background: rgba(15, 23, 42, 0.38);
-  padding: 12px;
-  color: var(--muted);
+  align-content: center;
+  gap: var(--s-2);
+  min-height: 190px;
+  border: 1px dashed var(--hairline-accent);
+  border-radius: var(--r-md);
+  background: rgba(3, 8, 15, 0.42);
+  padding: var(--s-4);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
   cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
+}
+
+.photo-upload:hover {
+  border-color: var(--teal-400);
+  background: rgba(20, 184, 166, 0.08);
+}
+
+.photo-upload:focus-within {
+  outline: 2px solid var(--teal-400);
+  outline-offset: 2px;
 }
 
 .photo-upload input {
@@ -718,441 +1361,216 @@ body.modal-open .route-shell {
 
 .photo-upload .image-preview {
   width: 100%;
-  height: 150px !important;
+  height: 148px;
   object-fit: contain;
-  border-radius: 7px;
-  background: rgba(2, 6, 23, 0.72);
+  border-radius: var(--r-xs);
+  background: rgba(2, 6, 23, 0.66);
 }
 
 .upload-icon {
-  width: 34px;
-  height: 34px;
-  opacity: 0.9;
+  width: 28px;
+  height: 28px;
+  opacity: 0.72;
 }
 
-.service-toggle-row {
+.service-toggle-row,
+.toggle-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  color: var(--muted);
-  font-weight: 900;
+  gap: var(--s-3);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
 }
 
-.confirmation-list {
-  display: grid;
-  gap: 10px;
+.ios-toggle {
+  --btn-bg: rgba(71, 85, 105, 0.7);
+  --btn-edge: rgba(148, 163, 184, 0.34);
+  --btn-glow: transparent;
+
+  position: relative;
+  flex: 0 0 auto;
+  width: 48px;
+  min-height: 28px;
+  height: 28px;
+  overflow: visible;
+  border-radius: var(--r-full);
+  padding: 0;
+  box-shadow: inset 0 1px 3px rgba(2, 6, 23, 0.5);
 }
 
-.confirmation-list div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 8px;
+/* The switch is 28px by design; a transparent pad keeps the hit area
+   comfortable without changing how it looks. */
+.ios-toggle::before {
+  content: '';
+  position: absolute;
+  inset: -8px -6px;
 }
 
-.confirmation-list span {
-  color: var(--muted);
+.ios-toggle > span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-full);
+  background: #f8fafc;
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.4), 0 2px 6px rgba(2, 6, 23, 0.3);
+  transition: left var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
 }
 
-.confirmation-list strong {
-  color: white;
+.ios-toggle.active {
+  --btn-bg: var(--cancelled);
+  --btn-edge: rgba(248, 113, 113, 0.56);
 }
 
-.confirmation-equipment {
-  display: grid !important;
+.ios-toggle.active > span {
+  left: 23px;
 }
 
-.confirmation-total strong {
-  color: var(--teal-bright);
+.ios-toggle:hover {
+  filter: none;
 }
 
-.landing-page {
+.ios-toggle:active {
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   12. Route transition
+   A short, cheap fade-and-lift. No full-page blur filter.
+   -------------------------------------------------------------------------- */
+
+.route-shell {
   min-height: 100vh;
-  padding-bottom: 35px;
+  overflow-x: clip;
 }
 
-.landing-nav,
-.hero-section,
-.showcase-section,
-.trust-section,
-.terms-strip,
-.help-band,
-.landing-footer {
-  width: min(1180px, calc(100% - 32px));
-  margin: 0 auto;
+.route-shell.route-changing {
+  opacity: 0.6;
+  transition: opacity var(--dur-1) var(--ease-out);
 }
 
-.landing-nav,
-.nav-links,
-.hero-actions,
-.landing-panel-header,
-.landing-card-topline,
-.landing-section-heading,
-.help-band,
-.landing-footer,
-.landing-footer div {
-  display: flex;
+/* `backwards`, not `both`: a forwards fill leaves the animated transform in
+   place as an identity matrix, and any transform on this element makes it the
+   containing block for `position: fixed` descendants — which silently breaks
+   every sticky bar and modal inside a routed page. */
+.route-shell.route-entering {
+  animation: route-enter var(--dur-3) var(--ease-out) backwards;
 }
 
-.landing-nav,
-.landing-panel-header,
-.landing-card-topline,
-.landing-section-heading,
-.help-band,
-.landing-footer {
-  justify-content: space-between;
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
 }
 
-.landing-nav {
-  align-items: center;
-  gap: 22px;
-  padding: 22px 0;
+/* --------------------------------------------------------------------------
+   14. Responsive
+   Landing-page breakpoints now live with the landing component.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .page {
+    padding-top: var(--s-5);
+  }
 }
 
-.landing-brand {
-  color: var(--teal-bright);
-  font-size: 28px;
-  font-weight: 950;
-  text-decoration: none;
+@media (max-width: 400px) {
+  .page {
+    width: calc(100% - var(--s-6));
+  }
 }
 
-.nav-links {
-  align-items: center;
-  gap: 18px;
-}
+/* --------------------------------------------------------------------------
+   15. Reduced motion
+   -------------------------------------------------------------------------- */
 
-.nav-links a,
-.landing-footer a {
-  color: var(--muted);
-  font-weight: 850;
-  text-decoration: none;
-}
+/* Reduced motion means gentler, not none.
+   The blunt version of this rule — collapsing every duration to 0.01ms —
+   removes opacity and colour transitions too, which carry meaning and cause
+   nobody motion sickness. What actually needs removing is travel: translate,
+   scale, rotate and parallax. So: keep the fades, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* Position/size animation is what triggers vestibular symptoms. */
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 
-.register-link,
-.login-link,
-.primary-action,
-.staff-action,
-.help-band a {
-  border-radius: 6px;
-  padding: 11px 16px;
-  text-decoration: none;
-  font-weight: 950;
-}
+  /* Ambient and decorative loops stop entirely. */
+  .field-lines,
+  .flag-dot,
+  .live-badge::before {
+    animation: none !important;
+  }
 
-.register-link,
-.login-link,
-.primary-action,
-.help-band a {
-  background: linear-gradient(135deg, var(--teal), var(--blue));
-  color: white !important;
-  box-shadow: 0 12px 26px rgba(13,148,136,.26);
-}
-
-.hero-section {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(340px, .65fr);
-  align-items: center;
-  gap: 44px;
-  min-height: 620px;
-  padding: 50px 0 70px;
-}
-
-.eyebrow,
-.landing-section-heading p {
-  margin: 0 0 12px;
-  color: var(--teal-bright);
-  font-size: 13px;
-  font-weight: 950;
-  text-transform: uppercase;
-}
-
-.hero-copy h1 {
-  max-width: 760px;
-  margin: 0;
-  color: white;
-  font-size: clamp(42px, 7vw, 86px);
-  line-height: .95;
-}
-
-.hero-text {
-  max-width: 660px;
-  margin: 24px 0 0;
-  color: var(--muted);
-  font-size: 21px;
-  line-height: 1.45;
-}
-
-.hero-actions {
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 34px;
-}
-
-.primary-action {
-  min-width: 170px;
-  text-align: center;
-}
-
-.staff-action {
-  border: 1px solid rgba(20,184,166,.52);
-  background: rgba(15,23,42,.72);
-  color: var(--teal-bright);
-}
-
-.live-panel {
-  border: 1px solid rgba(20,184,166,.34);
-  border-radius: 8px;
-  background: linear-gradient(180deg,rgba(31,41,55,.94),rgba(15,23,42,.98)), repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 1px,transparent 1px 14px);
-  box-shadow: var(--shadow);
-  padding: 24px;
-}
-
-.landing-panel-header span {
-  color: white;
-  font-size: 22px;
-  font-weight: 950;
-}
-
-.landing-panel-header strong,
-.landing-card-topline span {
-  border-radius: 999px;
-  background: rgba(20,184,166,.16);
-  color: var(--teal-bright);
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 950;
-  text-transform: uppercase;
-}
-
-.pulse-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 54px 0;
-  color: var(--muted);
-  font-weight: 850;
-}
-
-.pulse-row span {
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: var(--teal-bright);
-  box-shadow: 0 0 0 12px rgba(20,184,166,.14);
-}
-
-.panel-metrics,
-.showcase-grid,
-.trust-section,
-.terms-strip {
-  display: grid;
-  gap: 14px;
-}
-
-.panel-metrics {
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.panel-metrics div,
-.trust-section article,
-.terms-strip div {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(15,23,42,.62);
-  padding: 14px;
-}
-
-.panel-metrics strong,
-.trust-section strong,
-.terms-strip strong {
-  display: block;
-  color: white;
-}
-
-.panel-metrics strong {
-  font-size: 22px;
-}
-
-.panel-metrics span,
-.trust-section span,
-.terms-strip span {
-  display: block;
-  margin-top: 7px;
-  color: var(--muted);
-  line-height: 1.45;
-}
-
-.showcase-section {
-  padding: 28px 0 66px;
-}
-
-.landing-section-heading {
-  align-items: end;
-  gap: 16px;
-  margin-bottom: 22px;
-}
-
-.landing-section-heading h2,
-.help-band h2 {
-  margin: 0;
-  color: white;
-  font-size: 34px;
-}
-
-.showcase-grid {
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.showcase-card {
-  overflow: hidden;
-  border: 1px solid rgba(20,184,166,.34);
-  border-radius: 8px;
-  background: linear-gradient(180deg,var(--surface-2),var(--surface));
-  box-shadow: 0 16px 32px rgba(0,0,0,.24);
-}
-
-.showcase-card img,
-.image-fallback,
-.skeleton div {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-}
-
-.showcase-card img {
-  display: block;
-  object-fit: cover;
-}
-
-.image-fallback {
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg,rgba(13,148,136,.34),rgba(37,99,235,.2));
-  color: white;
-  font-size: 24px;
-  font-weight: 950;
-}
-
-.landing-card-body {
-  display: grid;
-  gap: 12px;
-  padding: 18px;
-}
-
-.landing-card-body h3 {
-  margin: 0;
-  color: white;
-  font-size: 24px;
-}
-
-.landing-card-body p {
-  min-height: 50px;
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.45;
-}
-
-.landing-card-body a {
-  color: var(--teal-bright);
-  font-weight: 950;
-  text-decoration: none;
-}
-
-.stock-line {
-  color: #bbf7d0;
-  font-size: 13px;
-  font-weight: 950;
-}
-
-.status-card {
-  grid-column: 1 / -1;
-}
-
-.skeleton {
-  padding-bottom: 18px;
-}
-
-.skeleton div,
-.skeleton span {
-  display: block;
-  background: linear-gradient(90deg,rgba(148,163,184,.12),rgba(148,163,184,.28),rgba(148,163,184,.12));
-}
-
-.skeleton span {
-  height: 18px;
-  margin: 18px;
-  border-radius: 99px;
-}
-
-.trust-section {
-  grid-template-columns: repeat(4, 1fr);
-  padding-bottom: 32px;
-}
-
-.terms-strip {
-  grid-template-columns: repeat(3, 1fr);
-  padding-bottom: 34px;
-}
-
-.help-band {
-  align-items: center;
-  gap: 24px;
-  border: 1px solid rgba(20,184,166,.34);
-  border-radius: 8px;
-  background: linear-gradient(135deg,rgba(13,148,136,.2),rgba(37,99,235,.16));
-  padding: 26px;
-
-}
-
-.help-band p {
-  margin: 0 0 8px;
-  color: var(--teal-bright);
-  font-weight: 950;
-}
-
-.landing-footer {
-  align-items: center;
-  gap: 20px;
-  padding: 28px 0;
-}
-
-.landing-footer > a {
-  color: var(--teal-bright);
-  font-size: 22px;
-  font-weight: 950;
-}
-
-.landing-footer div {
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-@media (max-width: 900px) {
-  .landing-nav,
-  .nav-links,
+  /* Anything that entered by moving now simply fades in, at a shorter
+     duration so it never feels sluggish. */
+  .reveal,
+  .stagger > *,
+  .modal-panel,
+  .route-shell.route-entering,
+  .hero-copy h1,
+  .hero-flag,
+  .hero-text,
   .hero-actions,
-  .help-band,
-  .landing-footer {
-    flex-direction: column;
-    align-items: stretch;
+  .hero-stats,
+  .hero-visual,
+  .brand-line,
+  .brand-copy p,
+  .gear-section,
+  .review,
+  .selected-row,
+  .gear-line,
+  .card-stepper,
+  .selected-tick,
+  .step-digit,
+  .auth-error {
+    animation-name: rm-fade !important;
+    animation-duration: 200ms !important;
+    animation-timing-function: ease !important;
+    transform: none !important;
+    filter: none !important;
   }
 
-  .hero-section,
-  .showcase-grid,
-  .trust-section,
-  .terms-strip {
-    grid-template-columns: 1fr;
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
-  .hero-section {
-    min-height: auto;
-    padding-top: 34px;
+  /* Travel is removed from state changes; the fade and colour change stay. */
+  .auth-form:not(.is-active),
+  .auth-form {
+    transform: none !important;
   }
 
-  .panel-metrics {
-    grid-template-columns: 1fr;
+  .route-shell.route-changing {
+    opacity: 1;
+  }
+
+  /* Press feedback is a direct response to the user's own finger, not
+     autonomous motion, so it stays — just without the scale. */
+  button:active,
+  .button-link:active {
+    transform: none !important;
+  }
+
+  @keyframes rm-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .modal-backdrop {
+    background: rgba(3, 7, 14, 0.94);
+    backdrop-filter: none;
   }
 }

@@ -3,141 +3,243 @@
 <main class="page">
   <header class="page-header">
     <div>
-      <h1>Admin Bookings</h1>
-      <p>Confirm bookings and manage equipment pickup and return.</p>
+      <h1>Booking queue</h1>
+      <p>Confirm reservations, and record equipment pickup and return.</p>
     </div>
 
     <div class="header-actions">
-      <label>
-        Status
-        <select [ngModel]="statusFilter()" (ngModelChange)="changeStatusFilter($event)">
-          <option value="All">All</option>
-          <option value="Pending">Pending</option>
-          <option value="Confirmed">Confirmed</option>
-          <option value="Cancelled">Cancelled</option>
-          <option value="Completed">Completed</option>
-        </select>
-      </label>
-
       <button type="button" class="secondary action-refresh" (click)="loadBookings()">Refresh</button>
     </div>
   </header>
 
+  <!-- Direct manipulation beats a dropdown: the filter is one click, and the
+       current state is visible without opening anything. -->
+  <div class="filter-bar" role="group" aria-label="Filter by status">
+    @for (status of statuses; track status) {
+      <button
+        type="button"
+        class="filter-chip"
+        [class.is-active]="statusFilter() === status"
+        [attr.aria-pressed]="statusFilter() === status"
+        (click)="changeStatusFilter(status)">
+        {{ status === 'All' ? 'All' : status }}
+      </button>
+    }
+
+    <span class="filter-count">
+      @if (!loading()) {
+        <strong>{{ totalCount() }}</strong> booking{{ totalCount() === 1 ? '' : 's' }}
+      }
+    </span>
+  </div>
+
   @if (loading()) {
-    <p>Loading bookings...</p>
+    <section class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading queue…</p>
+    </section>
   } @else if (error()) {
-    <section class="message">
+    <section class="state-block" role="alert">
+      <h2>We couldn't load the queue</h2>
       <p>{{ error() }}</p>
       <button type="button" class="action-refresh" (click)="loadBookings()">Try again</button>
     </section>
   } @else {
     @if (success()) {
-      <p class="success">{{ success() }}</p>
+      <p class="success page-feedback" role="status">{{ success() }}</p>
+    }
+
+    @if (actionError()) {
+      <p class="error page-feedback" role="alert">{{ actionError() }}</p>
     }
 
     @if (filteredBookings().length === 0) {
-      <section class="message">
-        <p>No bookings found.</p>
+      <section class="state-block">
+        <h2>Nothing in this view</h2>
+        <p>{{ statusFilter() === 'All' ? 'No bookings have been made yet.' : 'No ' + statusFilter().toLowerCase() + ' bookings right now.' }}</p>
       </section>
     } @else {
-      <div class="pagination-bar">
-        <span>
-          Page {{ page() }} of {{ totalPages() }} - {{ totalCount() }} bookings
-        </span>
+      <!-- One record per booking, in three bands: who and how much, then the
+           detail, then state and what can be done about it. Bands stack, so
+           nothing has to survive being squeezed into a narrow table column. -->
+      <ul class="queue-list stagger" aria-label="Bookings">
+        @for (booking of filteredBookings(); track booking.id; let i = $index) {
+          <li
+            class="booking-card"
+            [style.--i]="i"
+            [class.is-busy]="isBusy(booking)"
+            [attr.data-status]="booking.status">
 
-        <div>
-          <button type="button" class="secondary action-neutral" [disabled]="page() <= 1" (click)="previousPage()">Previous</button>
-          <button type="button" class="secondary action-neutral" [disabled]="page() >= totalPages()" (click)="nextPage()">Next</button>
-        </div>
-      </div>
-
-      <section class="bookings-list">
-        @for (booking of filteredBookings(); track booking.id) {
-          <article class="booking-card">
-            <div class="booking-content">
-              <div class="booking-title-row">
-                <h2>#{{ booking.id }} {{ booking.bookingType }}</h2>
-                <span class="status-badge" [class.pending]="booking.status === 'Pending'" [class.confirmed]="booking.status === 'Confirmed'" [class.cancelled]="booking.status === 'Cancelled'" [class.completed]="booking.status === 'Completed'">{{ booking.status }}</span>
-                @if (booking.rentalStatus && booking.bookingType === 'Equipment') {
-                  <span class="status-badge rental" [class.pending]="booking.rentalStatus === 'PendingPickup'" [class.confirmed]="booking.rentalStatus === 'Active'" [class.completed]="booking.rentalStatus === 'Returned'">{{ booking.rentalStatus }}</span>
-                }
+            <header class="card-head">
+              <div class="card-identity">
+                <span class="queue-ref">#{{ booking.id }}</span>
+                <span class="type-chip">{{ booking.bookingType }}</span>
+                <span
+                  class="status-badge"
+                  [class.pending]="booking.status === 'Pending'"
+                  [class.confirmed]="booking.status === 'Confirmed'"
+                  [class.cancelled]="booking.status === 'Cancelled'"
+                  [class.completed]="booking.status === 'Completed'">{{ booking.status }}</span>
               </div>
 
-              <section class="customer-block">
-                <strong>{{ booking.user.name }}</strong>
-                <p>{{ booking.user.phoneNumber }}</p>
-                <p>{{ booking.user.email }}</p>
-              </section>
+              <div class="card-money">
+                <span class="card-total">{{ booking.totalPrice }} <span>EGP</span></span>
+                <span class="card-payment">
+                  <span class="pay-method">{{ booking.paymentMethod === 'PayOnSite' ? 'Onsite' : 'Online' }}</span>
+                  <span
+                    class="payment-badge"
+                    [class.paid]="booking.paymentStatus === 'Paid'"
+                    [class.failed]="booking.paymentStatus === 'Failed'"
+                    [class.pending]="booking.paymentStatus === 'Pending' || booking.paymentStatus === 'Processing'">
+                    {{ booking.paymentStatus }}
+                  </span>
+                </span>
+              </div>
+            </header>
+
+            <dl class="card-facts">
+              <div class="fact">
+                <dt>Customer</dt>
+                <dd>
+                  <strong>{{ booking.user.name }}</strong>
+                  <a [href]="'tel:' + booking.user.phoneNumber">{{ booking.user.phoneNumber }}</a>
+                </dd>
+              </div>
 
               @if (isFacilityBooking(booking) && booking.facility) {
-                <section class="time-block">
-                  <strong>{{ booking.facility.name }}</strong>
-                  <p>{{ formatDateTime(booking.startDate) }} - {{ formatTime(booking.endDate) }}</p>
-                </section>
+                <div class="fact">
+                  <dt>Facility</dt>
+                  <dd><strong>{{ booking.facility.name }}</strong></dd>
+                </div>
               }
 
-              @if (isEquipmentBooking(booking) && booking.equipment.length > 0) {
-                <section class="equipment-list">
-                  <strong>Equipment</strong>
+              @if (booking.equipment.length > 0) {
+                <div class="fact">
+                  <dt>Equipment</dt>
+                  <dd><strong [title]="equipmentFull(booking)">{{ equipmentSummary(booking) }}</strong></dd>
+                </div>
+              }
 
-                  @for (item of booking.equipment; track item.equipmentId) {
-                    <div class="equipment-row">
-                      <span>{{ item.name }}</span>
-                      <small>Quantity: {{ item.quantity }}</small>
-                    </div>
+              <!-- Rentals are timed by their pickup, not by the booking's own
+                   start date, which for an equipment-only booking is midnight. -->
+              <div class="fact">
+                <dt>{{ isRentalOnly(booking) ? 'Pickup' : 'When' }}</dt>
+                <dd>
+                  <strong>
+                    @if (isRentalOnly(booking)) {
+                      {{ formatDateTime(startsAt(booking)) }}
+                    } @else {
+                      {{ formatDateTime(booking.startDate) }} – {{ formatTime(booking.endDate) }}
+                    }
+                  </strong>
+                  <span class="when-relative" [class.is-today]="isToday(startsAt(booking))" [class.is-past]="hasEnded(booking)">
+                    @if (hasEnded(booking)) {
+                      Ended {{ relativeLabel(endsAt(booking)) }}
+                    } @else {
+                      Starts {{ relativeLabel(startsAt(booking)) }}
+                    }
+                  </span>
+                </dd>
+              </div>
+
+              @if (isRentalOnly(booking)) {
+                <div class="fact">
+                  <dt>Return due</dt>
+                  <dd><strong>{{ formatDateTime(endsAt(booking)) }}</strong></dd>
+                </div>
+              }
+            </dl>
+
+            <footer class="card-foot">
+              <!-- Where this booking is in its lifecycle, at a glance.
+                   Text labels, not colour alone (SRS UI-04). -->
+              <ol class="lifecycle" [attr.aria-label]="'Progress: ' + booking.status">
+                @for (stage of lifecycle(booking); track stage.label) {
+                  <li [attr.data-state]="stage.state">
+                    <span class="stage-dot" aria-hidden="true"></span>
+                    <span class="stage-label">{{ stage.label }}</span>
+                  </li>
+                }
+              </ol>
+
+              <div class="card-actions">
+                @if (!isClosedBooking(booking)) {
+                  <!-- When an action is withheld, say why rather than showing
+                       a dead button or nothing at all. -->
+                  @if (pendingActionNote(booking); as note) {
+                    <span class="action-note">{{ note }}</span>
                   }
-                </section>
-              }
 
-              <p class="total-price">Total price: {{ booking.totalPrice }} EGP</p>
-
-              <section class="payment-block">
-                <div>
-                  <span>Payment method</span>
-                  <strong>{{ booking.paymentMethod === 'PayOnSite' ? 'Pay onsite' : 'Online' }}</strong>
-                </div>
-                <div>
-                  <span>Payment status</span>
-                  <strong [class.payment-paid]="booking.paymentStatus === 'Paid'" [class.payment-pending]="booking.paymentStatus === 'Pending' || booking.paymentStatus === 'Processing'">{{ booking.paymentStatus }}</strong>
-                </div>
-              </section>
-            </div>
-
-            <div class="card-actions">
-              @if (!isClosedBooking(booking)) {
-                @if (canConfirm(booking)) {
-                  <button type="button" class="action-admin" (click)="confirmBooking(booking.id)">Confirm</button>
+                  @if (canConfirm(booking)) {
+                    <button type="button" class="action-admin" [disabled]="isBusy(booking)" (click)="requestConfirm(booking)">Confirm</button>
+                  }
+                  @if (canPickup(booking)) {
+                    <button type="button" class="action-package" [disabled]="isBusy(booking)" (click)="markPickedUp(booking.id)">Picked up</button>
+                  }
+                  @if (canReturn(booking)) {
+                    <button type="button" class="action-booking" [disabled]="isBusy(booking)" (click)="markReturned(booking.id)">Returned</button>
+                  }
+                  @if (canComplete(booking)) {
+                    <button type="button" class="secondary" [disabled]="isBusy(booking)" (click)="completeBooking(booking.id)">Complete</button>
+                  }
+                  @if (canCancel(booking)) {
+                    <button
+                      type="button"
+                      class="danger icon-only"
+                      [disabled]="isBusy(booking)"
+                      [attr.aria-label]="'Cancel booking #' + booking.id"
+                      title="Cancel booking"
+                      (click)="requestCancel(booking)">&times;</button>
+                  }
+                } @else {
+                  <span class="closed-note">{{ booking.status }}</span>
                 }
-
-                @if (canPickup(booking)) {
-                  <button type="button" class="action-package" (click)="markPickedUp(booking.id)">Picked up</button>
-                }
-
-                @if (canReturn(booking)) {
-                  <button type="button" class="action-booking" (click)="markReturned(booking.id)">Returned</button>
-                }
-
-                @if (canComplete(booking)) {
-                  <button type="button" class="secondary action-neutral" (click)="completeBooking(booking.id)">Complete</button>
-                }
-
-                @if (canCancel(booking)) {
-                  <button type="button" class="danger" (click)="cancelBooking(booking.id)">Cancel</button>
-                }
-              } @else if (booking.status === 'Cancelled') {
-                <p class="closed-note">No further actions available for cancelled orders.</p>
-              }
-            </div>
-          </article>
+              </div>
+            </footer>
+          </li>
         }
-      </section>
+      </ul>
 
-      <div class="pagination-bar bottom">
-        <span>
-          Showing {{ filteredBookings().length }} bookings
-        </span>
-
-      </div>
+      <nav class="pager-bar" aria-label="Pagination">
+        <span>Page {{ page() }} of {{ totalPages() }}</span>
+        <div>
+          <button type="button" class="secondary" [disabled]="page() <= 1" (click)="previousPage()">Previous</button>
+          <button type="button" class="secondary" [disabled]="page() >= totalPages()" (click)="nextPage()">Next</button>
+        </div>
+      </nav>
     }
+  }
+
+  <!-- One guarded dialog for every state-changing action. It states what will
+       happen, disables itself while the request is in flight so a second click
+       cannot submit twice, and cannot be dismissed mid-request. -->
+  @if (pendingAction(); as action) {
+    <section class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="admin-action-title">
+      <div class="modal-panel action-dialog" [class.is-destructive]="action.destructive">
+        <h2 id="admin-action-title">{{ action.title }}</h2>
+        <p>{{ action.body }}</p>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            [class]="action.destructive ? 'danger' : 'action-admin'"
+            [disabled]="actionInFlight()"
+            (click)="commitAction()">
+            @if (actionInFlight()) {
+              <span class="spinner spinner-inline" aria-hidden="true"></span>
+              {{ action.busyLabel }}
+            } @else {
+              {{ action.confirmLabel }}
+            }
+          </button>
+
+          <button
+            type="button"
+            class="secondary"
+            [disabled]="actionInFlight()"
+            (click)="dismissAction()">{{ action.dismissLabel }}</button>
+        </div>
+      </div>
+    </section>
   }
 </main>

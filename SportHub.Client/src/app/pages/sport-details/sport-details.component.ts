@@ -1,17 +1,18 @@
-import { Component, OnDestroy, signal , OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, signal , OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {FormsModule} from '@angular/forms';
 
 import { SportsService } from '../../core/services/sports.service';
 import { BookingService } from '../../core/services/booking.service';
-import { resolveImageUrl } from '../../core/services/api.config';
+import { resolveImageUrl, toLocalDateTime } from '../../core/services/api.config';
 import {SportDetails} from '../../models/sport.model';
 import { BookingType, CreateBooking, FacilityAvailabilitySlot, EquipmentAvailability, PaymentMethod } from '../../models/booking.model';
 import {NavbarComponent} from '../../shared/navbar/navbar.component';
+import { QuantityStepperComponent } from '../../shared/quantity-stepper/quantity-stepper.component';
 
 @Component({
   selector: 'app-sport-details',
-  imports: [FormsModule, RouterLink, NavbarComponent],
+  imports: [FormsModule, RouterLink, NavbarComponent, QuantityStepperComponent],
   templateUrl: './sport-details.component.html',
   styleUrl: './sport-details.component.css'
 })
@@ -24,7 +25,6 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
 
   bookingType: BookingType = 1;
   facilityId: number | null = null;
-  equipmentToAddId: number | null = null;
   selectedEquipmentItems: { equipmentId: number; quantity: number }[] = [];
   bookingDate = '';
   startTime = '';
@@ -38,6 +38,135 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     document.body.style.overflow = '';
     document.body.classList.remove('modal-open');
+
+    if (this.narrow && this.onWidthChange) {
+      this.narrow.removeEventListener('change', this.onWidthChange);
+    }
+
+    this.routeSub?.unsubscribe();
+  }
+
+  // Which step of the booking panel is expanded. Purely presentational:
+  // every field keeps the same binding and the same validation.
+  openStep = signal(1);
+
+  hasFacility() {
+    return this.facilityId !== null && this.facilityId !== undefined;
+  }
+
+  hasTime() {
+    return !!this.bookingDate && !!this.startTime && this.selectedSlotCount > 0;
+  }
+
+  isStepOpen(step: number) {
+    return this.openStep() === step;
+  }
+
+  /** A step is reachable once the step before it is satisfied. */
+  canOpenStep(step: number) {
+    if (step === 2) {
+      return this.hasFacility();
+    }
+
+    if (step === 3) {
+      return this.canChooseGear();
+    }
+
+    return true;
+  }
+
+  toggleStep(step: number) {
+    if (!this.canOpenStep(step)) {
+      return;
+    }
+
+    this.openStep.set(this.openStep() === step ? 0 : step);
+  }
+
+  // --- Package gear ---------------------------------------------------------
+  // Presentation helpers only. Pricing (FR-PKG-05) and the stock checks in
+  // createBooking() are untouched.
+
+  selectedQtyFor(equipmentId: number) {
+    return this.selectedEquipmentItems.find(item => item.equipmentId === equipmentId)?.quantity ?? 0;
+  }
+
+  isEquipmentSelected(equipmentId: number) {
+    return this.selectedQtyFor(equipmentId) > 0;
+  }
+
+  availableFor(equipmentId: number): number | null {
+    return this.getEquipmentAvailability(equipmentId)?.availableQuantity ?? null;
+  }
+
+  stockPercent(equipmentId: number) {
+    const availability = this.getEquipmentAvailability(equipmentId);
+
+    if (!availability || availability.totalQuantity === 0) {
+      return 100;
+    }
+
+    return Math.round((availability.availableQuantity / availability.totalQuantity) * 100);
+  }
+
+  isEquipmentSoldOut(equipmentId: number) {
+    return this.availableFor(equipmentId) === 0;
+  }
+
+  isAtLimit(equipmentId: number) {
+    const available = this.availableFor(equipmentId);
+    return available !== null && this.selectedQtyFor(equipmentId) >= available;
+  }
+
+  /** Gear can only be priced and stock-checked once the facility time is set. */
+  canChooseGear() {
+    return this.bookingType === 3 && this.hasFacility() && this.hasTime();
+  }
+
+  totalGearCount() {
+    return this.selectedEquipmentItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  /** Line cost for one gear row: package hourly price x qty x duration. */
+  gearLineTotal(equipmentId: number) {
+    const equipment = this.sport()?.equipment.find(item => item.id === equipmentId);
+    return (equipment?.packageHourlyPrice ?? 0) * this.selectedQtyFor(equipmentId) * this.selectedDurationHours();
+  }
+
+  gearSummary() {
+    if (this.selectedEquipmentItems.length === 0) {
+      return this.canChooseGear() ? 'No gear added yet' : 'Choose a time first';
+    }
+
+    const count = this.totalGearCount();
+    return `${count} item${count === 1 ? '' : 's'} across ${this.selectedEquipmentItems.length} type${this.selectedEquipmentItems.length === 1 ? '' : 's'}`;
+  }
+
+  facilitySummary() {
+    if (!this.hasFacility()) {
+      return 'Not chosen yet';
+    }
+
+    const facility = this.sport()?.facilities.find(item => item.id === this.facilityId);
+    return facility ? `${facility.name} · ${facility.pricePerHour} EGP / hour` : 'Not chosen yet';
+  }
+
+  timeSummary() {
+    if (!this.hasTime()) {
+      return this.bookingDate ? 'No blocks selected' : 'Not chosen yet';
+    }
+
+    const day = new Date(`${this.bookingDate}T00:00`)
+      .toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+
+    return `${day} · ${this.selectedStartTimeLabel()} – ${this.selectedEndTimeLabel()}`;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    if (this.confirmBookingOpen()) {
+      this.closeBookingConfirmation();
+    }
   }
 
   constructor(
@@ -50,6 +179,100 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.loadSport(id);
+
+    // Narrow screens run the booking as its own full-page flow; wide screens
+    // keep the side panel beside the catalogue.
+    this.narrow = window.matchMedia('(max-width: 940px)');
+    this.compact.set(this.narrow.matches);
+    this.onWidthChange = event => this.compact.set(event.matches);
+    this.narrow.addEventListener('change', this.onWidthChange);
+
+    // The flow step follows the URL, so Back returns to the facility list.
+    this.routeSub = this.route.url.subscribe(segments => {
+      const inFlow = segments.some(segment => segment.path === 'book');
+
+      if (!inFlow) {
+        this.flowStep.set('choose');
+        return;
+      }
+
+      if (this.flowStep() === 'choose') {
+        this.flowStep.set('configure');
+      }
+    });
+  }
+
+  /** Which part of the booking flow a narrow screen is showing. */
+  flowStep = signal<'choose' | 'configure' | 'gear' | 'review'>('choose');
+  compact = signal(false);
+
+  private narrow?: MediaQueryList;
+  private onWidthChange?: (event: MediaQueryListEvent) => void;
+  private routeSub?: { unsubscribe(): void };
+
+  /** Drives the layout: which region the page shows on a narrow screen. */
+  layoutStep() {
+    return this.compact() ? this.flowStep() : 'wide';
+  }
+
+  /**
+   * `/sports/:id` and `/sports/:id/book` are different routes, so Angular
+   * rebuilds the component on the way in. The choice therefore travels in the
+   * URL rather than in memory — which also makes the step refresh-safe and
+   * shareable.
+   */
+  private enterFlow(facilityId: number) {
+    if (!this.compact()) {
+      return;
+    }
+
+    this.flowStep.set('configure');
+    this.router.navigate(['/sports', this.sport()?.id, 'book'], {
+      queryParams: { facility: facilityId, type: this.bookingType }
+    });
+  }
+
+  private restoreFlowFromUrl() {
+    const params = this.route.snapshot.queryParamMap;
+    const facility = Number(params.get('facility'));
+    const type = Number(params.get('type'));
+
+    if (!facility) {
+      return;
+    }
+
+    this.bookingType = (type === 3 ? 3 : 1) as BookingType;
+    this.facilityId = facility;
+    this.openStep.set(2);
+    this.loadFacilityAvailability();
+  }
+
+  /** Back out of the flow, returning to the facility list. */
+  leaveFlow() {
+    this.flowStep.set('choose');
+    this.router.navigate(['/sports', this.sport()?.id]);
+  }
+
+  /** Package only: gear is chosen after the time, so stock matches the slots. */
+  goToGear() {
+    if (!this.canChooseGear()) {
+      return;
+    }
+
+    this.flowStep.set('gear');
+  }
+
+  backToConfigure() {
+    this.flowStep.set('configure');
+  }
+
+  /** True once the flow has everything it needs to be reviewed. */
+  canReview() {
+    if (!this.hasFacility() || !this.hasTime()) {
+      return false;
+    }
+
+    return this.bookingType !== 3 || this.selectedEquipmentItems.length > 0;
   }
 
   loadSport(id: number){
@@ -60,6 +283,7 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
       next: sport => {
         this.sport.set(sport);
         this.loading.set(false);
+        this.restoreFlowFromUrl();
       },
       error: error => {
         if(error.status === 0){
@@ -162,15 +386,6 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
     return total;
   }
 
-  addEquipmentFromPanel() {
-  if (!this.equipmentToAddId) {
-    this.error.set('Please select equipment to add.');
-    return;
-  }
-
-  this.addEquipmentItem(this.equipmentToAddId);
-  this.equipmentToAddId = null;
-  }
   buildFacilityStartDate(): Date {
     return new Date(`${this.bookingDate}T${this.startTime}`);
   }
@@ -241,7 +456,7 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
 
     for (const equipmentId of equipmentIds) {
       this.bookingService
-        .getEquipmentAvailability(equipmentId, startDate.toISOString(), endDate.toISOString())
+        .getEquipmentAvailability(equipmentId, toLocalDateTime(startDate), toLocalDateTime(endDate))
         .subscribe({
           next: availability => {
             this.equipmentAvailability = [
@@ -354,6 +569,15 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
 
   this.pendingBookingRequest = request;
   this.confirmBookingOpen.set(true);
+
+  // On a narrow screen the review is a page of its own, so the body must keep
+  // scrolling; only the wide-screen dialog locks it.
+  if (this.compact()) {
+    this.flowStep.set('review');
+    window.scrollTo({ top: 0 });
+    return;
+  }
+
   document.body.style.overflow = 'hidden';
   document.body.classList.add('modal-open');
   }
@@ -394,6 +618,12 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
     this.pendingBookingRequest = null;
     document.body.style.overflow = '';
     document.body.classList.remove('modal-open');
+
+    // Back from the review returns to the step that produced it, not to the
+    // catalogue: the selection is still intact and usually needs a small edit.
+    if (this.compact() && this.flowStep() === 'review') {
+      this.flowStep.set(this.bookingType === 3 ? 'gear' : 'configure');
+    }
   }
 
   selectFacilityBooking(facilityId: number){
@@ -409,9 +639,11 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
     this.selectedEquipmentItems = [];
     this.startTime = '';
     this.selectedSlotCount = 0;
+    this.openStep.set(2);
     this.loadFacilityAvailability();
     this.success.set('');
     this.error.set('');
+    this.enterFlow(facilityId);
   }
 
   startPackageWithFacility(facilityId: number){
@@ -426,15 +658,16 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
     this.facilityId = facilityId;
     this.startTime = '';
     this.selectedSlotCount = 0;
+    this.openStep.set(2);
     this.loadFacilityAvailability();
     this.success.set('');
     this.error.set('');
+    this.enterFlow(facilityId);
   }
 
   cancelPackage() {
     this.bookingType = 1;
     this.selectedEquipmentItems = [];
-    this.equipmentToAddId = null;
     this.equipmentAvailability = [];
     this.success.set('');
     this.error.set('');
@@ -489,6 +722,55 @@ export class SportDetailsComponent implements OnInit, OnDestroy {
     this.selectedSlotCount = range.length;
     this.error.set('');
     this.loadEquipmentAvailability();
+  }
+
+  // The API reports past and occupied slots identically (available: false),
+  // so the two are separated here to keep the reason for a blocked slot visible.
+  isSlotPast(slot: FacilityAvailabilitySlot) {
+    if (!this.bookingDate) {
+      return false;
+    }
+
+    return new Date(`${this.bookingDate}T${slot.time}`).getTime() <= Date.now();
+  }
+
+  slotStatusLabel(slot: FacilityAvailabilitySlot) {
+    if (this.isSlotSelected(slot)) {
+      return 'Selected';
+    }
+
+    if (this.isSlotPast(slot)) {
+      return 'Past';
+    }
+
+    if (!slot.available) {
+      return 'Booked';
+    }
+
+    if (this.isSlotBlockedBySelection(slot)) {
+      return 'Blocked';
+    }
+
+    return 'Free';
+  }
+
+  isSlotRangeStart(slot: FacilityAvailabilitySlot) {
+    return this.isSlotSelected(slot) && slot.time === this.startTime;
+  }
+
+  isSlotRangeEnd(slot: FacilityAvailabilitySlot) {
+    if (!this.isSlotSelected(slot)) {
+      return false;
+    }
+
+    const startIndex = this.availabilitySlots.findIndex(item => item.time === this.startTime);
+    const slotIndex = this.availabilitySlots.findIndex(item => item.time === slot.time);
+
+    return slotIndex === startIndex + this.selectedSlotCount - 1;
+  }
+
+  freeSlotCount() {
+    return this.availabilitySlots.filter(slot => slot.available).length;
   }
 
   isSlotSelected(slot: FacilityAvailabilitySlot) {

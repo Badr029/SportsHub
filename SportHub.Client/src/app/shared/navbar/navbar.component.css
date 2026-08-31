@@ -1,57 +1,324 @@
+:host {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: block;
+}
+
 .navbar {
-  width: min(1180px, calc(100% - 32px));
-  min-height: 72px;
+  border-bottom: 1px solid var(--hairline);
+  background: rgba(7, 13, 22, 0.72);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+.navbar-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 22px;
+  gap: var(--s-6);
+  width: min(var(--shell), calc(100% - var(--s-7)));
+  min-height: 62px;
   margin: 0 auto;
-  padding: 22px 0;
+  padding: var(--s-2) 0;
 }
 
 .brand {
-  color: var(--teal-bright);
-  font-size: 28px;
-  font-weight: 950;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex: 0 0 auto;
+  min-height: 40px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.1875rem;
+  font-stretch: 118%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   text-decoration: none;
   white-space: nowrap;
 }
 
-nav {
+.brand::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--teal-400);
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.7);
+  rotate: 45deg;
+}
+
+.brand-tag {
+  border: 1px solid rgba(96, 165, 250, 0.36);
+  border-radius: var(--r-full);
+  background: var(--blue-wash);
+  color: var(--blue-400);
+  padding: 2px 8px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nav-primary {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 18px;
+  gap: var(--s-1);
+  flex: 1 1 auto;
   flex-wrap: wrap;
 }
 
-a {
-  border-bottom: 2px solid transparent;
-  color: var(--muted);
-  font-weight: 850;
+.nav-primary a {
+  position: relative;
+  border-radius: var(--r-xs);
+  color: var(--text-2);
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--fs-sm);
+  font-weight: 550;
   text-decoration: none;
-  padding: 9px 0;
+  transition: color var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
 }
 
-a:hover,
-a.active {
-  border-bottom-color: var(--teal-bright);
-  color: white;
+.nav-primary a:hover {
+  background: rgba(148, 163, 184, 0.09);
+  color: var(--text);
 }
 
-.logout-button {
-  padding: 11px 16px;
-  --button-start: ;
+/* Active route is marked by weight, color and a rule — not color alone. */
+.nav-primary a.active {
+  background: var(--teal-wash);
+  color: var(--teal-300);
+  font-weight: 650;
 }
 
-@media (max-width: 760px) {
-  .navbar {
-    flex-direction: column;
-    align-items: stretch;
-    width: min(100% - 32px, 1180px);
+.nav-primary a.active::after {
+  content: '';
+  position: absolute;
+  left: var(--s-3);
+  right: var(--s-3);
+  bottom: 1px;
+  height: 2px;
+  border-radius: var(--r-full);
+  background: var(--teal-400);
+}
+
+.nav-account {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex: 0 0 auto;
+}
+
+.account-name {
+  max-width: 16ch;
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   Drawer
+   Hidden entirely on desktop; below the breakpoint it replaces the inline
+   links and the account block.
+   -------------------------------------------------------------------------- */
+
+.menu-toggle,
+.nav-scrim,
+.nav-drawer {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .navbar-inner {
+    justify-content: space-between;
+    gap: var(--s-4);
+    width: calc(100% - var(--s-6));
+    min-height: 56px;
   }
 
-  nav {
-    justify-content: flex-start;
+  .nav-primary,
+  .nav-account {
+    display: none;
+  }
+
+  /* 44px square: the minimum comfortable touch target. */
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-sm);
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  /* Three bars drawn from one element: the middle is the box, the outer two
+     are its pseudo-elements, so they can cross into an X on open. */
+  .menu-bars,
+  .menu-bars::before,
+  .menu-bars::after {
+    width: 18px;
+    height: 2px;
+    border-radius: var(--r-full);
+    background: var(--text);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-1) var(--ease-out);
+  }
+
+  .menu-bars {
+    position: relative;
+    display: block;
+  }
+
+  .menu-bars::before,
+  .menu-bars::after {
+    content: '';
+    position: absolute;
+    left: 0;
+  }
+
+  .menu-bars::before {
+    top: -6px;
+  }
+
+  .menu-bars::after {
+    top: 6px;
+  }
+
+  .menu-toggle.is-open .menu-bars {
+    background: transparent;
+  }
+
+  .menu-toggle.is-open .menu-bars::before {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .menu-toggle.is-open .menu-bars::after {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: rgba(3, 8, 15, 0.6);
+    backdrop-filter: blur(2px);
+    animation: scrim-in var(--dur-2) var(--ease-out) both;
+  }
+
+  @keyframes scrim-in {
+    from { opacity: 0; }
+  }
+
+  /* Anchored right: on a phone that is where the thumb already is. */
+  .nav-drawer {
+    display: flex;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 46;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--s-6);
+    width: min(320px, 84vw);
+    overflow-y: auto;
+    border-left: 1px solid var(--hairline);
+    background: var(--surface-1);
+    padding: calc(56px + var(--s-5)) var(--s-5) var(--s-6);
+    box-shadow: var(--shadow-xl);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform var(--dur-3) var(--ease-out), visibility var(--dur-3);
+  }
+
+  .nav-drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .drawer-links {
+    display: grid;
+    gap: var(--s-2);
+  }
+
+  .drawer-links a {
+    display: grid;
+    gap: 2px;
+    min-height: 56px;
+    align-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--r-sm);
+    color: var(--text-2);
+    padding: var(--s-3) var(--s-4);
+    text-decoration: none;
+    transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+  }
+
+  .drawer-links a:active {
+    background: rgba(148, 163, 184, 0.12);
+  }
+
+  .drawer-links a.active {
+    border-color: var(--hairline-accent);
+    background: var(--teal-wash);
+    color: var(--teal-300);
+  }
+
+  .link-label {
+    color: inherit;
+    font-size: var(--fs-md);
+    font-weight: 650;
+  }
+
+  .drawer-links a.active .link-label {
+    color: var(--teal-300);
+  }
+
+  .link-note {
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+  }
+
+  .drawer-account {
+    display: grid;
+    gap: var(--s-3);
+    border-top: 1px solid var(--hairline);
+    padding-top: var(--s-4);
+  }
+
+  .drawer-user {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .drawer-user strong {
+    overflow: hidden;
+    color: var(--text);
+    font-size: var(--fs-sm);
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .drawer-user span {
+    overflow: hidden;
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .drawer-logout {
+    min-height: 48px;
+    width: 100%;
   }
 }

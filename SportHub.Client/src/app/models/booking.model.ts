@@ -95,6 +95,8 @@ export interface AdminBookingResponse {
   rentalStatus?: string | null;
   startDate: string;
   endDate: string;
+  pickupDate?: string | null;
+  returnDate?: string | null;
   totalPrice: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;

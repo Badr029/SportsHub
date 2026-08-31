@@ -1,106 +1,184 @@
-<main class="landing-page">
+<div class="landing">
   <nav class="landing-nav">
     <a class="landing-brand" routerLink="/">SportHub</a>
 
     <div class="nav-links">
       <a href="#sports">Sports</a>
-      <a href="#equipment-terms">Equipment Terms</a>
-      <a href="#help">Help Center</a>
-      <a class="register-link animated-button action-auth" routerLink="/register">Create Account</a>
-      <a class="login-link animated-button action-neutral" routerLink="/login">Login</a>
+      <a href="#booking-modes">How booking works</a>
+      <a href="#help">Help</a>
+      <a class="register-link" routerLink="/register">Create account</a>
+      <a class="login-link" routerLink="/login">Log in</a>
     </div>
   </nav>
 
-  <section class="hero-section">
+  <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+  <section class="hero">
     <div class="hero-copy">
-      <p class="eyebrow">Courts, fields, and gear ready when you are</p>
-      <h1>Book Your Game Faster.</h1>
+      <p class="hero-flag">
+        <span class="flag-dot" aria-hidden="true"></span>
+        Live availability · {{ sportCount() }} sports
+      </p>
+
+      <h1>
+        Book your <br>
+        game <em>faster.</em>
+      </h1>
+
       <p class="hero-text">
-        Find available sports facilities, add the equipment you need, and reserve everything in one simple booking.
+        Find an open court, add the gear you need, and reserve it all in one booking.
+        Availability and price come straight from the schedule — no phone calls, no guessing.
       </p>
 
       <div class="hero-actions">
-        <a class="primary-action animated-button action-booking" routerLink="/register">Start Booking</a>
+        <a class="primary-action" routerLink="/register">
+          @if (previewCount() > 0) {
+            Book {{ previewRangeLabel() }}
+          } @else {
+            Start booking
+          }
+          <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <a class="staff-action" routerLink="/login">I already have an account</a>
       </div>
+
+      <dl class="hero-stats">
+        <div>
+          <dt>Places to play</dt>
+          <dd>{{ openFacilities() }}</dd>
+        </div>
+        <div>
+          <dt>Items to rent</dt>
+          <dd>{{ equipmentStock() }}</dd>
+        </div>
+        <div>
+          <dt>Booking window</dt>
+          <dd>30<span>min</span></dd>
+        </div>
+      </dl>
     </div>
 
-    <div class="live-panel" aria-label="Live SportHub activity">
-      <div class="landing-panel-header">
-        <span>Available Today</span>
-        <strong>Online</strong>
+    <!-- Photo panel with the live grid overlapping it: real depth, and the
+         card sits on a material rather than floating on flat colour. -->
+    <div class="hero-visual">
+      <div class="hero-photo">
+        @if (heroImage()) {
+          <img [src]="heroImage()" alt="" decoding="async">
+        }
+        <span class="photo-tag">{{ liveSportName() }}</span>
       </div>
 
-      <div class="pulse-row">
-        <span></span>
-        <p>{{ loading() ? 'Checking what is available' : 'Fresh availability from SportHub' }}</p>
-      </div>
+      <div class="live-panel" aria-label="Try the booking grid">
+        <div class="live-head">
+          <div>
+            <span class="live-title">Try it — today's grid</span>
+            <span class="live-sub">Real availability. Nothing is reserved.</span>
+          </div>
+          <strong class="live-badge">Live</strong>
+        </div>
 
-      <div class="panel-metrics">
-        <div>
-          <strong>{{ openFacilities() }}</strong>
-          <span>places to play</span>
-        </div>
-        <div>
-          <strong>{{ equipmentStock() }}</strong>
-          <span>items ready to rent</span>
-        </div>
-        <div>
-          <strong>{{ sportCount() }}</strong>
-          <span>sports to choose from</span>
-        </div>
+        <!-- Flip between real facilities; the grid reloads from the API. -->
+        @if (liveFacilities().length > 1) {
+          <div class="facility-tabs" role="group" aria-label="Choose a facility">
+            @for (facility of liveFacilities(); track facility.id) {
+              <button
+                type="button"
+                class="facility-tab"
+                [class.is-active]="selectedFacilityId() === facility.id"
+                [attr.aria-pressed]="selectedFacilityId() === facility.id"
+                (click)="selectFacility(facility)">
+                {{ facility.name }}
+              </button>
+            }
+          </div>
+        }
+
+        @if (liveLoading()) {
+          <div class="live-grid" aria-hidden="true">
+            @for (i of [0,1,2,3,4,5,6,7,8,9,10,11,12,13]; track i) {
+              <span class="live-slot is-loading"></span>
+            }
+          </div>
+        } @else if (liveSlots().length === 0) {
+          <p class="live-empty">Live availability is unavailable right now.</p>
+        } @else {
+          <div class="live-grid" role="group" aria-label="30-minute blocks">
+            @for (slot of liveSlots(); track slot.time) {
+              <button
+                type="button"
+                class="live-slot"
+                [class.is-taken]="!slot.available"
+                [class.is-picked]="isPreviewSelected(slot)"
+                [disabled]="!slot.available"
+                [attr.aria-pressed]="isPreviewSelected(slot)"
+                [title]="slot.label + (slot.available ? ' — free' : ' — unavailable')"
+                (click)="pickSlot(slot)">
+                {{ shortSlotLabel(slot) }}
+              </button>
+            }
+          </div>
+
+          @if (previewCount() > 0) {
+            <div class="preview-summary" aria-live="polite">
+              <div>
+                <span class="preview-range">{{ previewRangeLabel() }}</span>
+                <span class="preview-meta">{{ previewHours() }} hour{{ previewHours() === 1 ? '' : 's' }} · {{ liveFacilityName() }}</span>
+              </div>
+              <span class="preview-price">{{ previewPrice() }} <small>EGP</small></span>
+            </div>
+          } @else {
+            <p class="live-legend">
+              <span class="live-key"><i class="key-free"></i>{{ freeSlotCount() }} free</span>
+              <span class="live-key"><i class="key-taken"></i>{{ liveSlots().length - freeSlotCount() }} gone</span>
+              <span class="live-hint">Tap a block, then the last one you want</span>
+            </p>
+          }
+        }
       </div>
     </div>
   </section>
 
-  <section class="showcase-section" id="sports">
-    <div class="landing-section-heading">
-      <p>Popular picks</p>
+  <!-- ── Sports ───────────────────────────────────────────────────────────── -->
+  <section class="section" id="sports">
+    <header class="section-head" reveal>
       <h2>See what you can book now</h2>
-    </div>
+      <p>Live facility and equipment counts, straight from the catalogue.</p>
+    </header>
 
     <div class="showcase-grid">
       @if (loading()) {
-        <article class="showcase-card skeleton">
-          <div></div>
-          <span></span>
-          <span></span>
-        </article>
-        <article class="showcase-card skeleton">
-          <div></div>
-          <span></span>
-          <span></span>
-        </article>
-        <article class="showcase-card skeleton">
-          <div></div>
-          <span></span>
-          <span></span>
-        </article>
+        @for (i of [0,1,2]; track i) {
+          <article class="showcase-card is-skeleton" aria-hidden="true">
+            <div class="showcase-media"></div>
+            <div class="showcase-body">
+              <span class="sk-line wide"></span>
+              <span class="sk-line"></span>
+            </div>
+          </article>
+        }
       } @else if (error()) {
         <article class="showcase-card status-card">
-          <div class="image-fallback">Live data</div>
-          <div class="landing-card-body">
+          <div class="showcase-body">
             <h3>Availability is taking longer than expected</h3>
             <p>{{ error() }}</p>
-            <a class="animated-button action-auth" routerLink="/register">Create Account</a>
+            <a class="register-link" routerLink="/register">Create account</a>
           </div>
         </article>
       } @else {
-        @for (item of showcase(); track item.name) {
-          <article class="showcase-card">
-            @if (item.imageUrl) {
-              <img [src]="item.imageUrl" [alt]="item.name">
-            } @else {
-              <div class="image-fallback">{{ item.name }}</div>
-            }
+        @for (item of showcase(); track item.name; let i = $index) {
+          <article class="showcase-card" reveal [revealDelay]="i * 80">
+            <div class="showcase-media">
+              @if (item.imageUrl) {
+                <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" decoding="async">
+              } @else {
+                <div class="image-fallback">{{ item.name }}</div>
+              }
+              <span class="showcase-metric">{{ item.metric }}</span>
+            </div>
 
-            <div class="landing-card-body">
-              <div class="landing-card-topline">
-                <h3>{{ item.name }}</h3>
-                <span>{{ item.metric }}</span>
-              </div>
+            <div class="showcase-body">
+              <h3>{{ item.name }}</h3>
               <p>{{ item.description }}</p>
               <strong class="stock-line">{{ item.detailMetric }}</strong>
-              <a class="animated-button action-booking" routerLink="/register">Start Booking</a>
             </div>
           </article>
         }
@@ -108,55 +186,68 @@
     </div>
   </section>
 
-  <section class="trust-section">
-    <article>
-      <strong>Book in Minutes</strong>
-      <span>Choose your sport, time, and equipment without calling around.</span>
-    </article>
-    <article>
-      <strong>Easy Arrival</strong>
-      <span>Your booking details are ready when you arrive at the facility.</span>
-    </article>
-    <article>
-      <strong>Know What Is Available</strong>
-      <span>See equipment quantities before you finish your rental.</span>
-    </article>
-    <article>
-      <strong>Clear Booking Rules</strong>
-      <span>Facility times, package gear, and cancellation windows stay visible.</span>
-    </article>
+  <!-- ── Booking modes ────────────────────────────────────────────────────── -->
+  <section class="section" id="booking-modes">
+    <header class="section-head" reveal>
+      <h2>Three ways to book</h2>
+      <p>Each is priced differently, and SportHub calculates it — never guessed at the counter.</p>
+    </header>
+
+    <div class="modes">
+      <article class="mode" reveal>
+        <span class="mode-num" aria-hidden="true">01</span>
+        <div class="mode-body">
+          <h3>Reserve a facility</h3>
+          <p>
+            Pick a court or field, a day, and a run of 30-minute blocks up to six hours.
+            Blocks another booking already holds cannot be crossed, so a double booking is not possible.
+          </p>
+        </div>
+        <span class="mode-price">Hourly rate &times; duration</span>
+      </article>
+
+      <article class="mode" reveal [revealDelay]="70">
+        <span class="mode-num" aria-hidden="true">02</span>
+        <div class="mode-body">
+          <h3>Rent equipment</h3>
+          <p>
+            Rent gear on its own for a day. Choose a pickup time and the return is set to the same
+            time the next day. Quantities are checked against the rentals already on the books.
+          </p>
+        </div>
+        <span class="mode-price">Daily price &times; quantity</span>
+      </article>
+
+      <article class="mode" reveal [revealDelay]="140">
+        <span class="mode-num" aria-hidden="true">03</span>
+        <div class="mode-body">
+          <h3>Build a package</h3>
+          <p>
+            Combine one facility with the gear you need for the same time. The equipment follows the
+            facility booking exactly — pick it up when you arrive, return it when you finish.
+          </p>
+        </div>
+        <span class="mode-price">Facility + gear per hour</span>
+      </article>
+    </div>
   </section>
 
-  <section class="terms-strip" id="equipment-terms">
-    <div>
-      <strong>Rent for the Day</strong>
-      <span>Equipment-only rentals use a simple daily price per item.</span>
-    </div>
-    <div>
-      <strong>Add Gear to Your Facility</strong>
-      <span>Packages let you book a place to play and rent matching equipment for the same time.</span>
-    </div>
-    <div>
-      <strong>Simple Pickup</strong>
-      <span>Pick up your rented equipment when you arrive and return it when you are done.</span>
-    </div>
-  </section>
-
-  <section class="help-band" id="help">
-    <div>
-      <p>Ready to play?</p>
+  <!-- ── CTA ──────────────────────────────────────────────────────────────── -->
+  <section class="cta-band" id="help" reveal>
+    <div class="cta-copy">
       <h2>Reserve a facility, rent equipment, or build a full package.</h2>
+      <p>Create an account and your first booking takes about a minute.</p>
     </div>
-    <a class="animated-button action-auth" routerLink="/register">Create Account</a>
+    <a class="primary-action" routerLink="/register">
+      Create account
+      <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+    </a>
   </section>
-</main>
 
-<footer class="landing-footer">
-  <a routerLink="/">SportHub</a>
-  <div>
-    <a href="#">Terms of Use</a>
-    <a href="#">Privacy Policy</a>
-    <a href="#">Legal Resources</a>
-    <a routerLink="/login">Staff Portal Login</a>
-  </div>
-</footer>
+  <footer class="landing-footer">
+    <a class="landing-brand" routerLink="/">SportHub</a>
+    <div>
+      <a routerLink="/login">Staff portal</a>
+    </div>
+  </footer>
+</div>

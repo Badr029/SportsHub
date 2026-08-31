@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/auth/login/login.component';
-import { RegisterComponent } from './pages/auth/register/register.component';
+import { AuthComponent } from './pages/auth/auth.component';
 import { HomeComponent } from './pages/home/home.component';
 import { SportsComponent } from './pages/sports/sports.component';
 import { SportDetailsComponent } from './pages/sport-details/sport-details.component';
@@ -17,11 +16,19 @@ import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  // Both paths render the same component so switching between them is an
+  // in-place transition, not a navigation. The routes stay real: direct entry,
+  // bookmarks and the auth guard's redirect to /login all still work.
+  { path: 'login', component: AuthComponent },
+  { path: 'register', component: AuthComponent },
   { path: 'sports', component: SportsComponent, canActivate: [authGuard] },
   { path: 'sports/:id', component: SportDetailsComponent, canActivate: [authGuard] },
+  // The booking flow is a real route so the phone's back button returns to the
+  // facility list and a refresh does not lose the step. It renders the same
+  // component; on a wide screen the side panel is shown as before.
+  { path: 'sports/:id/book', component: SportDetailsComponent, canActivate: [authGuard] },
   { path: 'equipment', component: EquipmentBookingComponent, canActivate: [authGuard] },
+  { path: 'equipment/review', component: EquipmentBookingComponent, canActivate: [authGuard] },
   { path: 'bookings', component: BookingsComponent, canActivate: [authGuard] },
   { path: 'payment/:id', component: PaymentComponent, canActivate: [authGuard] },
   { path: 'admin/bookings', component: AdminBookingsComponent, canActivate: [adminGuard] },

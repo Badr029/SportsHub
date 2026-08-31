@@ -1,250 +1,335 @@
-.page-header a {
-  color: var(--teal-bright);
-  font-weight: 900;
+.back-button {
+  margin-bottom: var(--s-4);
 }
 
-.page-header h1,
-.sport-summary h2,
-.modal-panel h2,
-.item-card h3 {
-  margin: 0;
-  color: white;
+.page-feedback {
+  margin-bottom: var(--s-4);
 }
 
-.page-header p,
-.sport-summary p,
-.item-card p {
-  color: var(--muted);
-}
-
-.sport-summary,
-.item-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-  box-shadow: var(--shadow);
-}
+/* --- Summary -------------------------------------------------------------- */
 
 .sport-summary {
   display: grid;
-  grid-template-columns: minmax(280px, 38%) minmax(0, 1fr);
-  gap: 16px;
-  padding: 14px;
-  margin-bottom: 20px;
-  border-color: rgba(20, 184, 166, 0.38);
-  background: linear-gradient(
-    135deg,
-    rgba(20, 184, 166, 0.14),
-    rgba(17, 24, 39, 0.96)
-  );
+  grid-template-columns: minmax(240px, 32%) minmax(0, 1fr);
+  gap: var(--s-6);
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: var(--s-7);
 }
 
-.sport-summary img,
-.item-card img {
+.sport-summary-media {
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.sport-summary-media img,
+.sport-summary-media .image-fallback {
   width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
   object-fit: cover;
   display: block;
-  border-radius: 6px;
-}
-
-.sport-summary img {
-  height: 100%;
 }
 
 .sport-info {
-  grid-template-rows: auto auto auto 1fr auto;
+  display: grid;
+  align-content: center;
+  gap: var(--s-3);
+  padding: var(--s-6) var(--s-6) var(--s-6) 0;
 }
 
-.sport-metrics {
-  align-self: end;
+.sport-info > p {
+  max-width: 56ch;
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-md);
+  line-height: 1.6;
 }
+
+.sport-actions {
+  margin-top: var(--s-2);
+}
+
+/* --- Management columns --------------------------------------------------- */
 
 .management-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+  gap: var(--s-6);
   align-items: start;
 }
 
 .manager-section {
   display: grid;
-  gap: 14px;
-  padding: 14px;
-  margin-bottom: 20px;
-  border-color: rgba(20, 184, 166, 0.38);
-  background: linear-gradient(
-    135deg,
-    rgba(20, 184, 166, 0.14),
-    rgba(17, 24, 39, 0.96)
-  );
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+  gap: var(--s-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-md);
+  padding: var(--s-5);
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
   align-items: center;
+  gap: var(--s-3);
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: var(--s-4);
 }
 
 .section-header h2 {
   margin: 0;
-  color: white;
+  font-size: var(--fs-lg);
+}
+
+.section-count {
+  margin-left: var(--s-2);
+  color: var(--text-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .cards-list {
   display: grid;
-  gap: 12px;
+  gap: var(--s-3);
 }
 
 .item-card {
   display: grid;
-  grid-template-columns: 150px minmax(0, 1fr);
-  gap: 14px;
-  padding: 14px;
-  align-items: stretch;
-}
-
-.card-image {
-  min-height: 132px;
-  border-radius: 6px;
-  overflow: hidden;
-  background: rgba(15, 23, 42, 0.72);
-}
-
-.card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: var(--s-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  background: rgba(3, 8, 15, 0.36);
+  padding: var(--s-3);
 }
 
 .item-card.out-of-service {
-  opacity: 0.74;
+  opacity: 0.7;
+}
+
+.card-image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--r-xs);
+  background: var(--surface-2);
+}
+
+.card-image img,
+.card-image .image-fallback {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: cover;
+  display: block;
+}
+
+.card-image .image-fallback {
+  font-size: var(--fs-sm);
+}
+
+.card-image .image-fallback::after {
+  display: none;
 }
 
 .card-body {
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 10px;
+  align-content: start;
+  gap: var(--s-2);
+  min-width: 0;
 }
 
 .card-title-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--s-2);
 }
 
-.card-metrics {
-  align-content: start;
+.card-title-row h3 {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-stretch: 104%;
 }
 
 .service-label {
   flex: 0 0 auto;
-  border-radius: 999px;
-  background: rgba(220, 38, 38, 0.18);
-  color: #fca5a5 !important;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 900;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  border-radius: var(--r-full);
+  background: var(--cancelled-wash);
+  color: var(--cancelled-ink);
+  padding: 2px 8px;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
+.card-metrics span {
+  font-size: var(--fs-2xs);
+  padding: 3px 8px;
+}
+
 .toggle-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.ios-toggle {
-  position: relative;
-  width: 52px;
-  height: 30px;
-  flex: 0 0 auto;
-  border: 1px solid rgba(148, 163, 184, 0.34);
-  border-radius: 999px;
-  background: rgba(71, 85, 105, 0.72);
-  padding: 0;
-}
-
-.ios-toggle span {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: white;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.32);
-}
-
-.ios-toggle.active {
-  border-color: rgba(220, 38, 38, 0.55);
-  background: var(--cancelled);
-}
-
-.ios-toggle.active span {
-  left: 25px;
-}
-
-label {
-  display: grid;
-  gap: 6px;
-  color: white;
-  font-weight: 800;
-}
-
-.checkbox-row {
-  display: flex;
-  align-items: center;
-}
-
-input,
-textarea {
-  padding: 11px 12px;
-  border: 1px solid rgba(20, 184, 166, 0.42);
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.72);
-  color: white;
-}
-
-.image-preview {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 6px;
+  margin-top: var(--s-1);
+  font-size: var(--fs-xs);
 }
 
 .card-actions {
   grid-column: 1 / -1;
   justify-content: flex-end;
+  border-top: 1px solid var(--hairline);
+  padding-top: var(--s-3);
+}
+
+.card-actions button {
+  min-height: 34px;
+  padding-inline: var(--s-3);
+  font-size: var(--fs-xs);
 }
 
 .pager {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: var(--s-3);
+  border-top: 1px solid var(--hairline);
+  padding-top: var(--s-4);
 }
 
-.pager span,
+.pager span {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.pager button {
+  min-height: 34px;
+  font-size: var(--fs-xs);
+}
+
+.field-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
 .confirm-panel p {
-  color: var(--muted);
-  font-weight: 800;
+  color: var(--text-2);
 }
 
-@media (max-width: 900px) {
-  .page-header,
-  .sport-summary,
-  .management-grid,
-  .item-card {
-    display: grid;
+@media (max-width: 1024px) {
+  .management-grid {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 820px) {
+  .sport-summary {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .sport-summary-media {
+    min-height: 0;
+    aspect-ratio: 16 / 8;
+  }
+
+  .sport-info {
+    padding: var(--s-5);
+  }
+}
+
+/* The summary is a header, not the content: at full width its photograph
+   pushed both manager sections — the reason for the page — off the screen. */
+@media (max-width: 560px) {
+  .sport-summary {
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .sport-summary-media {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 140px;
+  }
+
+  .sport-info {
+    gap: var(--s-2);
+    padding: var(--s-3) var(--s-4);
+  }
+
+  .sport-info > p {
+    font-size: var(--fs-sm);
+  }
+
+  .sport-actions {
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+
+  .sport-actions button {
+    flex: 1 1 auto;
+  }
+
+  /* The section title and its Add button stop fighting for one line. */
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--s-3);
+  }
+}
+
+@media (max-width: 520px) {
+  /* Keep the row. Collapsing to one column turned every facility and every
+     piece of gear into a banner, so managing a sport became a long scroll
+     through pictures. A smaller thumbnail keeps the list scannable. */
+  .item-card {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: var(--s-3);
+    padding: var(--s-3);
+  }
+
+  .card-image {
+    aspect-ratio: 1;
+  }
+
+  /* The out-of-service label has nowhere to go beside a short title. */
+  .card-title-row {
+    flex-wrap: wrap;
+    gap: var(--s-1);
+  }
+
+  .card-metrics {
+    gap: var(--s-1);
+  }
+
+  /* Full-width targets: these are the actions, not an afterthought. */
+  .card-actions {
+    justify-content: stretch;
+    gap: var(--s-2);
+  }
+
+  .card-actions button {
+    flex: 1;
+  }
+
+  .field-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.empty-line {
+  margin: 0;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
 }

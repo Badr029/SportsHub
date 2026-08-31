@@ -1,0 +1,494 @@
+.auth-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   Brand side
+   -------------------------------------------------------------------------- */
+
+.auth-brand-panel {
+  position: relative;
+  display: grid;
+  align-content: space-between;
+  gap: var(--s-9);
+  overflow: hidden;
+  border-right: 1px solid var(--hairline);
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(20, 184, 166, 0.26), transparent 60%),
+    radial-gradient(100% 80% at 90% 100%, rgba(37, 99, 235, 0.22), transparent 62%),
+    linear-gradient(160deg, #0d1f2c 0%, #070d16 68%);
+  padding: var(--s-8) clamp(var(--s-7), 5vw, var(--s-11));
+}
+
+/* Court-line motif, static and cheap: one gradient, no animation. */
+.auth-brand-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 13.9%, rgba(45, 212, 191, 0.13) 13.9% 14.05%, transparent 14.05% 85.95%, rgba(45, 212, 191, 0.13) 85.95% 86.1%, transparent 86.1%),
+    repeating-linear-gradient(112deg, transparent 0 130px, rgba(45, 212, 191, 0.08) 131px 132px, transparent 133px 262px);
+  mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+  pointer-events: none;
+}
+
+.auth-brand-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  justify-self: start;
+  min-height: 40px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-stretch: 118%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.auth-brand::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--teal-400);
+  box-shadow: 0 0 14px rgba(45, 212, 191, 0.8);
+  rotate: 45deg;
+}
+
+.brand-copy {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.brand-line {
+  margin: 0;
+  font-size: clamp(2.5rem, 1.4rem + 3.8vw, 4.25rem);
+  font-stretch: 122%;
+  font-weight: 900;
+  letter-spacing: -0.048em;
+  line-height: 0.94;
+  animation: brand-in var(--dur-4) var(--ease-out) both;
+}
+
+.brand-copy p {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  animation: brand-in var(--dur-4) var(--ease-out) 60ms both;
+}
+
+@keyframes brand-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+}
+
+.brand-points {
+  display: grid;
+  gap: var(--s-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 40ch;
+}
+
+.brand-points li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: var(--s-3);
+  align-items: start;
+}
+
+.point-mark {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 2px;
+  background: var(--teal-400);
+  rotate: 45deg;
+}
+
+.brand-points span:last-child {
+  display: grid;
+  gap: 2px;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.brand-points strong {
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+}
+
+/* --------------------------------------------------------------------------
+   Form side
+   -------------------------------------------------------------------------- */
+
+.auth-form-panel {
+  display: grid;
+  place-items: center;
+  background: var(--canvas);
+  padding: var(--s-8) clamp(var(--s-5), 4vw, var(--s-9));
+}
+
+.auth-form-inner {
+  display: grid;
+  gap: var(--s-5);
+  width: min(420px, 100%);
+}
+
+/* --- Mode switch ---------------------------------------------------------- */
+
+.mode-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  background: rgba(3, 8, 15, 0.6);
+  padding: 3px;
+  box-shadow: var(--edge-top);
+}
+
+/* One sliding pill instead of two swapping backgrounds — the movement shows
+   the two tabs are the same control in two positions. */
+.mode-indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  border-radius: var(--r-full);
+  background: linear-gradient(140deg, var(--teal-400), var(--teal-500));
+  box-shadow: 0 2px 12px rgba(20, 184, 166, 0.34);
+  transition: transform var(--dur-3) var(--ease-out);
+}
+
+.auth-shell[data-mode='register'] .mode-indicator {
+  transform: translateX(100%);
+}
+
+.mode-tab {
+  --btn-bg: transparent;
+  --btn-ink: var(--text-2);
+  --btn-edge: transparent;
+  --btn-glow: transparent;
+
+  position: relative;
+  z-index: 1;
+  min-height: 38px;
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  box-shadow: none;
+  transition: color var(--dur-2) var(--ease-out);
+}
+
+.mode-tab:active {
+  transform: none;
+}
+
+.mode-tab.is-active {
+  --btn-ink: var(--text-on-accent);
+  font-weight: 700;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mode-tab:hover:not(.is-active) {
+    --btn-ink: var(--text);
+    filter: none;
+  }
+}
+
+.auth-error {
+  animation: brand-in var(--dur-2) var(--ease-out) both;
+}
+
+/* --- Form stage ----------------------------------------------------------- */
+
+/* Both forms share one grid cell. The inactive one is hidden from the tab
+   order and the a11y tree, and slides out the side it came from. */
+.form-stage {
+  display: grid;
+  align-items: start;
+}
+
+.auth-form {
+  grid-area: 1 / 1;
+  display: grid;
+  gap: var(--s-4);
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out),
+    visibility 0s linear var(--dur-3);
+  visibility: hidden;
+  opacity: 0;
+}
+
+.auth-form.is-active {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s, 0s, 0s;
+}
+
+/* Spatial consistency: sign-in lives on the left of the switch, so it leaves
+   to the left; create-account leaves to the right. */
+.is-login:not(.is-active) {
+  transform: translate3d(-28px, 0, 0);
+}
+
+.is-register:not(.is-active) {
+  transform: translate3d(28px, 0, 0);
+}
+
+.field-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+.auth-form input {
+  min-height: 46px;
+}
+
+.password-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 46px;
+  overflow: hidden;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-xs);
+  background: rgba(3, 8, 15, 0.6);
+  transition: border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+}
+
+.password-field:focus-within {
+  border-color: var(--teal-400);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+}
+
+.password-field input {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.password-field input:focus {
+  box-shadow: none;
+}
+
+.toggle-password {
+  --btn-bg: transparent;
+  --btn-ink: var(--teal-300);
+  --btn-edge: transparent;
+  --btn-glow: transparent;
+
+  align-self: stretch;
+  min-width: 56px;
+  min-height: 0;
+  border-radius: 0;
+  border-left: 1px solid var(--hairline);
+  padding-inline: var(--s-3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.toggle-password:active {
+  transform: none;
+}
+
+/* --- Password rules (FR-AUTH-02) ------------------------------------------ */
+
+.pw-rules {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-2) var(--s-4);
+  list-style: none;
+  margin: calc(var(--s-2) * -1) 0 0;
+  padding: 0;
+}
+
+.pw-rules li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--text-3);
+  font-size: var(--fs-2xs);
+  transition: color var(--dur-2) var(--ease-out);
+}
+
+.pw-rules li:last-child {
+  grid-column: 1 / -1;
+}
+
+.pw-rules li.is-met {
+  color: var(--confirmed-ink);
+}
+
+.rule-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-full);
+  color: var(--text-on-accent);
+  transition:
+    background var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
+}
+
+.is-met .rule-mark {
+  border-color: var(--confirmed);
+  background: var(--confirmed);
+  color: #ecfdf5;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- Submit and switch ---------------------------------------------------- */
+
+.auth-submit {
+  min-height: 48px;
+  margin-top: var(--s-1);
+  font-size: var(--fs-base);
+}
+
+.spinner-inline {
+  width: 15px;
+  height: 15px;
+  border-width: 2px;
+  border-top-color: currentColor;
+}
+
+.switch-hint {
+  margin: 0;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+/* Inline in a sentence, so the target-size exception applies — but the hit
+   area is still padded out to a comfortable 24px. */
+.link-btn {
+  --btn-bg: transparent;
+  --btn-ink: var(--teal-300);
+  --btn-edge: transparent;
+  --btn-glow: transparent;
+
+  min-height: 24px;
+  padding: 2px 4px;
+  margin-inline: -4px;
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.link-btn:active {
+  transform: none;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  filter: none;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: one column, brand becomes a compact header
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+  }
+
+  .auth-brand-panel {
+    align-content: start;
+    gap: var(--s-5);
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline);
+    padding: var(--s-6) var(--s-6) var(--s-7);
+  }
+
+  .brand-copy {
+    max-width: none;
+  }
+
+  .brand-line {
+    font-size: clamp(2rem, 1.2rem + 4.4vw, 2.75rem);
+  }
+
+  .brand-line br {
+    display: none;
+  }
+
+  /* Three proof points is a lot of scroll before the form on a phone. */
+  .brand-points {
+    display: none;
+  }
+
+  .auth-form-panel {
+    padding: var(--s-7) var(--s-5) var(--s-9);
+  }
+}
+
+@media (max-width: 460px) {
+  .field-pair,
+  .pw-rules {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand-panel {
+    padding: var(--s-5) var(--s-5) var(--s-6);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion: cross-fade only, no lateral travel
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-form:not(.is-active) {
+    transform: none;
+  }
+
+  .brand-line,
+  .brand-copy p,
+  .auth-error {
+    animation: none;
+  }
+
+  .mode-indicator {
+    transition: none;
+  }
+}

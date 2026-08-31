@@ -1,20 +1,85 @@
 <header class="navbar">
+  <div class="navbar-inner">
     @if (authService.isAdmin()) {
-      <a class="brand" routerLink="/admin/bookings">SportHub Admin</a>
+      <a class="brand" routerLink="/admin/bookings">
+        SportHub
+        <span class="brand-tag">Admin</span>
+      </a>
     } @else {
       <a class="brand" routerLink="/sports">SportHub</a>
     }
-  <nav>
-    @if (!authService.isAdmin()) {
-      <a routerLink="/sports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Sports</a>
-      <a routerLink="/equipment" routerLinkActive="active">Equipment</a>
-      <a routerLink="/bookings" routerLinkActive="active">My Bookings</a>
-    }
 
-    @if (authService.isAdmin()) {
-      <a routerLink="/admin/bookings" routerLinkActive="active">Admin Bookings</a>
-      <a routerLink="/admin/sports" routerLinkActive="active">Sports Management</a>
-    }
-    <button type="button" class="logout-button" (click)="logout()">Logout</button>
-  </nav>
+    <nav class="nav-primary" aria-label="Main">
+      @if (!authService.isAdmin()) {
+        <a routerLink="/sports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Sports</a>
+        <a routerLink="/equipment" routerLinkActive="active">Equipment</a>
+        <a routerLink="/bookings" routerLinkActive="active">My Bookings</a>
+      } @else {
+        <a routerLink="/admin/bookings" routerLinkActive="active">Bookings</a>
+        <a routerLink="/admin/sports" routerLinkActive="active">Sports</a>
+      }
+    </nav>
+
+    <div class="nav-account">
+      @if (authService.currentUser(); as user) {
+        <span class="account-name" [title]="user.email">{{ user.name }}</span>
+      }
+      <button type="button" class="secondary logout-button" (click)="logout()">Log out</button>
+    </div>
+
+    <!-- Below the breakpoint the links and account move into a drawer, so the
+         bar itself stays one thumb-height row instead of wrapping to two. -->
+    <button
+      type="button"
+      class="menu-toggle"
+      [class.is-open]="menuOpen()"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="nav-drawer"
+      [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'"
+      (click)="toggleMenu()">
+      <span class="menu-bars" aria-hidden="true"></span>
+    </button>
+  </div>
 </header>
+
+@if (menuOpen()) {
+  <div class="nav-scrim" (click)="closeMenu()"></div>
+}
+
+<div id="nav-drawer" class="nav-drawer" [class.is-open]="menuOpen()" [attr.inert]="menuOpen() ? null : ''">
+  <nav class="drawer-links" aria-label="Main">
+    @if (!authService.isAdmin()) {
+      <a routerLink="/sports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="link-label">Sports</span>
+        <span class="link-note">Browse facilities and book a slot</span>
+      </a>
+      <a routerLink="/equipment" routerLinkActive="active">
+        <span class="link-label">Equipment</span>
+        <span class="link-note">Rent gear on its own</span>
+      </a>
+      <a routerLink="/bookings" routerLinkActive="active">
+        <span class="link-label">My Bookings</span>
+        <span class="link-note">Your reservations and rentals</span>
+      </a>
+    } @else {
+      <a routerLink="/admin/bookings" routerLinkActive="active">
+        <span class="link-label">Bookings</span>
+        <span class="link-note">Confirm, pick up and return</span>
+      </a>
+      <a routerLink="/admin/sports" routerLinkActive="active">
+        <span class="link-label">Sports</span>
+        <span class="link-note">Facilities and equipment</span>
+      </a>
+    }
+  </nav>
+
+  <div class="drawer-account">
+    @if (authService.currentUser(); as user) {
+      <div class="drawer-user">
+        <strong>{{ user.name }}</strong>
+        <span>{{ user.email }}</span>
+      </div>
+    }
+    <button type="button" class="secondary drawer-logout" (click)="logout()">Log out</button>
+  </div>
+</div>

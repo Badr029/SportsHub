@@ -1,99 +1,292 @@
-.page {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 30px 20px 52px;
-}
-
-.page-header {
-  margin-bottom: 22px;
-}
-
-.page-header h1 {
-  margin: 0 0 6px;
-  color: white;
-  font-size: 38px;
-}
-
-.page-header p {
-  margin: 0;
-  color: #dbeafe;
-}
-
 .sports-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  gap: var(--s-5);
 }
+
+/* --------------------------------------------------------------------------
+   Card
+   The whole card is one link: no separate button to aim at, and the hover
+   state belongs to the thing you are actually clicking.
+   -------------------------------------------------------------------------- */
 
 .sport-card {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: 420px;
+  position: relative;
   overflow: hidden;
-  border: 2px solid rgba(20, 184, 166, 0.68);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-  box-shadow: var(--shadow), 0 0 18px rgba(20, 184, 166, 0.14);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-md);
+  transition:
+    border-color var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out);
 }
 
-.sport-card img {
+.sport-card-hit {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.sport-card-hit:focus-visible {
+  outline: 2px solid var(--teal-400);
+  outline-offset: -3px;
+  border-radius: var(--r-md);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sport-card:hover {
+    border-color: var(--hairline-accent);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.sport-card:focus-within {
+  border-color: var(--hairline-accent);
+}
+
+/* --- Media ---------------------------------------------------------------- */
+
+.sport-card-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 11;
+  background: var(--surface-2);
+}
+
+.sport-card-media img,
+.sport-card-media .image-fallback {
   width: 100%;
-  aspect-ratio: 16 / 10.5;
+  height: 100%;
+  aspect-ratio: auto;
   object-fit: cover;
   display: block;
+  transition: transform var(--dur-4) var(--ease-out);
 }
 
-.sport-card h2,
-.sport-card p,
-.sport-card a {
-  margin-left: 18px;
-  margin-right: 18px;
+@media (hover: hover) and (pointer: fine) {
+  .sport-card:hover .sport-card-media img {
+    transform: scale(1.045);
+  }
+}
+
+.sport-card-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 13, 22, 0.97) 3%, rgba(7, 13, 22, 0.5) 32%, transparent 60%);
+  pointer-events: none;
+}
+
+.availability-pill {
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 1;
+  border: 1px solid rgba(110, 231, 183, 0.4);
+  border-radius: var(--r-full);
+  background: rgba(4, 35, 31, 0.82);
+  color: var(--confirmed-ink);
+  padding: 4px 10px;
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  backdrop-filter: blur(6px);
+}
+
+.availability-pill.is-none {
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(60, 12, 12, 0.82);
+  color: var(--cancelled-ink);
+}
+
+/* --- Body ----------------------------------------------------------------- */
+
+.sport-card-body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: start;
+  gap: var(--s-3);
+  margin-top: -60px;
+  padding: 0 var(--s-5) var(--s-4);
 }
 
 .sport-card h2 {
-  margin-top: 18px;
-  margin-bottom: 10px;
-  color: white;
-  font-size: clamp(25px, 2.5vw, 32px);
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.5rem, 1.1rem + 1.1vw, 2rem);
+  font-stretch: 116%;
+  font-weight: 800;
+  /* Large display type needs negative tracking; it reads loose as it grows. */
+  letter-spacing: -0.038em;
   line-height: 1;
   text-transform: uppercase;
-  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 14px rgba(2, 6, 23, 0.66);
 }
 
 .sport-card p {
-  min-height: 70px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sport-card-foot {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.from-price {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.from-price strong {
+  color: var(--teal-300);
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.from-price.is-muted {
+  color: var(--cancelled-ink);
+}
+
+.gear-count {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.gear-count::before {
+  content: '·';
+  margin-right: var(--s-3);
+}
+
+/* --- CTA ------------------------------------------------------------------ */
+
+.sport-card-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  border-top: 1px solid var(--hairline);
+  padding: var(--s-3) var(--s-5);
+  color: var(--teal-300);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+}
+
+.cta-arrow {
+  transition: transform var(--dur-2) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sport-card:hover .sport-card-cta {
+    background: var(--teal-wash);
+  }
+
+  .sport-card:hover .cta-arrow {
+    transform: translateX(4px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Feature card: the first sport leads
+   -------------------------------------------------------------------------- */
+
+.sport-card.is-feature {
+  grid-column: span 2;
+}
+
+.sport-card.is-feature .sport-card-media {
+  aspect-ratio: 16 / 8;
+}
+
+.sport-card.is-feature .sport-card-body {
+  margin-top: -76px;
+  padding-inline: var(--s-6);
+}
+
+.sport-card.is-feature h2 {
+  font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  letter-spacing: -0.045em;
+}
+
+.sport-card.is-feature p {
+  max-width: 54ch;
+  font-size: var(--fs-md);
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.sport-card.is-feature .sport-card-cta {
+  padding-inline: var(--s-6);
+}
+
+/* --------------------------------------------------------------------------
+   Skeleton
+   Matches the real card's shape, so nothing jumps when content lands.
+   -------------------------------------------------------------------------- */
+
+.is-skeleton {
+  --sk: linear-gradient(90deg, rgba(148, 163, 184, 0.07), rgba(148, 163, 184, 0.17), rgba(148, 163, 184, 0.07));
+  pointer-events: none;
+}
+
+.is-skeleton .sport-card-media {
+  background: var(--sk);
+  background-size: 200% 100%;
+  animation: sweep 1.5s linear infinite;
+}
+
+.is-skeleton .sport-card-media::after {
+  display: none;
+}
+
+.is-skeleton .sport-card-body {
   margin-top: 0;
-  color: #f1f5f9;
-  font-size: 17px;
-  line-height: 1.3;
+  padding: var(--s-5);
 }
 
-.sport-card a,
-.message button {
+.skeleton-line {
   display: block;
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #2563eb, #1d4ed8);
-  color: white;
-  padding: 13px 18px;
-  text-align: center;
-  text-decoration: none;
-  text-transform: uppercase;
-  font-weight: 900;
-  cursor: pointer;
+  height: 12px;
+  width: 62%;
+  border-radius: var(--r-full);
+  background: var(--sk);
+  background-size: 200% 100%;
+  animation: sweep 1.5s linear infinite;
 }
 
-.sport-card a {
-  margin-bottom: 18px;
+.skeleton-line.wide {
+  width: 88%;
+  height: 20px;
 }
 
-.message {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: rgba(17, 24, 39, 0.86);
-  color: var(--muted);
-  padding: 18px;
+@keyframes sweep {
+  to {
+    background-position: -200% 0;
+  }
 }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
 
 @media (max-width: 980px) {
   .sports-grid {
@@ -104,9 +297,81 @@
 @media (max-width: 640px) {
   .sports-grid {
     grid-template-columns: 1fr;
+    gap: var(--s-4);
   }
 
-  .sport-card {
-    min-height: 0;
+  .sport-card.is-feature {
+    grid-column: span 1;
+  }
+
+  .sport-card.is-feature .sport-card-media,
+  .sport-card .sport-card-media {
+    aspect-ratio: 16 / 10;
+  }
+
+  .sport-card.is-feature .sport-card-body {
+    margin-top: -60px;
+    padding-inline: var(--s-5);
+  }
+
+  .sport-card.is-feature .sport-card-cta {
+    padding-inline: var(--s-5);
+  }
+}
+
+/* A row, not a poster. The full-bleed card filled a phone screen, so only one
+   sport was visible at a time.
+
+   The grid goes on `.sport-card-hit`, not on the card: the link is the only
+   child of the article, and the media, body and call-to-action are its
+   children. Putting the columns on the card left them all in one 104px cell. */
+@media (max-width: 560px) {
+  .sports-grid {
+    grid-template-columns: 1fr;
+    gap: var(--s-3);
+  }
+
+  .sport-card-hit {
+    grid-template-rows: auto auto;
+    grid-template-columns: 108px minmax(0, 1fr);
+    grid-template-areas:
+      "media body"
+      "media cta";
+    align-items: start;
+  }
+
+  .sport-card .sport-card-media,
+  .sport-card.is-feature .sport-card-media {
+    grid-area: media;
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 116px;
+  }
+
+  /* The body rode up over the image, which only worked as a poster. */
+  .sport-card .sport-card-body,
+  .sport-card.is-feature .sport-card-body {
+    grid-area: body;
+    margin-top: 0;
+    gap: var(--s-1);
+    padding: var(--s-3) var(--s-4) var(--s-2);
+  }
+
+  .sport-card .sport-card-body h2,
+  .sport-card.is-feature .sport-card-body h2 {
+    font-size: var(--fs-md);
+  }
+
+  .sport-card .sport-card-cta,
+  .sport-card.is-feature .sport-card-cta {
+    grid-area: cta;
+    border-top: 0;
+    padding: 0 var(--s-4) var(--s-3);
+    font-size: var(--fs-xs);
+  }
+
+  .sport-card-foot {
+    gap: var(--s-2);
+    font-size: var(--fs-xs);
   }
 }

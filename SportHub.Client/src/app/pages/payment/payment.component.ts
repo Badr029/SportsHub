@@ -24,7 +24,6 @@ export class PaymentComponent implements OnInit {
   cardNumber = '';
   expiry = '';
   cvv = '';
-  billingZip = '';
 
   private paymentId = 0;
   private payKey: string | null = null;
@@ -105,8 +104,20 @@ export class PaymentComponent implements OnInit {
     this.cvv = this.cvv.replace(/\D/g, '').slice(0, 4);
   }
 
-  formatZip() {
-    this.billingZip = this.billingZip.replace(/\D/g, '').slice(0, 8);
+  // Demo affordance: fills the documented Visa test PAN so nobody is tempted
+  // to type a real card into a mock checkout (SRS FR-PAY-09).
+  fillTestCard() {
+    this.cardName = 'SPORTHUB DEMO';
+    this.cardNumber = '4242 4242 4242 4242';
+    this.expiry = this.futureExpiry();
+    this.cvv = '123';
+    this.clearMessages();
+  }
+
+  private futureExpiry() {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 3);
+    return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear().toString().slice(2)}`;
   }
 
   simulateFailure() {
@@ -211,10 +222,6 @@ export class PaymentComponent implements OnInit {
       return 'Enter a valid CVV.';
     }
 
-    if (this.billingZip && !/^\d{4,8}$/.test(this.billingZip)) {
-      return 'Enter a valid billing ZIP.';
-    }
-
     return '';
   }
 
@@ -245,7 +252,6 @@ export class PaymentComponent implements OnInit {
     this.cardNumber = '';
     this.expiry = '';
     this.cvv = '';
-    this.billingZip = '';
   }
 
   private getErrorMessage(error: any, fallback: string) {

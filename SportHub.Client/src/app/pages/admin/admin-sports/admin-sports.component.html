@@ -3,8 +3,8 @@
 <main class="page">
   <header class="page-header">
     <div>
-      <h1>Admin Sports</h1>
-      <p>Manage sports and open each sport to customize its facilities and equipment.</p>
+      <h1>Sports</h1>
+      <p>Manage the catalogue. Open a sport to edit its facilities and equipment.</p>
     </div>
 
     <div class="header-actions">
@@ -14,40 +14,55 @@
   </header>
 
   @if (loading()) {
-    <p>Loading sports...</p>
+    <section class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading sports…</p>
+    </section>
   } @else {
     @if (error()) {
-      <p class="error">{{ error() }}</p>
+      <p class="error page-feedback" role="alert">{{ error() }}</p>
     }
 
     @if (success()) {
-      <p class="success">{{ success() }}</p>
+      <p class="success page-feedback" role="status">{{ success() }}</p>
     }
 
-    <section class="sports-grid">
-      @for (sport of sports(); track sport.id) {
-        <article class="sport-card">
-          @if (sport.imageUrl) {
-            <img [src]="getImageUrl(sport.imageUrl)" [alt]="sport.name">
-          }
-
-          <div class="sport-body">
-            <h2>{{ sport.name }}</h2>
-            <p>{{ sport.description }}</p>
-
-            <div class="card-actions">
-              <a class="button-link action-admin" [routerLink]="['/admin/sports', sport.id]">Manage</a>
+    @if (sports().length === 0) {
+      <section class="state-block">
+        <h2>No sports yet</h2>
+        <p>Add the first sport to start building the catalogue of facilities and equipment.</p>
+        <button type="button" class="action-admin" (click)="openAddSport()">Add sport</button>
+      </section>
+    } @else {
+      <section class="sports-grid">
+        @for (sport of sports(); track sport.id) {
+          <article class="sport-card">
+            <div class="sport-card-media">
+              @if (sport.imageUrl) {
+                <img [src]="getImageUrl(sport.imageUrl)" [alt]="sport.name" loading="lazy" decoding="async">
+              } @else {
+                <div class="image-fallback">{{ sport.name }}</div>
+              }
             </div>
-          </div>
-        </article>
-      }
-    </section>
+
+            <div class="sport-body">
+              <h2>{{ sport.name }}</h2>
+              <p>{{ sport.description }}</p>
+
+              <div class="card-actions">
+                <a class="button-link action-admin" [routerLink]="['/admin/sports', sport.id]">Manage</a>
+              </div>
+            </div>
+          </article>
+        }
+      </section>
+    }
   }
 
   @if (editorOpen()) {
-    <section class="modal-backdrop">
+    <section class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="sport-editor-title">
       <form class="modal-panel editor-modal" (ngSubmit)="saveSport()">
-        <h2>{{ editingId ? 'Edit sport' : 'Add sport' }}</h2>
+        <h2 id="sport-editor-title">{{ editingId ? 'Edit sport' : 'Add sport' }}</h2>
 
         <label>
           Name
@@ -64,13 +79,13 @@
           @if (form.imageUrl) {
             <img class="image-preview" [src]="getImageUrl(form.imageUrl)" alt="Sport preview">
           } @else {
-            <span>Photo Upload</span>
+            <span>Add a photo</span>
           }
           <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
 
         <div class="form-actions">
-          <button type="submit" class="action-admin">{{ editingId ? 'Update sport' : 'Create sport' }}</button>
+          <button type="submit" class="action-admin">{{ editingId ? 'Save changes' : 'Create sport' }}</button>
           <button type="button" class="secondary" (click)="resetForm()">Cancel</button>
         </div>
       </form>

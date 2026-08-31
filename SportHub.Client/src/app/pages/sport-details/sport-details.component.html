@@ -1,264 +1,475 @@
 <app-navbar></app-navbar>
 
-<main class="page">
+<main class="page has-book-bar" [attr.data-flow]="layoutStep()">
   @if (loading()) {
-    <p>Loading sport...</p>
+    <section class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading sport…</p>
+    </section>
   } @else if (error() && !sport()) {
-    <section class="message">
+    <section class="state-block" role="alert">
+      <h2>We couldn't open this sport</h2>
       <p>{{ error() }}</p>
-      <a class="button-link back-button" routerLink="/sports">Back to sports</a>
+      <a class="button-link" routerLink="/sports">Back to sports</a>
     </section>
   } @else if (sport()) {
-    <a class="button-link back-button" routerLink="/sports">Back to sports</a>
-    <header class="sport-card">
-      <div class="sport-media">
+    <a class="button-link back-button" routerLink="/sports">
+      <span aria-hidden="true">&larr;</span>
+      Back to sports
+    </a>
+
+    <header class="sport-hero">
+      <div class="sport-hero-media">
         @if (sport()!.imageUrl) {
-          <img [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name">
+          <img [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name" decoding="async">
+        } @else {
+          <div class="image-fallback">{{ sport()!.name }}</div>
         }
       </div>
 
-      <div class="sport-info">
-        <p class="eyebrow">Sport details</p>
+      <div class="sport-hero-copy">
         <h1>{{ sport()!.name }}</h1>
         <p>{{ sport()!.description }}</p>
 
         <div class="sport-metrics">
-          <span>{{ sport()!.facilities.length }} facilities</span>
-          <span>{{ sport()!.equipment.length }} equipment items</span>
+          <span>{{ sport()!.facilities.length }} {{ sport()!.facilities.length === 1 ? 'facility' : 'facilities' }}</span>
+          <span>{{ sport()!.equipment.length }} equipment {{ sport()!.equipment.length === 1 ? 'item' : 'items' }}</span>
         </div>
       </div>
     </header>
 
+    <!-- On a narrow screen the flow replaces the page, so it needs its own way
+         back to the facility list. -->
+    <button type="button" class="flow-back back-button" (click)="leaveFlow()">
+      <span aria-hidden="true">&larr;</span>
+      Back to facilities
+    </button>
+
     <section class="content-grid">
-      <section>
+      <section class="catalogue">
         <div class="section-heading">
           <h2>Facilities</h2>
-          <p>Choose a court or field and check real-time availability.</p>
+          <p>Pick a court or field, then choose your 30-minute blocks in the panel.</p>
         </div>
 
         <div class="list">
           @for (facility of sport()!.facilities; track facility.id) {
-            <article class="item-card" [class.out-of-service]="facility.isOutOfService">
-              @if (facility.imageUrl) {
-                <img class="item-image" [src]="getImageUrl(facility.imageUrl)" [alt]="facility.name">
-              }
-              <h3>{{ facility.name }}</h3>
-              @if (facility.isOutOfService) {
-                <div class="service-label">OUT OF SERVICE</div>
-              }
-              <p class="price-line">{{ facility.pricePerHour }} EGP / hour</p>
+            <article
+              class="item-card"
+              [class.out-of-service]="facility.isOutOfService"
+              [class.is-selected]="facilityId === facility.id">
+              <div class="item-media">
+                @if (facility.imageUrl) {
+                  <img [src]="getImageUrl(facility.imageUrl)" [alt]="facility.name" loading="lazy" decoding="async">
+                } @else {
+                  <div class="image-fallback">{{ facility.name }}</div>
+                }
 
-              <div class="card-actions">
-                <button type="button" class="action-booking" [disabled]="facility.isOutOfService" (click)="selectFacilityBooking(facility.id)">
-                  Book facility
-                </button>
+                @if (facility.isOutOfService) {
+                  <span class="service-label">Out of service</span>
+                }
+              </div>
 
-                <button type="button" class="secondary action-package" [disabled]="facility.isOutOfService" (click)="startPackageWithFacility(facility.id)">
-                  Start package
-                </button>
+              <div class="item-body">
+                <h3>{{ facility.name }}</h3>
+                <p class="price-line">
+                  <strong>{{ facility.pricePerHour }}</strong> EGP <span>/ hour</span>
+                </p>
+
+                <div class="card-actions">
+                  <button type="button" class="action-booking" [disabled]="facility.isOutOfService" (click)="selectFacilityBooking(facility.id)">
+                    Book facility
+                  </button>
+
+                  <button type="button" class="action-package" [disabled]="facility.isOutOfService" (click)="startPackageWithFacility(facility.id)">
+                    Start package
+                  </button>
+                </div>
               </div>
             </article>
           }
         </div>
 
+        <!-- Gear only appears once the package has a facility and a time:
+             availability and price both depend on the booked slot range. -->
         @if (bookingType === 3 && facilityId) {
-          <div class="section-heading">
-            <h2>Equipment</h2>
-            <p>Add equipment to the selected facility package.</p>
-            <button type="button" class="danger" (click)="cancelPackage()">Cancel package</button>
-          </div>
-
-          <div class="list">
-            @for (equipment of sport()!.equipment; track equipment.id) {
-              <article class="item-card">
-                @if (equipment.imageUrl) {
-                  <img class="item-image" [src]="getImageUrl(equipment.imageUrl)" [alt]="equipment.name">
-                }
-                <h3>{{ equipment.name }}</h3>
-                <div class="metric-row">
-                  <span>Total stock: {{ equipment.quantity }}</span>
-                  @if (getEquipmentAvailability(equipment.id); as availability) {
-                    <span>Available: {{ availability.availableQuantity }} / {{ availability.totalQuantity }}</span>
+          <section class="gear-section" id="package-gear">
+            <div class="section-heading with-action">
+              <div>
+                <h2>Add your gear</h2>
+                <p>
+                  @if (canChooseGear()) {
+                    Priced per hour for the {{ selectedDurationHours() }}-hour booking, and picked up with the {{ getFacilityName() }}.
+                  } @else {
+                    Pick your time first — stock is checked against the exact slots you book.
                   }
-                </div>
-                @if (getEquipmentAvailability(equipment.id); as availability) {
-                  <p class="availability-text">
-                    Available for selected package time:
-                    {{ availability.availableQuantity }} / {{ availability.totalQuantity }}
-                  </p>
-                }
-                <p class="price-line">{{ equipment.dailyRentalPrice }} EGP / day</p>
-                <p class="price-line package-price">{{ equipment.packageHourlyPrice }} EGP / package hour</p>
+                </p>
+              </div>
+              <button type="button" class="danger" (click)="cancelPackage()">Cancel package</button>
+            </div>
 
-                <div class="card-actions">
-                  <button type="button" class="secondary action-package" (click)="addEquipmentToPackage(equipment.id)">
-                    Add to package
-                  </button>
-                </div>
-              </article>
+            @if (!canChooseGear()) {
+              <p class="gear-locked">
+                <span class="gear-locked-mark" aria-hidden="true">2</span>
+                Choose a day and time slots in the panel to unlock gear.
+              </p>
             }
-          </div>
-        }
-      </section>
 
-      <aside class="booking-panel">
-        <h2>Create booking</h2>
-
-        <p class="panel-hint">
-          Pick from the cards, then review and complete the booking here.
-        </p>
-
-        <form (ngSubmit)="createBooking()">
-          <label>
-            Booking type
-            <select name="bookingType" [(ngModel)]="bookingType">
-              <option [ngValue]="1">Facility</option>
-              <option [ngValue]="3">Package</option>
-            </select>
-          </label>
-
-          @if (bookingType === 1 || bookingType === 3) {
-            <label>
-              Facility
-              <select name="facilityId" [(ngModel)]="facilityId" (ngModelChange)="loadFacilityAvailability()">
-                <option [ngValue]="null">Select facility</option>
-                @for (facility of sport()!.facilities; track facility.id) {
-                  <option [ngValue]="facility.id" [disabled]="facility.isOutOfService">
-                    {{ facility.name }} - {{ facility.isOutOfService ? 'Out of service' : facility.pricePerHour + ' / hour' }}
-                  </option>
-                }
-              </select>
-            </label>
-          }
-
-          @if (bookingType === 3 && facilityId) {
-            <section class="selected-equipment">
-              <div class="package-header">
-                <h3>Package equipment</h3>
-                <button type="button" class="danger" (click)="cancelPackage()">Cancel package</button>
-              </div>
-
-              <div class="equipment-picker">
-                <label>
-                  Add equipment
-                  <select name="equipmentToAddId" [(ngModel)]="equipmentToAddId">
-                    <option [ngValue]="null">Select equipment</option>
-                    @for (equipment of sport()!.equipment; track equipment.id) {
-                      <option [ngValue]="equipment.id">
-                        {{ equipment.name }} - available {{ equipment.quantity }}
-                      </option>
+            <div class="list gear-list" [class.is-locked]="!canChooseGear()">
+              @for (equipment of sport()!.equipment; track equipment.id; let i = $index) {
+                <article
+                  class="item-card gear-card"
+                  [style.--i]="i"
+                  [class.is-selected]="isEquipmentSelected(equipment.id)"
+                  [class.is-soldout]="isEquipmentSoldOut(equipment.id)">
+                  <div class="item-media">
+                    @if (equipment.imageUrl) {
+                      <img [src]="getImageUrl(equipment.imageUrl)" [alt]="equipment.name" loading="lazy" decoding="async">
+                    } @else {
+                      <div class="image-fallback">{{ equipment.name }}</div>
                     }
-                  </select>
-                </label>
 
-                <button type="button" class="secondary action-package" (click)="addEquipmentFromPanel()">
-                  Add
-                </button>
-              </div>
-              @if (selectedEquipmentItems.length === 0) {
-                <p>No equipment selected yet.</p>
-              } @else {
-                @for (item of selectedEquipmentItems; track item.equipmentId) {
-                  <div class="selected-equipment-row">
-                    <div>
-                      <span>{{ getEquipmentName(item.equipmentId) }}</span>
+                    @if (isEquipmentSelected(equipment.id)) {
+                      <span class="selected-tick" aria-hidden="true">
+                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M3 8.5 6.5 12 13 4.5" />
+                        </svg>
+                      </span>
+                    }
 
-                      @if (getEquipmentAvailability(item.equipmentId); as availability) {
-                        <small>
-                          Available:
-                          {{ availability.availableQuantity }} / {{ availability.totalQuantity }}
-                        </small>
+                    @if (isEquipmentSoldOut(equipment.id)) {
+                      <span class="soldout-tag">None free for this time</span>
+                    }
+                  </div>
+
+                  <div class="item-body">
+                    <h3>{{ equipment.name }}</h3>
+
+                    <div class="stock">
+                      @if (getEquipmentAvailability(equipment.id); as availability) {
+                        <div class="stock-meter" role="img"
+                             [attr.aria-label]="availability.availableQuantity + ' of ' + availability.totalQuantity + ' available, ' + availability.reservedQuantity + ' reserved'">
+                          <span class="stock-fill" [style.transform]="'scaleX(' + (stockPercent(equipment.id) / 100) + ')'"></span>
+                        </div>
+                        <p class="stock-line">
+                          <strong>{{ availability.availableQuantity }}</strong> of {{ availability.totalQuantity }} free
+                          @if (availability.reservedQuantity > 0) {
+                            <span>· {{ availability.reservedQuantity }} reserved</span>
+                          }
+                        </p>
+                      } @else {
+                        <div class="stock-meter is-unknown" aria-hidden="true"><span class="stock-fill"></span></div>
+                        <p class="stock-line is-muted">{{ equipment.quantity }} in stock</p>
                       }
                     </div>
 
-                    <input
-                      type="number"
-                      min="1"
-                      [ngModel]="item.quantity"
-                      (ngModelChange)="updateEquipmentQuantity(item.equipmentId, $event)"
-                      [name]="'quantity-' + item.equipmentId">
+                    <div class="card-foot">
+                      <p class="price-line">
+                        <strong>{{ equipment.packageHourlyPrice }}</strong> EGP <span>/ hour</span>
+                      </p>
 
-                    <button type="button" class="danger" (click)="removeEquipmentItem(item.equipmentId)">
-                      Remove
-                    </button>
+                      @if (isEquipmentSelected(equipment.id)) {
+                        <app-quantity-stepper
+                          class="card-stepper"
+                          [quantity]="selectedQtyFor(equipment.id)"
+                          [max]="availableFor(equipment.id)"
+                          [label]="equipment.name"
+                          (quantityChange)="updateEquipmentQuantity(equipment.id, $event)"
+                          (remove)="removeEquipmentItem(equipment.id)" />
+                      } @else {
+                        <button
+                          type="button"
+                          class="add-btn"
+                          [disabled]="!canChooseGear() || isEquipmentSoldOut(equipment.id)"
+                          (click)="addEquipmentToPackage(equipment.id)">
+                          Add
+                        </button>
+                      }
+                    </div>
+
+                    @if (isEquipmentSelected(equipment.id) && selectedDurationHours() > 0) {
+                      <p class="gear-line-total">
+                        {{ gearLineTotal(equipment.id) }} EGP for {{ selectedDurationHours() }}h
+                      </p>
+                    }
                   </div>
-                }
+                </article>
               }
-            </section>
-          }
-          @if (bookingType === 1 || bookingType === 3) {
-            @if (bookingType === 3) {
-              <div class="date-section-label">
-                <span>Facility time</span>
-                <small>When the field or court is reserved.</small>
-              </div>
-            }
-            <label>
-              Booking day
-              <input type="date" name="bookingDate" [min]="todayDate" [(ngModel)]="bookingDate" (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">
-            </label>
+            </div>
+          </section>
+        }
+      </section>
 
-            <section class="slot-section">
-              <strong>Choose Time Slot</strong>
-              @if (availabilitySlots.length === 0) {
-                <p class="panel-hint">Select a facility and day to see available 30-minute blocks.</p>
-              } @else {
-                <div class="slot-grid">
-                @for (slot of availabilitySlots; track slot.time) {
-                  <button
-                    type="button"
-                    class="slot-button"
-                    [class.selected]="isSlotSelected(slot)"
-                    [class.occupied]="!slot.available"
-                    [class.blocked]="isSlotBlockedBySelection(slot)"
-                    [disabled]="!slot.available || isSlotBlockedBySelection(slot)"
-                    (click)="selectTimeSlot(slot)">
-                    <span>{{ slot.label }}</span>
-                    <small>
-                      {{ !slot.available ? 'Occupied' : isSlotSelected(slot) ? 'Selected' : 'Free' }}
-                    </small>
+      <aside class="booking-panel" aria-label="Create booking">
+        <div class="panel-head">
+          <h2>Create booking</h2>
+          <span class="panel-type" [class.is-package]="bookingType === 3">{{ bookingTypeLabel() }}</span>
+        </div>
+
+        <form id="booking-form" (ngSubmit)="createBooking()">
+          <!-- Step 1 — what you are booking -->
+          <section class="step" [class.is-open]="isStepOpen(1)" [class.is-done]="hasFacility()">
+            <button type="button" class="step-head" [attr.aria-expanded]="isStepOpen(1)" (click)="toggleStep(1)">
+              <span class="step-marker" aria-hidden="true">
+                @if (hasFacility() && !isStepOpen(1)) { &#10003; } @else { 1 }
+              </span>
+              <span class="step-label">
+                <strong>What are you booking?</strong>
+                <small>{{ facilitySummary() }}</small>
+              </span>
+              <span class="step-chevron" aria-hidden="true"></span>
+            </button>
+
+            <div class="step-body">
+              <div class="step-content">
+              <label>
+                Booking type
+                <select name="bookingType" [(ngModel)]="bookingType">
+                  <option [ngValue]="1">Facility only</option>
+                  <option [ngValue]="3">Package (facility + gear)</option>
+                </select>
+              </label>
+
+              <label>
+                Facility
+                <select name="facilityId" [(ngModel)]="facilityId" (ngModelChange)="loadFacilityAvailability()">
+                  <option [ngValue]="null">Select facility</option>
+                  @for (facility of sport()!.facilities; track facility.id) {
+                    <option [ngValue]="facility.id" [disabled]="facility.isOutOfService">
+                      {{ facility.name }} &mdash; {{ facility.isOutOfService ? 'out of service' : facility.pricePerHour + ' EGP / hour' }}
+                    </option>
+                  }
+                </select>
+              </label>
+
+              @if (hasFacility()) {
+                <button type="button" class="step-next action-booking" (click)="toggleStep(2)">
+                  Choose a time
+                </button>
+              }
+              </div>
+            </div>
+          </section>
+
+          <!-- Step 2 — when. The slot grid below is unchanged: pick the first
+               block, then the last block you want. -->
+          <section class="step" [class.is-open]="isStepOpen(2)" [class.is-done]="hasTime()" [class.is-locked]="!canOpenStep(2)">
+            <button
+              type="button"
+              class="step-head"
+              [attr.aria-expanded]="isStepOpen(2)"
+              [disabled]="!canOpenStep(2)"
+              (click)="toggleStep(2)">
+              <span class="step-marker" aria-hidden="true">
+                @if (hasTime() && !isStepOpen(2)) { &#10003; } @else { 2 }
+              </span>
+              <span class="step-label">
+                <strong>When?</strong>
+                <small>{{ timeSummary() }}</small>
+              </span>
+              <span class="step-chevron" aria-hidden="true"></span>
+            </button>
+
+            <div class="step-body">
+              <div class="step-content">
+              <label>
+                Booking day
+                <input
+                  type="date"
+                  name="bookingDate"
+                  [min]="todayDate"
+                  [(ngModel)]="bookingDate"
+                  (ngModelChange)="loadFacilityAvailability(); loadEquipmentAvailability()">
+              </label>
+
+              <section class="slot-section">
+                <div class="slot-head">
+                  <strong>Choose time slot</strong>
+                  @if (availabilitySlots.length > 0) {
+                    <span class="slot-count">{{ freeSlotCount() }} free</span>
+                  }
+                </div>
+
+                @if (!facilityId || !bookingDate) {
+                  <p class="slot-hint">Select a facility and a day to see the 30-minute blocks.</p>
+                } @else if (availabilitySlots.length === 0) {
+                  <p class="slot-hint">No blocks available for this day.</p>
+                } @else {
+                  <div class="slot-grid" role="group" aria-label="30-minute time slots">
+                    @for (slot of availabilitySlots; track slot.time) {
+                      <button
+                        type="button"
+                        class="slot-button"
+                        [class.selected]="isSlotSelected(slot)"
+                        [class.range-start]="isSlotRangeStart(slot)"
+                        [class.range-end]="isSlotRangeEnd(slot)"
+                        [class.past]="isSlotPast(slot)"
+                        [class.occupied]="!slot.available && !isSlotPast(slot)"
+                        [class.blocked]="isSlotBlockedBySelection(slot)"
+                        [attr.aria-pressed]="isSlotSelected(slot)"
+                        [disabled]="!slot.available || isSlotBlockedBySelection(slot)"
+                        (click)="selectTimeSlot(slot)">
+                        <span class="slot-time">{{ slot.label }}</span>
+                        <small class="slot-state">{{ slotStatusLabel(slot) }}</small>
+                      </button>
+                    }
+                  </div>
+
+                  <p class="slot-legend">
+                    <span class="legend-item legend-free">Free</span>
+                    <span class="legend-item legend-selected">Selected</span>
+                    <span class="legend-item legend-occupied">Booked</span>
+                    <span class="legend-item legend-past">Past</span>
+                  </p>
+
+                  @if (!hasTime()) {
+                    <p class="slot-hint">Click your first block, then the last block you want. The range must stay free from end to end.</p>
+                  }
+                }
+              </section>
+
+                @if (hasTime() && bookingType === 3) {
+                  <button type="button" class="step-next action-package" (click)="toggleStep(3)">
+                    Add gear to the package
                   </button>
                 }
-                </div>
-              }
-            </section>
+              </div>
+            </div>
+          </section>
 
-            <section class="booking-summary">
-              <strong>Booking Summary</strong>
-              @if (startTime && selectedSlotCount > 0) {
-                <p>{{ selectedStartTimeLabel() }} to {{ selectedEndTimeLabel() }}</p>
-                <p>Duration: {{ selectedDurationHours() }} hour{{ selectedDurationHours() === 1 ? '' : 's' }}</p>
-              } @else {
-                <p>Select the first block, then click the last block you want to reserve.</p>
-              }
+          <!-- Step 3 — gear. Package mode only (FR-PKG-02: one facility plus at
+               least one equipment item). -->
+          @if (bookingType === 3) {
+            <section class="step" [class.is-open]="isStepOpen(3)" [class.is-done]="selectedEquipmentItems.length > 0" [class.is-locked]="!canChooseGear()">
+              <button
+                type="button"
+                class="step-head"
+                [attr.aria-expanded]="isStepOpen(3)"
+                [disabled]="!canChooseGear()"
+                (click)="toggleStep(3)">
+                <span class="step-marker" aria-hidden="true">
+                  @if (selectedEquipmentItems.length > 0 && !isStepOpen(3)) { &#10003; } @else { 3 }
+                </span>
+                <span class="step-label">
+                  <strong>Your gear</strong>
+                  <small>{{ gearSummary() }}</small>
+                </span>
+                <span class="step-chevron" aria-hidden="true"></span>
+              </button>
+
+              <div class="step-body">
+                <div class="step-content">
+                  @if (selectedEquipmentItems.length === 0) {
+                    <p class="package-empty">Pick gear from the catalogue on the left. A package needs at least one item.</p>
+                  } @else {
+                    <ul class="gear-lines">
+                      @for (item of selectedEquipmentItems; track item.equipmentId) {
+                        <li class="gear-line">
+                          <div class="gear-line-name">
+                            <span>{{ getEquipmentName(item.equipmentId) }}</span>
+                            @if (getEquipmentAvailability(item.equipmentId); as availability) {
+                              <small>{{ availability.availableQuantity }} of {{ availability.totalQuantity }} free</small>
+                            }
+                          </div>
+
+                          <app-quantity-stepper
+                            [quantity]="item.quantity"
+                            [max]="availableFor(item.equipmentId)"
+                            [label]="getEquipmentName(item.equipmentId)"
+                            (quantityChange)="updateEquipmentQuantity(item.equipmentId, $event)"
+                            (remove)="removeEquipmentItem(item.equipmentId)" />
+
+                          <span class="gear-line-cost">{{ gearLineTotal(item.equipmentId) }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              </div>
             </section>
           }
 
-
-          @if (bookingType === 3) {
-            <div class="date-section-label equipment-label">
-              <span>Equipment rental</span>
-              <small>Equipment follows the facility time in package bookings.</small>
-            </div>
+          <!-- Review is not a step you open; it appears when there is
+               something to review. -->
+          @if (hasTime()) {
+            <section class="review" aria-live="polite">
+              <div class="review-row">
+                <span>Duration</span>
+                <strong>{{ selectedDurationHours() }} hour{{ selectedDurationHours() === 1 ? '' : 's' }}</strong>
+              </div>
+              @if (bookingType === 3 && selectedEquipmentItems.length > 0) {
+                <div class="review-row">
+                  <span>Equipment</span>
+                  <strong>{{ selectedEquipmentItems.length }} item{{ selectedEquipmentItems.length === 1 ? '' : 's' }}</strong>
+                </div>
+              }
+              <div class="review-row review-total">
+                <span>Estimated total</span>
+                <strong>{{ estimatedTotal() }} EGP</strong>
+              </div>
+            </section>
           }
 
           @if (error()) {
-            <p class="error">{{ error() }}</p>
+            <p class="error" role="alert">{{ error() }}</p>
           }
 
           @if (success()) {
-            <p class="success">{{ success() }}</p>
+            <p class="success" role="status">{{ success() }}</p>
           }
 
-          <button type="submit" class="action-booking">Create booking</button>
+          <button type="submit" class="action-booking submit-booking" [disabled]="!hasTime()">
+            {{ hasTime() ? 'Review booking' : 'Pick a facility and time' }}
+          </button>
+
         </form>
       </aside>
     </section>
 
+    <!-- Outside the panel on purpose: the bar has to stay reachable while the
+         flow is showing the gear step, where the panel itself is hidden. It is
+         tied back to the form by id, so Review still submits it. -->
+    @if (layoutStep() !== 'review') {
+      <div class="book-bar" [class.is-ready]="hasTime()">
+        <div class="book-bar-summary">
+          @if (hasTime()) {
+            <strong>{{ estimatedTotal() }} <small>EGP</small></strong>
+            <span>{{ timeSummary() }}</span>
+          } @else if (hasFacility()) {
+            <strong>Pick a time</strong>
+            <span>Tap a block, then the last one you want</span>
+          } @else {
+            <strong>Pick a facility</strong>
+            <span>Then choose your time</span>
+          }
+        </div>
+
+        @if (layoutStep() === 'gear') {
+          <button type="button" class="secondary" (click)="backToConfigure()">Back</button>
+          <button type="submit" form="booking-form" class="action-booking" [disabled]="!canReview()">Review</button>
+        } @else if (bookingType === 3 && selectedEquipmentItems.length === 0) {
+          <!-- A package is priced against the booked slots, so gear comes after
+               the time and before the review. -->
+          <button type="button" class="action-package" [disabled]="!canChooseGear()" (click)="goToGear()">
+            Choose gear
+          </button>
+        } @else {
+          <button type="submit" form="booking-form" class="action-booking" [disabled]="!canReview()">Review</button>
+        }
+      </div>
+    }
+
+    <!-- One block, two presentations: a dialog on a wide screen, the review page
+         of the flow on a narrow one. -->
     @if (confirmBookingOpen()) {
-      <section class="modal-backdrop">
+      <section
+        class="modal-backdrop"
+        [class.is-page]="compact()"
+        [attr.role]="compact() ? null : 'dialog'"
+        [attr.aria-modal]="compact() ? null : true"
+        aria-labelledby="confirm-booking-title">
         <div class="modal-panel booking-confirmation">
-          <h2>Confirm booking</h2>
+          <h2 id="confirm-booking-title">{{ compact() ? 'Review your booking' : 'Confirm booking' }}</h2>
 
           <div class="confirmation-list">
             <div>
@@ -266,33 +477,31 @@
               <strong>{{ bookingTypeLabel() }}</strong>
             </div>
 
-            @if (bookingType === 1 || bookingType === 3) {
-              <div>
-                <span>Facility</span>
-                <strong>{{ getFacilityName() }}</strong>
-              </div>
+            <div>
+              <span>Facility</span>
+              <strong>{{ getFacilityName() }}</strong>
+            </div>
 
-              <div>
-                <span>Date</span>
-                <strong>{{ bookingDate }}</strong>
-              </div>
+            <div>
+              <span>Date</span>
+              <strong>{{ bookingDate }}</strong>
+            </div>
 
-              <div>
-                <span>Time</span>
-                <strong>{{ selectedStartTimeLabel() }} to {{ selectedEndTimeLabel() }}</strong>
-              </div>
+            <div>
+              <span>Time</span>
+              <strong>{{ selectedStartTimeLabel() }} – {{ selectedEndTimeLabel() }}</strong>
+            </div>
 
-              <div>
-                <span>Duration</span>
-                <strong>{{ selectedDurationHours() }} hour{{ selectedDurationHours() === 1 ? '' : 's' }}</strong>
-              </div>
-            }
+            <div>
+              <span>Duration</span>
+              <strong>{{ selectedDurationHours() }} hour{{ selectedDurationHours() === 1 ? '' : 's' }}</strong>
+            </div>
 
             @if (bookingType === 3) {
               <div class="confirmation-equipment">
                 <span>Equipment</span>
                 @for (item of selectedEquipmentDetails(); track item.equipmentId) {
-                  <strong>{{ item.name }} x {{ item.quantity }}</strong>
+                  <strong>{{ item.name }} &times; {{ item.quantity }}</strong>
                 }
               </div>
             }
@@ -311,13 +520,13 @@
             </label>
             <label [class.selected]="paymentMethod === 'Online'">
               <input type="radio" name="paymentMethod" value="Online" [(ngModel)]="paymentMethod">
-              <span><strong>Pay online</strong><small>Continue to secure mock checkout.</small></span>
+              <span><strong>Pay online</strong><small>Continue to the demo checkout.</small></span>
             </label>
           </fieldset>
 
           <div class="form-actions">
             <button type="button" class="action-booking" (click)="confirmCreateBooking()">Confirm booking</button>
-            <button type="button" class="secondary" (click)="closeBookingConfirmation()">Cancel</button>
+            <button type="button" class="secondary" (click)="closeBookingConfirmation()">Back</button>
           </div>
         </div>
       </section>

@@ -1,0 +1,271 @@
+<main class="auth-shell" [attr.data-mode]="mode()">
+  <!-- Brand side. Content cross-fades with the mode so the two states read as
+       one place, not two pages. -->
+  <aside class="auth-brand-panel">
+    <a class="auth-brand" routerLink="/">SportHub</a>
+
+    <div class="brand-copy">
+      @if (mode() === 'login') {
+        <h1 class="brand-line">Your court <br>is waiting.</h1>
+        <p>Pick up where you left off — your bookings, rentals and packages are all here.</p>
+      } @else {
+        <h1 class="brand-line">Book your <br>game faster.</h1>
+        <p>One account for facility bookings, equipment rentals and combined packages.</p>
+      }
+    </div>
+
+    <ul class="brand-points">
+      <li>
+        <span class="point-mark" aria-hidden="true"></span>
+        <span><strong>30-minute blocks</strong>Reserve exactly the time you need, up to six hours.</span>
+      </li>
+      <li>
+        <span class="point-mark" aria-hidden="true"></span>
+        <span><strong>Live availability</strong>Stock and slots are checked against real bookings.</span>
+      </li>
+      <li>
+        <span class="point-mark" aria-hidden="true"></span>
+        <span><strong>One price, up front</strong>Calculated by SportHub, never guessed at the counter.</span>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Form side -->
+  <section class="auth-form-panel">
+    <div class="auth-form-inner">
+      <div class="mode-switch" role="tablist" aria-label="Authentication mode">
+        <span class="mode-indicator" aria-hidden="true"></span>
+        <button
+          type="button"
+          role="tab"
+          class="mode-tab"
+          [class.is-active]="mode() === 'login'"
+          [attr.aria-selected]="mode() === 'login'"
+          (click)="switchTo('login')">Sign in</button>
+        <button
+          type="button"
+          role="tab"
+          class="mode-tab"
+          [class.is-active]="mode() === 'register'"
+          [attr.aria-selected]="mode() === 'register'"
+          (click)="switchTo('register')">Create account</button>
+      </div>
+
+      @if (error()) {
+        <p class="error auth-error" role="alert">{{ error() }}</p>
+      }
+
+      <!-- Both forms stay mounted so the swap can animate in and out. The
+           inactive one is visibility:hidden, which also removes it from the
+           tab order and the accessibility tree. -->
+      <div class="form-stage">
+        <form
+          class="auth-form is-login"
+          [class.is-active]="mode() === 'login'"
+          [attr.aria-hidden]="mode() !== 'login'"
+          (ngSubmit)="login()"
+          novalidate>
+          <label>
+            Email
+            <input
+              type="email"
+              name="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              [attr.tabindex]="mode() === 'login' ? null : -1"
+              [attr.aria-invalid]="fieldError('email') ? 'true' : null"
+              [(ngModel)]="email"
+              (ngModelChange)="clearFieldError('email')">
+            @if (mode() === 'login' && fieldError('email'); as message) {
+              <span class="field-error" role="alert">{{ message }}</span>
+            }
+          </label>
+
+          <label>
+            Password
+            <span class="password-field">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                name="password"
+                autocomplete="current-password"
+                [attr.tabindex]="mode() === 'login' ? null : -1"
+                [attr.aria-invalid]="fieldError('password') ? 'true' : null"
+                [(ngModel)]="password"
+                (ngModelChange)="clearFieldError('password')">
+              <button
+                type="button"
+                class="toggle-password"
+                [attr.tabindex]="mode() === 'login' ? null : -1"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                (click)="showPassword = !showPassword">
+                {{ showPassword ? 'Hide' : 'Show' }}
+              </button>
+            </span>
+            @if (mode() === 'login' && fieldError('password'); as message) {
+              <span class="field-error" role="alert">{{ message }}</span>
+            }
+          </label>
+
+          <button
+            type="submit"
+            class="action-auth auth-submit"
+            [attr.tabindex]="mode() === 'login' ? null : -1"
+            [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner spinner-inline" aria-hidden="true"></span>
+              Signing in…
+            } @else {
+              Sign in
+            }
+          </button>
+
+          <p class="switch-hint">
+            New to SportHub?
+            <button type="button" class="link-btn" [attr.tabindex]="mode() === 'login' ? null : -1" (click)="switchTo('register')">Create an account</button>
+          </p>
+        </form>
+
+        <form
+          class="auth-form is-register"
+          [class.is-active]="mode() === 'register'"
+          [attr.aria-hidden]="mode() !== 'register'"
+          (ngSubmit)="register()"
+          novalidate>
+          <div class="field-pair">
+            <label>
+              Name
+              <input
+                type="text"
+                name="name"
+                autocomplete="name"
+                [attr.tabindex]="mode() === 'register' ? null : -1"
+                [attr.aria-invalid]="fieldError('name') ? 'true' : null"
+                [(ngModel)]="name"
+                (ngModelChange)="clearFieldError('name')">
+              @if (mode() === 'register' && fieldError('name'); as message) {
+                <span class="field-error" role="alert">{{ message }}</span>
+              }
+            </label>
+
+            <label>
+              Phone number
+              <input
+                type="tel"
+                name="phoneNumber"
+                autocomplete="tel"
+                placeholder="01012345678"
+                [attr.tabindex]="mode() === 'register' ? null : -1"
+                [attr.aria-invalid]="fieldError('phoneNumber') ? 'true' : null"
+                [(ngModel)]="phoneNumber"
+                (ngModelChange)="clearFieldError('phoneNumber')">
+              @if (mode() === 'register' && fieldError('phoneNumber'); as message) {
+                <span class="field-error" role="alert">{{ message }}</span>
+              }
+            </label>
+          </div>
+
+          <label>
+            Email
+            <input
+              type="email"
+              name="regEmail"
+              autocomplete="email"
+              placeholder="you@example.com"
+              [attr.tabindex]="mode() === 'register' ? null : -1"
+              [attr.aria-invalid]="fieldError('email') ? 'true' : null"
+              [(ngModel)]="regEmail"
+              (ngModelChange)="clearFieldError('email')">
+            @if (mode() === 'register' && fieldError('email'); as message) {
+              <span class="field-error" role="alert">{{ message }}</span>
+            }
+          </label>
+
+          <label>
+            Password
+            <span class="password-field">
+              <input
+                [type]="showRegPassword ? 'text' : 'password'"
+                name="regPassword"
+                autocomplete="new-password"
+                [attr.tabindex]="mode() === 'register' ? null : -1"
+                [attr.aria-invalid]="fieldError('password') ? 'true' : null"
+                [(ngModel)]="regPassword"
+                (ngModelChange)="clearFieldError('password')">
+              <button
+                type="button"
+                class="toggle-password"
+                [attr.tabindex]="mode() === 'register' ? null : -1"
+                [attr.aria-label]="showRegPassword ? 'Hide password' : 'Show password'"
+                (click)="showRegPassword = !showRegPassword">
+                {{ showRegPassword ? 'Hide' : 'Show' }}
+              </button>
+            </span>
+            @if (mode() === 'register' && fieldError('password'); as message) {
+              <span class="field-error" role="alert">{{ message }}</span>
+            }
+          </label>
+
+          <!-- The five rules the API enforces, checked live (FR-AUTH-02). -->
+          <ul class="pw-rules" [class.is-active]="regPassword.length > 0" aria-label="Password requirements">
+            @for (rule of passwordRules; track rule.id) {
+              <li [class.is-met]="passwordRuleMet(rule)">
+                <span class="rule-mark" aria-hidden="true">
+                  @if (passwordRuleMet(rule)) {
+                    <svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 6.4 4.6 9 10 3" />
+                    </svg>
+                  }
+                </span>
+                {{ rule.label }}
+                <span class="visually-hidden">{{ passwordRuleMet(rule) ? '— met' : '— not met yet' }}</span>
+              </li>
+            }
+          </ul>
+
+          <label>
+            Confirm password
+            <span class="password-field">
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                name="confirmPassword"
+                autocomplete="new-password"
+                [attr.tabindex]="mode() === 'register' ? null : -1"
+                [attr.aria-invalid]="fieldError('confirmPassword') ? 'true' : null"
+                [(ngModel)]="confirmPassword"
+                (ngModelChange)="clearFieldError('confirmPassword')">
+              <button
+                type="button"
+                class="toggle-password"
+                [attr.tabindex]="mode() === 'register' ? null : -1"
+                [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                (click)="showConfirmPassword = !showConfirmPassword">
+                {{ showConfirmPassword ? 'Hide' : 'Show' }}
+              </button>
+            </span>
+            @if (mode() === 'register' && fieldError('confirmPassword'); as message) {
+              <span class="field-error" role="alert">{{ message }}</span>
+            }
+          </label>
+
+          <button
+            type="submit"
+            class="action-auth auth-submit"
+            [attr.tabindex]="mode() === 'register' ? null : -1"
+            [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner spinner-inline" aria-hidden="true"></span>
+              Creating account…
+            } @else {
+              Create account
+            }
+          </button>
+
+          <p class="switch-hint">
+            Already registered?
+            <button type="button" class="link-btn" [attr.tabindex]="mode() === 'register' ? null : -1" (click)="switchTo('login')">Sign in</button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>

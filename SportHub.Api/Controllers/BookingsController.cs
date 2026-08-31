@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -385,7 +385,7 @@ namespace SportHub.Api.Controllers
                 ? booking.ReturnDate
                 : booking.EndDate;
 
-            if (expiryDate <= DateTime.UtcNow)
+            if (expiryDate <= DateTime.Now)
             {
                 booking.Status = BookingStatus.Completed;
                 await _context.SaveChangesAsync();
@@ -397,7 +397,9 @@ namespace SportHub.Api.Controllers
                 ? booking.PickupDate ?? booking.StartDate
                 : booking.StartDate;
 
-            if (cancellationStart <= DateTime.UtcNow.AddHours(2))
+            // Local, to match how StartDate/PickupDate were stored. Using UTC
+            // here stretched the documented 2-hour window (FR-CUS-04) to 4-5.
+            if (cancellationStart <= DateTime.Now.AddHours(2))
             {
                 return BadRequest("Cannot cancel booking less than 2 hours before start date.");
             }
@@ -501,7 +503,7 @@ namespace SportHub.Api.Controllers
 
         private async Task UpdateExpiredBookings(List<Booking> bookings)
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var changed = false;
 
             foreach (var booking in bookings)

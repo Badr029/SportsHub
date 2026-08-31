@@ -3,8 +3,8 @@
 <main class="page">
   <header class="page-header">
     <div>
-      <h1>Admin Equipment</h1>
-      <p>Manage stock and rental prices for each sport.</p>
+      <h1>Equipment</h1>
+      <p>Stock levels and rental prices across every sport.</p>
     </div>
 
     <div class="header-actions">
@@ -14,57 +14,73 @@
   </header>
 
   @if (loading()) {
-    <p>Loading equipment...</p>
+    <section class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading equipment…</p>
+    </section>
   } @else {
     @if (error()) {
-      <p class="error">{{ error() }}</p>
+      <p class="error page-feedback" role="alert">{{ error() }}</p>
     }
 
     @if (success()) {
-      <p class="success">{{ success() }}</p>
+      <p class="success page-feedback" role="status">{{ success() }}</p>
     }
 
-    <section class="equipment-list">
-      @if (equipment().length === 0) {
-        <section class="message">
-          <p>No equipment found.</p>
-        </section>
-      } @else {
+    @if (equipment().length === 0) {
+      <section class="state-block">
+        <h2>No equipment yet</h2>
+        <p>Add rentable gear and assign it to a sport so customers can book it.</p>
+        <button type="button" class="action-admin" (click)="openAddEquipment()">Add equipment</button>
+      </section>
+    } @else {
+      <section class="equipment-list">
         @for (item of equipment(); track item.id) {
           <article class="equipment-card">
-            @if (item.imageUrl) {
-              <img class="equipment-image" [src]="getImageUrl(item.imageUrl)" [alt]="item.name">
-            }
-            <div>
-              <h2>{{ item.name }}</h2>
-              <p>{{ item.sport.name }}</p>
+            <div class="equipment-media">
+              @if (item.imageUrl) {
+                <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name" loading="lazy" decoding="async">
+              } @else {
+                <div class="image-fallback">{{ item.name }}</div>
+              }
             </div>
 
-            <div class="details-grid">
-              <span>Stock</span>
-              <strong>{{ item.quantity }}</strong>
+            <div class="equipment-body">
+              <div class="equipment-title">
+                <span class="equipment-sport">{{ item.sport.name }}</span>
+                <h2>{{ item.name }}</h2>
+              </div>
 
-              <span>Daily</span>
-              <strong>{{ item.dailyRentalPrice }} EGP</strong>
+              <dl class="details-grid">
+                <div>
+                  <dt>Stock</dt>
+                  <dd>{{ item.quantity }}</dd>
+                </div>
+                <div>
+                  <dt>Daily</dt>
+                  <dd>{{ item.dailyRentalPrice }} EGP</dd>
+                </div>
+                <div>
+                  <dt>Package / hour</dt>
+                  <dd>{{ item.packageHourlyPrice }} EGP</dd>
+                </div>
+              </dl>
 
-              <span>Package/hour</span>
-              <strong>{{ item.packageHourlyPrice }} EGP</strong>
-            </div>
-
-            <div class="card-actions">
-              <button type="button" class="secondary action-neutral" (click)="editEquipment(item)">Edit</button>
-              <button type="button" class="danger" (click)="deleteEquipment(item.id)">Delete</button>
+              <div class="card-actions">
+                <button type="button" class="secondary" (click)="editEquipment(item)">Edit</button>
+                <button type="button" class="danger" (click)="deleteEquipment(item.id)">Delete</button>
+              </div>
             </div>
           </article>
         }
-      }
-    </section>
+      </section>
+    }
   }
 
   @if (editorOpen()) {
-    <section class="modal-backdrop">
+    <section class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="equipment-editor-title">
       <form class="modal-panel editor-modal" (ngSubmit)="saveEquipment()">
-        <h2>{{ editingId ? 'Edit equipment' : 'Add equipment' }}</h2>
+        <h2 id="equipment-editor-title">{{ editingId ? 'Edit equipment' : 'Add equipment' }}</h2>
 
         <label>
           Sport
@@ -81,9 +97,21 @@
           <input type="text" name="name" [(ngModel)]="form.name">
         </label>
 
+        <div class="field-pair">
+          <label>
+            Total stock
+            <input type="number" name="quantity" min="0" [(ngModel)]="form.quantity">
+          </label>
+
+          <label>
+            Daily rental price
+            <input type="number" name="dailyRentalPrice" min="1" [(ngModel)]="form.dailyRentalPrice">
+          </label>
+        </div>
+
         <label>
-          Total stock
-          <input type="number" name="quantity" min="0" [(ngModel)]="form.quantity">
+          Package hourly price
+          <input type="number" name="packageHourlyPrice" min="1" [(ngModel)]="form.packageHourlyPrice">
         </label>
 
         <label class="photo-upload">
@@ -91,24 +119,14 @@
           @if (form.imageUrl) {
             <img class="image-preview" [src]="getImageUrl(form.imageUrl)" alt="Equipment preview">
           } @else {
-            <span>Photo Upload</span>
+            <span>Add a photo</span>
           }
           <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
 
-        <label>
-          Daily rental price
-          <input type="number" name="dailyRentalPrice" min="1" [(ngModel)]="form.dailyRentalPrice">
-        </label>
-
-        <label>
-          Package hourly price
-          <input type="number" name="packageHourlyPrice" min="1" [(ngModel)]="form.packageHourlyPrice">
-        </label>
-
         <div class="form-actions">
           <button type="submit" class="action-admin">
-            {{ editingId ? 'Update equipment' : 'Create equipment' }}
+            {{ editingId ? 'Save changes' : 'Create equipment' }}
           </button>
           <button type="button" class="secondary" (click)="resetForm()">Cancel</button>
         </div>

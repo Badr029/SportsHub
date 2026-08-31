@@ -1,56 +1,87 @@
 <app-navbar></app-navbar>
 
 <main class="payment-page">
-  <a class="button-link back-button" routerLink="/bookings">Back to my bookings</a>
+  <a class="button-link back-button" routerLink="/bookings">
+    <span aria-hidden="true">&larr;</span>
+    Back to my bookings
+  </a>
 
   @if (loading()) {
-    <section class="payment-card message-card">Loading payment...</section>
+    <section class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading payment…</p>
+    </section>
   } @else if (!payment()) {
-    <section class="payment-card message-card">
-      <p class="error">{{ error() }}</p>
+    <section class="state-block" role="alert">
+      <h2>We couldn't open this payment</h2>
+      <p>{{ error() }}</p>
       <button type="button" class="action-refresh" (click)="loadPayment()">Try again</button>
     </section>
   } @else {
     @if (payment(); as item) {
-      <section class="payment-card">
+    <section class="payment-card">
       <header class="payment-header">
         <div>
-          <p class="eyebrow">Secure checkout</p>
           <h1>Complete payment</h1>
-          <p>Offline demo payment. Card data is validated on this page only.</p>
+          <p>Booking #{{ item.bookingId }} · Payment reference #{{ item.paymentId }}</p>
         </div>
 
-        <span class="payment-status" [class.paid]="item.status === 'Paid'" [class.failed]="item.status === 'Failed'" [class.pending]="item.status === 'Pending' || item.status === 'Processing'">
+        <span
+          class="payment-status"
+          [class.paid]="item.status === 'Paid'"
+          [class.failed]="item.status === 'Failed'"
+          [class.pending]="item.status === 'Pending' || item.status === 'Processing'">
           {{ item.status }}
         </span>
       </header>
 
+      <!-- SRS FR-PAY-09: this is a mock gateway. It must be impossible to
+           mistake it for one that accepts a real card. -->
+      <aside class="demo-banner" role="note">
+        <strong>Demo checkout — do not enter a real card</strong>
+        <p>
+          No payment is taken and no card details leave this page or reach the server.
+          The form only checks the number's shape so the flow can be demonstrated end to end.
+        </p>
+        @if (canAttemptPayment()) {
+          <button type="button" class="secondary" (click)="fillTestCard()">Use the test card</button>
+        }
+      </aside>
+
       @if (error()) {
-        <p class="error">{{ error() }}</p>
+        <p class="error" role="alert">{{ error() }}</p>
       }
 
       @if (success()) {
-        <p class="success">{{ success() }}</p>
+        <p class="success" role="status">{{ success() }}</p>
       }
 
-      <div class="payment-details">
-        <div><span>Booking</span><strong>#{{ item.bookingId }}</strong></div>
-        <div><span>Payment reference</span><strong>#{{ item.paymentId }}</strong></div>
-        <div><span>Method</span><strong>{{ item.method }}</strong></div>
-        <div class="amount-row"><span>Amount</span><strong>{{ item.amount }} {{ item.currency }}</strong></div>
+      <dl class="payment-details">
+        <div>
+          <dt>Method</dt>
+          <dd>{{ item.method === 'PayOnSite' ? 'Pay onsite' : 'Online' }}</dd>
+        </div>
         @if (item.providerReference) {
-          <div><span>Provider reference</span><strong>{{ item.providerReference }}</strong></div>
+          <div>
+            <dt>Provider reference</dt>
+            <dd>{{ item.providerReference }}</dd>
+          </div>
         }
-      </div>
+        <div class="amount-row">
+          <dt>Amount due</dt>
+          <dd>{{ item.amount }} {{ item.currency }}</dd>
+        </div>
+      </dl>
 
       @if (canAttemptPayment()) {
         <form class="card-form" (ngSubmit)="pay()">
-          <div class="card-preview">
-            <div>
-              <span>{{ getCardBrand() }}</span>
-              <strong>{{ cardNumber || '•••• •••• •••• ••••' }}</strong>
+          <div class="card-preview" aria-hidden="true">
+            <div class="card-preview-top">
+              <span class="card-brand">{{ getCardBrand() }}</span>
+              <span class="card-demo">Demo</span>
             </div>
-            <div>
+            <strong class="card-number">{{ cardNumber || '•••• •••• •••• ••••' }}</strong>
+            <div class="card-preview-bottom">
               <small>{{ cardName || 'CARDHOLDER NAME' }}</small>
               <small>{{ expiry || 'MM/YY' }}</small>
             </div>
@@ -61,10 +92,9 @@
             <input
               type="text"
               name="cardName"
-              autocomplete="cc-name"
+              autocomplete="off"
               placeholder="Name on card"
-              [(ngModel)]="cardName"
-              >
+              [(ngModel)]="cardName">
           </label>
 
           <label class="field full">
@@ -73,11 +103,10 @@
               type="text"
               name="cardNumber"
               inputmode="numeric"
-              autocomplete="cc-number"
+              autocomplete="off"
               placeholder="4242 4242 4242 4242"
               [(ngModel)]="cardNumber"
               maxlength="19"
-              pattern="^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}$"
               required
               (input)="formatCardNumber()">
           </label>
@@ -88,11 +117,10 @@
               type="text"
               name="expiry"
               inputmode="numeric"
-              autocomplete="cc-exp"
+              autocomplete="off"
               placeholder="MM/YY"
               [(ngModel)]="expiry"
               maxlength="5"
-              pattern="^(0[1-9]|1[0-2])\/?([0-9]{2})$"
               required
               (input)="formatExpiry()">
           </label>
@@ -103,22 +131,35 @@
               type="password"
               name="cvv"
               inputmode="numeric"
-              autocomplete="cc-csc"
+              autocomplete="off"
               placeholder="123"
               [(ngModel)]="cvv"
-              maxlength="3"
-              pattern="^[0-9]{3,4}$"
+              maxlength="4"
               required
               (input)="formatCvv()">
           </label>
 
-
-          <button type="submit" class="action-booking" [disabled]="paying()">
-            {{ paying() ? 'Authorizing...' : 'Pay ' + item.amount + ' ' + item.currency }}
+          <button type="submit" class="action-booking pay-button" [disabled]="paying()">
+            @if (paying()) {
+              <span class="spinner spinner-inline" aria-hidden="true"></span>
+              Authorizing…
+            } @else {
+              Pay {{ item.amount }} {{ item.currency }}
+            }
           </button>
+
+          <p class="fail-row">
+            <button type="button" class="secondary fail-button" [disabled]="failing()" (click)="simulateFailure()">
+              {{ failing() ? 'Simulating…' : 'Simulate a declined payment' }}
+            </button>
+          </p>
         </form>
+      } @else if (item.status === 'Paid') {
+        <p class="notice">This payment is settled. Your booking is confirmed — nothing further to do.</p>
+      } @else {
+        <p class="notice">This payment is {{ item.status }} and can no longer be attempted from here.</p>
       }
-      </section>
+    </section>
     }
   }
 </main>

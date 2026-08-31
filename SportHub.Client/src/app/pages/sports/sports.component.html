@@ -2,27 +2,82 @@
 
 <main class="page">
   <header class="page-header">
-    <h1>Sports</h1>
-    <p>Choose a sport to view facilities and equipment.</p>
+    <div>
+      <h1>Sports</h1>
+      <p>Choose a sport to see its courts, fields and rentable equipment.</p>
+    </div>
   </header>
 
   @if (loading()) {
-    <p>Loading sports...</p>
+    <section class="sports-grid" aria-busy="true" aria-label="Loading sports">
+      @for (i of [0, 1, 2, 3, 4, 5]; track i) {
+        <article class="sport-card is-skeleton" [class.is-feature]="i === 0">
+          <div class="sport-card-media"></div>
+          <div class="sport-card-body">
+            <span class="skeleton-line wide"></span>
+            <span class="skeleton-line"></span>
+          </div>
+        </article>
+      }
+    </section>
   } @else if (error()) {
-    <section class="message">
+    <section class="state-block" role="alert">
+      <h2>We couldn't load the catalogue</h2>
       <p>{{ error() }}</p>
       <button type="button" class="action-refresh" (click)="loadSports()">Try again</button>
     </section>
+  } @else if (sports().length === 0) {
+    <section class="state-block">
+      <h2>No sports published yet</h2>
+      <p>Once an administrator adds a sport, it appears here with its facilities and equipment.</p>
+    </section>
   } @else {
-    <section class="sports-grid">
-      @for (sport of sports(); track sport.id) {
-        <article class="sport-card">
-          @if (sport.imageUrl) {
-            <img [src]="getImageUrl(sport.imageUrl)" [alt]="sport.name">
-          }
-          <h2>{{ sport.name }}</h2>
-          <p>{{ sport.description }}</p>
-          <a class="button-link action-view" [routerLink]="['/sports', sport.id]">View details</a>
+    <!-- The first sport leads at double width. A uniform grid says every
+         option is equally important; an editorial one gives the eye a start. -->
+    <section class="sports-grid stagger">
+      @for (sport of sports(); track sport.id; let i = $index) {
+        <article class="sport-card" [class.is-feature]="i === 0" [style.--i]="i">
+          <a class="sport-card-hit" [routerLink]="['/sports', sport.id]" [attr.aria-label]="'View ' + sport.name">
+            <div class="sport-card-media">
+              @if (sport.imageUrl) {
+                <img
+                  [src]="getImageUrl(sport.imageUrl)"
+                  [alt]="sport.name"
+                  [attr.loading]="i === 0 ? null : 'lazy'"
+                  decoding="async">
+              } @else {
+                <div class="image-fallback">{{ sport.name }}</div>
+              }
+
+              @if (sport.totalFacilities > 0) {
+                <span class="availability-pill" [class.is-none]="sport.openFacilities === 0">
+                  {{ sport.openFacilities }} of {{ sport.totalFacilities }} open
+                </span>
+              }
+            </div>
+
+            <div class="sport-card-body">
+              <h2>{{ sport.name }}</h2>
+              <p>{{ sport.description }}</p>
+
+              <div class="sport-card-foot">
+                @if (sport.fromPrice !== null) {
+                  <span class="from-price">from <strong>{{ sport.fromPrice }}</strong> EGP / hour</span>
+                } @else {
+                  <span class="from-price is-muted">No open facilities</span>
+                }
+
+                @if (sport.equipmentCount > 0) {
+                  <span class="gear-count">{{ sport.equipmentCount }} gear items</span>
+                }
+              </div>
+            </div>
+
+            <span class="sport-card-cta" aria-hidden="true">
+              View details
+              <span class="cta-arrow">&rarr;</span>
+            </span>
+          </a>
         </article>
       }
     </section>

@@ -1,249 +1,437 @@
-.page {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 30px 20px 52px;
+.page-feedback {
+  margin-bottom: var(--s-5);
 }
 
-.page-header {
-  margin-bottom: 24px;
-}
+/* --------------------------------------------------------------------------
+   Next up — the one booking that matters right now
+   -------------------------------------------------------------------------- */
 
-.page-header h1 {
-  margin: 0 0 8px;
-  color: white;
-  font-size: 38px;
-}
-
-.page-header p,
-.message p,
-.locked-note {
-  color: var(--muted);
-}
-
-.bookings-list {
+.next-up {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: 180px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--hairline-accent);
+  border-radius: var(--r-lg);
+  background:
+    linear-gradient(120deg, rgba(20, 184, 166, 0.14), transparent 46%),
+    var(--surface-1);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: var(--s-9);
+  animation: rise-in var(--dur-4) var(--ease-out) both;
 }
 
-.booking-card,
-.message {
+.next-rail {
   display: grid;
-  gap: 16px;
-  border: 1px solid var(--line);
-  border-left: 5px solid #2563eb;
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-  box-shadow: var(--shadow);
-  padding: 18px;
+  align-content: center;
+  gap: var(--s-2);
+  border-right: 1px solid var(--hairline);
+  background: rgba(20, 184, 166, 0.08);
+  padding: var(--s-6) var(--s-5);
 }
 
-.equipment-card {
-  border-left-color: var(--pending);
+.next-eyebrow {
+  color: var(--teal-300);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.package-card {
-  border-left-color: var(--teal);
-}
-
-.booking-content {
-  display: grid;
-  gap: 10px;
-}
-
-.booking-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.booking-card h2 {
-  margin: 0;
-  color: white;
-  font-size: 20px;
-}
-
-.status-badge {
-  width: max-content;
-  border-radius: 999px;
-  background: rgba(20, 184, 166, 0.14);
-  color: var(--teal-bright);
-  padding: 4px 9px;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.status-badge.pending {
-  background: rgba(217, 119, 6, 0.18);
-  color: #fbbf24;
-}
-
-.status-badge.confirmed {
-  background: rgba(5, 150, 105, 0.18);
-  color: #86efac;
-}
-
-.status-badge.cancelled {
-  background: rgba(220, 38, 38, 0.18);
-  color: #fca5a5;
-}
-
-.status-badge.completed {
-  background: rgba(71, 85, 105, 0.32);
-  color: #cbd5e1;
-}
-
-.time-block,
-.equipment-list {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.45);
-  padding: 10px 12px;
-}
-
-.time-block {
-  border-left: 4px solid #2563eb;
-}
-
-.equipment-time {
-  border-left-color: var(--teal);
-}
-
-.time-block strong,
-.equipment-list strong,
-.equipment-row span,
-.total-price {
-  color: white;
-}
-
-.time-block p,
-.time-block small,
-.equipment-row small {
-  color: var(--muted);
-}
-
-.equipment-list {
-  display: grid;
-  gap: 8px;
-}
-
-.equipment-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--line);
-  padding-top: 8px;
-}
-
-.equipment-row:first-of-type {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.total-price {
-  font-weight: 900;
-}
-
-.payment-block {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.45);
-  padding: 10px 12px;
-}
-
-.payment-block div {
-  display: grid;
-  gap: 3px;
-}
-
-.payment-block span {
-  color: var(--muted);
-}
-
-.payment-block strong {
-  color: white;
-}
-
-.payment-badge {
-  border-radius: 999px;
-  background: rgba(71, 85, 105, 0.32);
-  padding: 4px 9px;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.payment-badge.pending {
-  background: rgba(217, 119, 6, 0.18);
-  color: #fbbf24;
-}
-
-.payment-badge.paid {
-  background: rgba(5, 150, 105, 0.18);
-  color: #86efac;
-}
-
-.payment-badge.failed {
-  background: rgba(220, 38, 38, 0.18);
-  color: #fca5a5;
-}
-
-.card-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-button {
-  border: 0;
-  border-radius: 6px;
-  background: var(--teal);
-  color: white;
-  padding: 10px 12px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.secondary {
-  background: rgba(20, 184, 166, 0.14);
-  color: var(--teal-bright);
-}
-
-.danger {
-  border: 1px solid var(--cancelled);
-  background: transparent;
-  color: #fecaca;
-}
-
-.success {
-  border: 1px solid #86efac;
-  border-radius: 6px;
-  background: rgba(5, 150, 105, 0.18);
-  color: #bbf7d0;
-  padding: 10px 12px;
+.next-countdown {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-stretch: 106%;
   font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
 }
 
-.button-link{
-  border: 0;
-  border-radius: 6px;
-  background: var(--teal);
-  color: white;
-  padding: 10px 12px;
-  font-weight: 900;
-  cursor: pointer;
-  text-decoration: none;
+.next-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-7);
+  padding: var(--s-6);
+}
+
+.next-when {
+  display: grid;
+  gap: 2px;
+  padding-right: var(--s-7);
+  border-right: 1px solid var(--hairline);
+}
+
+.next-day {
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.next-day.is-today {
+  color: var(--teal-300);
+}
+
+.next-time {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.375rem);
+  font-stretch: 108%;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.next-what {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.next-what h2 {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-stretch: 106%;
+  letter-spacing: -0.028em;
+}
+
+.next-what p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+
+.next-equipment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  list-style: none;
+  margin: var(--s-1) 0 0;
+  padding: 0;
+}
+
+.next-equipment li {
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  background: rgba(148, 163, 184, 0.09);
+  color: var(--text-2);
+  padding: 3px 10px;
+  font-size: var(--fs-xs);
+}
+
+.next-equipment em {
+  color: var(--text);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.next-meta {
+  display: grid;
+  justify-items: end;
+  gap: var(--s-3);
+}
+
+.next-badges {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.next-total {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.next-total span {
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.locked-note {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Timeline — rows on a rail, not a grid of boxes
+   -------------------------------------------------------------------------- */
+
+.timeline-section + .timeline-section {
+  margin-top: var(--s-9);
+}
+
+.timeline-heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+
+.timeline-heading h2 {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-stretch: 106%;
+}
+
+.timeline-heading span {
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.timeline-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr) auto 110px auto;
+  align-items: center;
+  gap: var(--s-5);
+  border-bottom: 1px solid var(--hairline);
+  padding: var(--s-4) var(--s-3);
+  margin-inline: calc(var(--s-3) * -1);
+  border-radius: var(--r-sm);
+  transition: background var(--dur-1) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .timeline-row:hover {
+    background: rgba(148, 163, 184, 0.05);
+  }
+}
+
+/* A hairline rail ties the rows together into one sequence. */
+.timeline-row::before {
+  content: '';
+  position: absolute;
+  left: calc(116px + var(--s-5) / 2 + var(--s-3));
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--hairline);
+}
+
+.timeline-row::after {
+  content: '';
+  position: absolute;
+  left: calc(116px + var(--s-5) / 2 + var(--s-3) - 3px);
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: var(--r-full);
+  background: var(--teal-400);
+  box-shadow: 0 0 0 4px var(--surface-1);
+}
+
+.is-past .timeline-row::after {
+  background: var(--completed);
+}
+
+.row-when {
+  display: grid;
+  gap: 1px;
+  text-align: right;
+}
+
+.row-day {
+  color: var(--text-2);
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.row-time {
+  color: var(--text);
+  font-size: var(--fs-md);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.row-what {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding-left: var(--s-3);
+}
+
+.row-what strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-what span {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.row-price {
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.row-actions {
+  display: flex;
+  gap: var(--s-2);
+  justify-content: flex-end;
+  min-width: 84px;
+}
+
+.row-actions button,
+.row-actions .button-link {
+  min-height: 32px;
+  padding-inline: var(--s-3);
+  font-size: var(--fs-xs);
+}
+
+.is-past .timeline-row {
+  opacity: 0.82;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .is-past .timeline-row:hover {
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1000px) {
+  .next-body {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--s-5);
+  }
+
+  .next-meta {
+    grid-column: 1 / -1;
+    justify-items: start;
+    border-top: 1px solid var(--hairline);
+    padding-top: var(--s-4);
+  }
+
+  .next-badges {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 820px) {
-  .bookings-list {
+  .next-up {
     grid-template-columns: 1fr;
+  }
+
+  .next-rail {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline);
+    padding: var(--s-4) var(--s-5);
+  }
+
+  .timeline-row {
+    grid-template-columns: 92px minmax(0, 1fr) auto;
+    gap: var(--s-3);
+    row-gap: var(--s-3);
+  }
+
+  .timeline-row::before,
+  .timeline-row::after {
+    display: none;
+  }
+
+  .row-what {
+    padding-left: 0;
+  }
+
+  .row-price {
+    grid-column: 2;
+    text-align: left;
+    color: var(--text-2);
+  }
+
+  .row-actions {
+    grid-column: 3;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 560px) {
+  .next-body {
+    grid-template-columns: 1fr;
+  }
+
+  .next-when {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline);
+    padding: 0 0 var(--s-3);
+  }
+
+  .next-time {
+    font-size: var(--fs-xl);
+  }
+
+  .timeline-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .row-when {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+    text-align: left;
+  }
+
+  .row-status {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* The price kept `grid-column: 2` from the 820px block while the actions
+     were also placed in column 2 of the same row, so the button sat on top of
+     the price. They are peers on this row: price leads, actions trail. */
+  .row-price {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: center;
+    text-align: left;
+  }
+
+  .row-actions {
+    grid-column: 2;
+    grid-row: 3;
+    justify-content: flex-end;
   }
 }

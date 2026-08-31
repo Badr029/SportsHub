@@ -1,159 +1,67 @@
-.page {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 30px 20px 52px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
-
-.page-header h1,
-.modal-panel h2,
-.sport-card h2 {
-  margin: 0;
-  color: white;
-}
-
-.page-header h1 {
-  font-size: 38px;
-}
-
-.page-header p,
-.sport-card p {
-  color: var(--muted);
-}
-
-.header-actions,
-.form-actions,
-.card-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .sports-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: var(--s-4);
 }
 
 .sport-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-  box-shadow: var(--shadow);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out);
 }
 
-.sport-card img {
+.sport-card:hover {
+  border-color: var(--hairline-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.sport-card-media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.sport-card-media img,
+.sport-card-media .image-fallback {
   width: 100%;
-  height: 170px;
+  height: 100%;
+  aspect-ratio: auto;
   object-fit: cover;
   display: block;
 }
 
 .sport-body {
   display: grid;
-  gap: 10px;
-  padding: 18px;
+  align-content: start;
+  gap: var(--s-3);
+  padding: var(--s-4);
+}
+
+.sport-card h2 {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-stretch: 104%;
 }
 
 .sport-card p {
-  min-height: 48px;
+  min-height: 2.9em;
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
 }
 
-label {
-  display: grid;
-  gap: 6px;
-  color: white;
-  font-weight: 800;
+.sport-card .card-actions {
+  margin-top: var(--s-1);
 }
 
-input,
-textarea {
-  padding: 11px 12px;
-  border: 1px solid rgba(20, 184, 166, 0.42);
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.72);
-  color: white;
-}
-
-.image-preview {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
-button,
-a {
-  border: 0;
-  border-radius: 6px;
-  background: var(--teal);
-  color: white;
-  padding: 10px 12px;
-  font-weight: 900;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.secondary {
-  background: rgba(20, 184, 166, 0.14);
-  color: var(--teal-bright);
-}
-
-.danger {
-  border: 1px solid var(--cancelled);
-  background: transparent;
-  color: #fecaca;
-}
-
-.error,
-.success {
-  border-radius: 6px;
-  padding: 10px 12px;
-  font-weight: 800;
-}
-
-.error {
-  border: 1px solid #fca5a5;
-  background: rgba(127, 29, 29, 0.42);
-  color: #fecaca;
-}
-
-.success {
-  border: 1px solid #86efac;
-  background: rgba(5, 150, 105, 0.18);
-  color: #bbf7d0;
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-  display: grid;
-  place-items: center;
-  background: rgba(15, 23, 42, 0.58);
-  backdrop-filter: blur(8px);
-  padding: 20px;
-}
-
-.modal-panel {
-  display: grid;
-  gap: 13px;
-  width: min(520px, 100%);
-  max-height: 90vh;
-  overflow: auto;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-  box-shadow: var(--shadow);
-  padding: 22px;
+.page-feedback {
+  margin-bottom: var(--s-4);
 }
 
 @media (max-width: 980px) {
@@ -162,10 +70,15 @@ a {
   }
 }
 
-@media (max-width: 700px) {
-  .page-header,
+/* A management grid, not a browse list: two per row keeps more of the estate
+   on screen at a glance, which is what an administrator is scanning for. */
+@media (max-width: 620px) {
   .sports-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-3);
+  }
+
+  .sport-card p {
+    min-height: 0;
   }
 }

@@ -1,311 +1,602 @@
-.page {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 30px 20px 52px;
-}
-
-.page-header {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.14), rgba(15, 23, 42, 0.72));
-  box-shadow: var(--shadow);
-  padding: 22px;
-  margin-bottom: 18px;
-}
-
-.eyebrow {
-  margin: 0 0 6px;
-  color: var(--teal-bright);
-  font-weight: 900;
-  text-transform: uppercase;
-  font-size: 12px;
-}
-
-h1,
-h2 {
-  margin: 0;
-  color: white;
-}
-
-.page-header p,
-.panel-hint,
-.empty-state {
-  color: var(--muted);
-}
-
-.toolbar,
-.booking-panel,
-.equipment-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
-  box-shadow: var(--shadow);
-}
-
-.toolbar {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
-  gap: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-label {
-  display: grid;
-  gap: 6px;
-  color: white;
-  font-weight: 800;
-}
-
-input,
-select {
-  width: 100%;
-  padding: 11px 12px;
-  border: 1px solid rgba(20, 184, 166, 0.42);
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.72);
-  color: white;
-}
-
 .content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 20px;
+  gap: var(--s-6);
   align-items: start;
 }
+
+/* --- Toolbar -------------------------------------------------------------- */
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: var(--s-4);
+  margin-bottom: var(--s-5);
+}
+
+.toolbar-filter {
+  width: min(280px, 100%);
+}
+
+.toolbar-count {
+  margin: 0 0 var(--s-2);
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --- Catalogue ------------------------------------------------------------ */
 
 .equipment-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: var(--s-4);
 }
 
 .equipment-card {
-  overflow: hidden;
+  position: relative;
   display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-sm), var(--edge-top);
+  transition:
+    border-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
 }
 
-.equipment-card.selected {
-  border-color: rgba(20, 184, 166, 0.78);
+@media (hover: hover) and (pointer: fine) {
+  .equipment-card:hover:not(.is-soldout) {
+    border-color: var(--hairline-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md), var(--edge-top);
+  }
 }
 
-.equipment-card img {
-  width: 100%;
+/* Selection is carried by an accent ring and a tick, not colour alone. */
+.equipment-card.is-selected {
+  border-color: var(--teal-500);
+  box-shadow: var(--glow-teal), var(--shadow-md), var(--edge-top-strong);
+}
+
+.equipment-card.is-soldout {
+  opacity: 0.62;
+}
+
+.equipment-media {
+  position: relative;
   aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.equipment-media img,
+.equipment-media .image-fallback {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
   object-fit: cover;
   display: block;
+  transition: transform var(--dur-4) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .equipment-card:hover:not(.is-soldout) .equipment-media img {
+    transform: scale(1.04);
+  }
+}
+
+.equipment-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 13, 22, 0.82), transparent 46%);
+  pointer-events: none;
+}
+
+.card-sport-tag {
+  position: absolute;
+  left: var(--s-3);
+  top: var(--s-3);
+  z-index: 1;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: var(--r-full);
+  background: rgba(7, 13, 22, 0.72);
+  color: var(--text-2);
+  padding: 3px 9px;
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
+.selected-tick {
+  position: absolute;
+  right: var(--s-3);
+  top: var(--s-3);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-full);
+  background: var(--teal-400);
+  color: var(--text-on-accent);
+  box-shadow: 0 2px 10px rgba(20, 184, 166, 0.45);
+  animation: tick-in var(--dur-2) var(--ease-out) both;
+}
+
+@keyframes tick-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+.soldout-tag {
+  position: absolute;
+  left: var(--s-3);
+  bottom: var(--s-3);
+  z-index: 1;
+  border: 1px solid rgba(248, 113, 113, 0.44);
+  border-radius: var(--r-full);
+  background: rgba(60, 12, 12, 0.86);
+  color: var(--cancelled-ink);
+  padding: 3px 10px;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  backdrop-filter: blur(6px);
 }
 
 .card-body {
   display: grid;
-  gap: 10px;
-  padding: 14px;
+  align-content: start;
+  gap: var(--s-3);
+  padding: var(--s-4);
 }
 
-.card-title {
+.card-name {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-md);
+  font-stretch: 104%;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+}
+
+/* --- Stock (FR-EQP-04) ---------------------------------------------------- */
+
+.stock {
   display: grid;
-  gap: 4px;
+  gap: var(--s-2);
 }
 
-.card-title span {
-  color: var(--teal-bright);
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
+.stock-meter {
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: rgba(148, 163, 184, 0.16);
 }
 
-.card-title strong,
-.selected-row strong {
-  color: white;
+.stock-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--teal-500);
+  transform-origin: left center;
+  transform: scaleX(1);
+  transition: transform var(--dur-3) var(--ease-out), background var(--dur-3) var(--ease-out);
 }
 
-.metric-row {
+.is-soldout .stock-fill {
+  background: var(--cancelled);
+}
+
+.stock-meter.is-unknown .stock-fill {
+  background: rgba(148, 163, 184, 0.3);
+}
+
+.stock-line {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.stock-line strong {
+  color: var(--teal-300);
+  font-weight: 700;
+}
+
+.stock-line span {
+  color: var(--text-3);
+}
+
+.stock-line.is-muted {
+  color: var(--text-3);
+}
+
+/* --- Foot ----------------------------------------------------------------- */
+
+.card-foot {
   display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-
-.metric-row span {
-  border-radius: 999px;
-  background: rgba(20, 184, 166, 0.14);
-  color: var(--teal-bright);
-  padding: 5px 8px;
-  font-size: 12px;
-  font-weight: 900;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  min-height: 36px;
 }
 
 .price-line {
   margin: 0;
-  color: var(--teal-bright);
-  font-weight: 900;
+  color: var(--text-2);
+  font-size: var(--fs-xs);
 }
+
+.price-line strong {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.022em;
+}
+
+.price-line span {
+  color: var(--text-3);
+}
+
+.add-btn {
+  --btn-bg: rgba(20, 184, 166, 0.12);
+  --btn-ink: var(--teal-300);
+  --btn-edge: var(--hairline-accent);
+  --btn-glow: transparent;
+  min-height: 36px;
+  border-radius: var(--r-full);
+  padding-inline: var(--s-5);
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .add-btn:hover:not(:disabled) {
+    --btn-bg: rgba(20, 184, 166, 0.24);
+    filter: none;
+    box-shadow: none;
+  }
+}
+
+.card-stepper {
+  animation: stepper-in var(--dur-2) var(--ease-out) both;
+}
+
+@keyframes stepper-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+.limit-note {
+  margin: 0;
+  color: var(--pending-ink);
+  font-size: var(--fs-2xs);
+}
+
+/* --- Panel ---------------------------------------------------------------- */
 
 .booking-panel {
   position: sticky;
-  top: 88px;
+  top: 84px;
   display: grid;
-  gap: 13px;
-  padding: 16px;
+  gap: var(--s-4);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-lg);
+  padding: var(--s-5);
 }
 
-.payment-choice {
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-3);
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: var(--s-4);
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
+
+.panel-count {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: var(--r-full);
+  background: var(--teal-500);
+  color: #04231f;
+  padding: 0 7px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pickup-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  border: 0;
-  padding: 0;
+  gap: var(--s-3);
 }
 
-.payment-choice legend {
-  margin-bottom: 9px;
-  color: white;
-  font-weight: 900;
+.return-note,
+.empty-state {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
 }
 
-.payment-choice label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: rgba(15, 23, 42, 0.48);
-  padding: 12px;
-  cursor: pointer;
+.empty-state {
+  color: var(--text-3);
 }
 
-.payment-choice label.selected {
-  border-color: var(--teal-bright);
-  background: rgba(13, 148, 136, 0.18);
-}
-
-.payment-choice input {
-  width: auto;
-}
-
-.payment-choice span,
-.payment-choice small {
-  display: block;
-}
-
-.payment-choice strong {
-  color: white;
-}
-
-.payment-choice small {
-  margin-top: 4px;
-  color: var(--muted);
-}
 .selected-list {
   display: grid;
-  gap: 10px;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
 }
 
 .selected-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 70px auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto 58px;
+  gap: var(--s-3);
   align-items: center;
-  border-top: 1px solid var(--line);
-  padding-top: 10px;
+  border-bottom: 1px solid var(--hairline);
+  padding: var(--s-3) 0;
+  animation: row-in var(--dur-2) var(--ease-out) both;
 }
 
-.selected-row small {
-  display: block;
-  color: var(--muted);
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
 }
 
-button {
-  border: 0;
-  border-radius: 6px;
-  background: var(--teal);
-  color: white;
-  padding: 10px 12px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.danger {
-  border: 1px solid var(--cancelled);
-  background: transparent;
-  color: #fecaca;
-}
-
-.rental-total {
-  margin: 14px 0 0;
-  color: var(--teal-bright);
-  font-size: 18px;
-  font-weight: 900;
+.selected-line-total {
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
+.selected-name {
   display: grid;
-  place-items: center;
-  width: 100vw;
-  height: 100vh;
-  min-height: 100vh;
-  overflow: hidden;
-  padding: 20px;
-  background: rgba(2, 6, 23, 0.78);
+  gap: 1px;
+  min-width: 0;
 }
 
-.modal-panel.booking-confirmation {
-  position: relative;
-  z-index: 1001;
-  display: grid;
-  visibility: visible;
-  opacity: 1;
-  width: min(520px, calc(100vw - 40px));
-  min-height: 280px;
-  max-height: calc(100vh - 40px);
+.selected-name strong {
   overflow: hidden;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.error,
-.success {
-  border-radius: 6px;
-  padding: 10px 12px;
+.selected-name small {
+  color: var(--text-3);
+  font-size: var(--fs-2xs);
+}
+
+.rental-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin: 0;
+}
+
+.rental-total span {
+  display: grid;
+  gap: 1px;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+
+.rental-total small {
+  color: var(--text-3);
+  font-size: var(--fs-2xs);
+}
+
+.rental-total strong {
+  color: var(--teal-300);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
   font-weight: 800;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
 }
 
-.error {
-  border: 1px solid #fca5a5;
-  background: rgba(127, 29, 29, 0.42);
-  color: #fecaca;
+/* One primary action per screen: the panel's "Review rental". Adding an item
+   from the catalogue is a supporting action, so it stays quiet. */
+.add-to-rental {
+  width: 100%;
 }
 
-.success {
-  border: 1px solid #86efac;
-  background: rgba(5, 150, 105, 0.18);
-  color: #bbf7d0;
+.add-to-rental:disabled {
+  --btn-ink: var(--text-3);
 }
 
-@media (max-width: 1000px) {
-  .content-grid,
-  .toolbar {
-    grid-template-columns: 1fr;
-  }
+.submit-rental {
+  min-height: 48px;
+  font-size: var(--fs-base);
+}
 
+.modal-panel.equipment-rental-confirmation {
+  width: min(540px, 100%);
+}
+
+/* --- Responsive ----------------------------------------------------------- */
+
+@media (max-width: 1080px) {
   .equipment-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 940px) {
+  .content-grid {
+    grid-template-columns: 1fr;
   }
 
   .booking-panel {
     position: static;
   }
+
+  .equipment-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-@media (max-width: 640px) {
-  .equipment-grid,
-  .selected-row {
+@media (max-width: 720px) {
+  .equipment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-filter {
+    width: 100%;
+  }
+
+  .toolbar-count {
+    margin-bottom: 0;
+  }
+}
+
+/* A row, not a poster. One full-bleed 16:10 card filled the whole phone
+   screen, so a customer saw a single item at a time. The card keeps its
+   border, surface and radius — it is just laid out horizontally around a
+   square thumbnail, which fits four to a screen instead of one. */
+@media (max-width: 560px) {
+  .equipment-grid {
     grid-template-columns: 1fr;
+    gap: var(--s-3);
+  }
+
+  .equipment-card {
+    grid-template-rows: none;
+    grid-template-columns: 104px minmax(0, 1fr);
+  }
+
+  .equipment-media {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+
+  /* The sport tag needs the card's width to read; on a thumbnail it only
+     covers the picture. */
+  .card-sport-tag {
+    display: none;
+  }
+
+  .card-body {
+    gap: var(--s-2);
+    padding: var(--s-3) var(--s-4);
+  }
+
+  .card-name {
+    font-size: var(--fs-sm);
+  }
+
+  .stock-line {
+    font-size: var(--fs-2xs);
+  }
+
+  .limit-note {
+    font-size: var(--fs-2xs);
+  }
+}
+
+@media (max-width: 480px) {
+
+  .pickup-fields,
+  .payment-choice {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The sticky booking bar replaces this on small screens; see styles.css. */
+@media (max-width: 940px) {
+  .submit-rental {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Narrow-screen rental flow
+   The summary panel is not a sidebar here, it is the page, and it is not on
+   screen at all until Review asks for it.
+
+     choose     the catalogue        (panel hidden)
+     configure  pickup and items     (catalogue hidden)
+     review     the confirmation     (everything else hidden)
+   -------------------------------------------------------------------------- */
+
+.flow-back {
+  display: none;
+}
+
+@media (max-width: 940px) {
+  .page[data-flow='choose'] .booking-panel {
+    display: none;
+  }
+
+  .page[data-flow='configure'] .catalogue,
+  .page[data-flow='configure'] .page-header,
+  .page[data-flow='review'] .catalogue,
+  .page[data-flow='review'] .page-header,
+  .page[data-flow='review'] .booking-panel,
+  .page[data-flow='review'] .book-bar,
+  .page[data-flow='review'] .flow-back {
+    display: none;
+  }
+
+  .page[data-flow='configure'] .flow-back {
+    display: inline-flex;
+    margin-bottom: var(--s-4);
+  }
+
+  /* The review is a page here, so it must not behave like a dialog. */
+  .modal-backdrop.is-page {
+    position: static;
+    display: block;
+    padding: 0;
+    background: none;
+    backdrop-filter: none;
+  }
+
+  .modal-backdrop.is-page .modal-panel {
+    width: 100%;
+    max-height: none;
+    box-shadow: none;
   }
 }

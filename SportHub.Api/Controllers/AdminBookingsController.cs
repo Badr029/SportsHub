@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportHub.Api.Data;
@@ -82,6 +82,10 @@ public class AdminBookingsController : ControllerBase
                 RentalStatus = booking.RentalStatus == null ? null : booking.RentalStatus.ToString(),
                 booking.StartDate,
                 booking.EndDate,
+                // Equipment rentals gate pickup/complete on these, so the
+                // client needs them to mirror the same rules.
+                booking.PickupDate,
+                booking.ReturnDate,
                 booking.TotalPrice,
                 PaymentMethod = booking.PaymentMethod.ToString(),
                 PaymentStatus = booking.PaymentStatus.ToString(),
@@ -104,6 +108,12 @@ public class AdminBookingsController : ControllerBase
             TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
         });
     }
+
+    /// <summary>
+    /// How early staff may hand equipment over, relative to the booked
+    /// pickup time. Change this in one place if the venue's policy differs.
+    /// </summary>
+    private const int PickupGraceMinutes = 60;
 
     [HttpPost("{id}/confirm")]
     public async Task<IActionResult> ConfirmBooking(int id)
@@ -161,6 +171,27 @@ public class AdminBookingsController : ControllerBase
             return BadRequest("Only pending pickup rentals can be picked up.");
         }
 
+        // Cancelling a booking leaves RentalStatus at PendingPickup, and a
+        // booking that was never confirmed also sits there. Without this check
+        // the gear could be handed over for a reservation the venue has already
+        // released or never accepted.
+        if (booking.Status != BookingStatus.Confirmed)
+        {
+            return BadRequest($"Only confirmed bookings can be picked up. This booking is {booking.Status}.");
+        }
+
+        // Equipment cannot leave the counter well before the customer is due.
+        // A short grace window keeps this workable for customers who arrive
+        // early without letting staff hand gear over days in advance.
+        var pickupDue = booking.PickupDate ?? booking.StartDate;
+
+        if (DateTime.Now < pickupDue.AddMinutes(-PickupGraceMinutes))
+        {
+            return BadRequest(
+                $"This rental is not due for pickup until {pickupDue:ddd d MMM, h:mm tt}. " +
+                $"Pickup opens {PickupGraceMinutes} minutes before that.");
+        }
+
         if (booking.PaymentMethod == PaymentMethod.Online && booking.PaymentStatus != PaymentStatus.Paid)
         {
             return BadRequest("Online booking must be paid before pickup.");
@@ -189,7 +220,7 @@ public class AdminBookingsController : ControllerBase
         }
 
         booking.RentalStatus = RentalStatus.Returned;
-        booking.ReturnedAt = DateTime.UtcNow;
+        booking.ReturnedAt = DateTime.Now;
 
         await _context.SaveChangesAsync();
 
@@ -211,6 +242,27 @@ public class AdminBookingsController : ControllerBase
             return BadRequest("Only confirmed bookings can be completed.");
         }
 
+        // A booking is not "complete" until the time it reserved has passed.
+        // Completing early would free the slot while the customer is still
+        // entitled to it.
+        var endsAt = booking.BookingType == BookingType.Equipment
+            ? booking.ReturnDate ?? booking.EndDate
+            : booking.EndDate;
+
+        if (DateTime.Now < endsAt)
+        {
+            return BadRequest(
+                $"This booking runs until {endsAt:ddd d MMM, h:mm tt} and cannot be completed before then.");
+        }
+
+        // Gear still in the customer's hands means the rental is not finished,
+        // whatever the clock says.
+        if (booking.BookingType == BookingType.Equipment &&
+            booking.RentalStatus != RentalStatus.Returned)
+        {
+            return BadRequest("Mark the equipment as returned before completing this rental.");
+        }
+
         booking.Status = BookingStatus.Completed;
 
         await _context.SaveChangesAsync();
@@ -220,7 +272,9 @@ public class AdminBookingsController : ControllerBase
 
     private async Task UpdateExpiredBookings(List<SportHub.Api.Models.Booking> bookings)
     {
-        var now = DateTime.UtcNow;
+        // Booking times are stored as local wall clock (see CreateBooking),
+        // so they must be compared against local now, not UTC.
+        var now = DateTime.Now;
         var changed = false;
 
         foreach (var booking in bookings)

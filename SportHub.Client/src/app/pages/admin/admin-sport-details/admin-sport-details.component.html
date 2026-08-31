@@ -1,41 +1,50 @@
 <app-navbar></app-navbar>
 
 <main class="page">
+  <a class="button-link back-button" routerLink="/admin/sports">
+    <span aria-hidden="true">&larr;</span>
+    Back to sports
+  </a>
+
   <header class="page-header">
     <div>
-      <a class="button-link back-button" routerLink="/admin/sports">Back to admin sports</a>
       <h1>{{ sport()?.name || 'Sport details' }}</h1>
-      <p>Customize sport details, facilities, and equipment.</p>
+      <p>Edit this sport and manage its facilities and equipment.</p>
     </div>
 
-    <button type="button" class="secondary action-refresh" (click)="loadPageData()">Refresh</button>
+    <div class="header-actions">
+      <button type="button" class="secondary action-refresh" (click)="loadPageData()">Refresh</button>
+    </div>
   </header>
 
   @if (loading()) {
-    <p>Loading sport management...</p>
+    <section class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading sport management</p>
+    </section>
   } @else {
     @if (error()) {
-      <p class="error">{{ error() }}</p>
+      <p class="error page-feedback" role="alert">{{ error() }}</p>
     }
 
     @if (success()) {
-      <p class="success">{{ success() }}</p>
+      <p class="success page-feedback" role="status">{{ success() }}</p>
     }
 
     <section class="sport-summary">
-      <div class="sport-media">
+      <div class="sport-summary-media">
         @if (sport()?.imageUrl) {
-          <img [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name">
+          <img [src]="getImageUrl(sport()!.imageUrl)" [alt]="sport()!.name" decoding="async">
+        } @else {
+          <div class="image-fallback">{{ sport()?.name }}</div>
         }
       </div>
 
       <div class="sport-info">
-        <p class="eyebrow">Managed sport</p>
-        <h2>{{ sport()?.name }}</h2>
         <p>{{ sport()?.description }}</p>
         <div class="sport-metrics">
-          <span>{{ facilities().length }} facilities</span>
-          <span>{{ equipment().length }} equipment items</span>
+          <span>{{ facilities().length }} {{ facilities().length === 1 ? 'facility' : 'facilities' }}</span>
+          <span>{{ equipment().length }} equipment {{ equipment().length === 1 ? 'item' : 'items' }}</span>
         </div>
         <div class="sport-actions">
           <button type="button" class="action-admin" (click)="openSportEditor()">Edit sport</button>
@@ -47,16 +56,22 @@
     <section class="management-grid">
       <section class="manager-section">
         <div class="section-header">
-          <h2>Facilities</h2>
+          <h2>Facilities<span class="section-count">{{ facilities().length }}</span></h2>
           <button type="button" class="action-admin" (click)="openAddFacility()">Add facility</button>
         </div>
+
+        @if (facilities().length === 0) {
+          <p class="empty-line">No facilities yet. Add a court or field to make this sport bookable.</p>
+        }
 
         <div class="cards-list">
           @for (facility of facilities(); track facility.id) {
             <article class="item-card" [class.out-of-service]="facility.isOutOfService">
               <div class="card-image">
                 @if (facility.imageUrl) {
-                  <img [src]="getImageUrl(facility.imageUrl)" [alt]="facility.name">
+                  <img [src]="getImageUrl(facility.imageUrl)" [alt]="facility.name" loading="lazy" decoding="async">
+                } @else {
+                  <div class="image-fallback">{{ facility.name }}</div>
                 }
               </div>
 
@@ -87,7 +102,7 @@
               </div>
 
               <div class="card-actions">
-                <button type="button" class="secondary action-neutral" (click)="editFacility(facility)">Edit</button>
+                <button type="button" class="secondary" (click)="editFacility(facility)">Edit</button>
                 <button type="button" class="danger" (click)="deleteFacility(facility.id)">Delete</button>
               </div>
             </article>
@@ -97,16 +112,22 @@
 
       <section class="manager-section">
         <div class="section-header">
-          <h2>Equipment</h2>
+          <h2>Equipment<span class="section-count">{{ equipment().length }}</span></h2>
           <button type="button" class="action-admin" (click)="openAddEquipment()">Add equipment</button>
         </div>
+
+        @if (equipment().length === 0) {
+          <p class="empty-line">No equipment yet. Add gear so customers can rent it or bundle it in a package.</p>
+        }
 
         <div class="cards-list">
           @for (item of pagedEquipment(); track item.id) {
             <article class="item-card">
               <div class="card-image">
                 @if (item.imageUrl) {
-                  <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name">
+                  <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name" loading="lazy" decoding="async">
+                } @else {
+                  <div class="image-fallback">{{ item.name }}</div>
                 }
               </div>
 
@@ -123,7 +144,7 @@
               </div>
 
               <div class="card-actions">
-                <button type="button" class="secondary action-neutral" (click)="editEquipment(item)">Edit</button>
+                <button type="button" class="secondary" (click)="editEquipment(item)">Edit</button>
                 <button type="button" class="danger" (click)="deleteEquipment(item.id)">Delete</button>
               </div>
             </article>
@@ -132,11 +153,11 @@
 
         @if (equipment().length > equipmentPageSize) {
           <div class="pager">
-            <button type="button" class="secondary action-neutral" (click)="previousEquipmentPage()" [disabled]="equipmentPage === 1">
+            <span>Page {{ equipmentPage }} of {{ equipmentTotalPages() }}</span>
+            <button type="button" class="secondary" (click)="previousEquipmentPage()" [disabled]="equipmentPage === 1">
               Previous
             </button>
-            <span>Page {{ equipmentPage }} / {{ equipmentTotalPages() }}</span>
-            <button type="button" class="secondary action-neutral" (click)="nextEquipmentPage()" [disabled]="equipmentPage === equipmentTotalPages()">
+            <button type="button" class="secondary" (click)="nextEquipmentPage()" [disabled]="equipmentPage === equipmentTotalPages()">
               Next
             </button>
           </div>
@@ -146,7 +167,7 @@
   }
 
   @if (sportEditorOpen()) {
-    <section class="modal-backdrop">
+    <section class="modal-backdrop" role="dialog" aria-modal="true">
       <form class="modal-panel editor-modal" (ngSubmit)="requestSaveSport()">
         <h2>Edit sport</h2>
 
@@ -165,7 +186,7 @@
           @if (sportForm.imageUrl) {
             <img class="image-preview" [src]="getImageUrl(sportForm.imageUrl)" alt="Sport preview">
           } @else {
-            <span>Photo Upload</span>
+            <span>Add a photo</span>
           }
           <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
@@ -179,7 +200,7 @@
   }
 
   @if (facilityEditorOpen()) {
-    <section class="modal-backdrop">
+    <section class="modal-backdrop" role="dialog" aria-modal="true">
       <form class="modal-panel editor-modal" (ngSubmit)="requestSaveFacility()">
         <h2>{{ editingFacilityId ? 'Edit facility' : 'Add facility' }}</h2>
 
@@ -198,7 +219,7 @@
           @if (facilityForm.imageUrl) {
             <img class="image-preview" [src]="getImageUrl(facilityForm.imageUrl)" alt="Facility preview">
           } @else {
-            <span>Photo Upload</span>
+            <span>Add a photo</span>
           }
           <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
@@ -224,7 +245,7 @@
   }
 
   @if (equipmentEditorOpen()) {
-    <section class="modal-backdrop">
+    <section class="modal-backdrop" role="dialog" aria-modal="true">
       <form class="modal-panel editor-modal" (ngSubmit)="requestSaveEquipment()">
         <h2>{{ editingEquipmentId ? 'Edit equipment' : 'Add equipment' }}</h2>
 
@@ -233,15 +254,17 @@
           <input type="text" name="equipmentName" [(ngModel)]="equipmentForm.name">
         </label>
 
-        <label>
-          Total stock
-          <input type="number" name="equipmentQuantity" min="0" [(ngModel)]="equipmentForm.quantity">
-        </label>
+        <div class="field-pair">
+          <label>
+            Total stock
+            <input type="number" name="equipmentQuantity" min="0" [(ngModel)]="equipmentForm.quantity">
+          </label>
 
-        <label>
-          Daily rental price
-          <input type="number" name="dailyRentalPrice" min="1" [(ngModel)]="equipmentForm.dailyRentalPrice">
-        </label>
+          <label>
+            Daily rental price
+            <input type="number" name="dailyRentalPrice" min="1" [(ngModel)]="equipmentForm.dailyRentalPrice">
+          </label>
+        </div>
 
         <label>
           Package hourly price
@@ -253,7 +276,7 @@
           @if (equipmentForm.imageUrl) {
             <img class="image-preview" [src]="getImageUrl(equipmentForm.imageUrl)" alt="Equipment preview">
           } @else {
-            <span>Photo Upload</span>
+            <span>Add a photo</span>
           }
           <img class="upload-icon" src="/icons/add-photo-alternate.svg" alt="">
         </label>
@@ -267,7 +290,7 @@
   }
 
   @if (confirmOpen()) {
-    <section class="modal-backdrop">
+    <section class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal-panel confirm-panel">
         <h2>{{ confirmTitle() }}</h2>
         <p>{{ confirmMessage() }}</p>

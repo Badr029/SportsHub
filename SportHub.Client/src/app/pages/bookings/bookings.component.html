@@ -2,111 +2,207 @@
 
 <main class="page">
   <header class="page-header">
-    <h1>My Bookings</h1>
-    <p>View and manage your facility bookings and equipment rentals.</p>
+    <div>
+      <h1>My bookings</h1>
+      <p>What's coming up, and everything you've booked before.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="secondary action-refresh" (click)="loadBookings()">Refresh</button>
+    </div>
   </header>
 
   @if (loading()) {
-    <p>Loading bookings...</p>
+    <section class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading bookings…</p>
+    </section>
   } @else if (error()) {
-    <section class="message">
+    <section class="state-block" role="alert">
+      <h2>We couldn't load your bookings</h2>
       <p>{{ error() }}</p>
       <button type="button" class="action-refresh" (click)="loadBookings()">Try again</button>
     </section>
   } @else {
     @if (success()) {
-      <p class="success">{{ success() }}</p>
+      <p class="success page-feedback" role="status">{{ success() }}</p>
     }
 
     @if (bookings().length === 0) {
-      <section class="message">
-        <p>You don't have any bookings yet.</p>
+      <section class="state-block">
+        <h2>Nothing booked yet</h2>
+        <p>Reserve a court or field, or rent equipment for the day. Everything you book shows up here.</p>
+        <div class="form-actions">
+          <a class="button-link action-booking" routerLink="/sports">Browse sports</a>
+          <a class="button-link secondary" routerLink="/equipment">Rent equipment</a>
+        </div>
       </section>
     } @else {
-      <section class="bookings-list">
-        @for (booking of bookings(); track booking.id) {
-          <article class="booking-card" [class.facility-card]="booking.bookingType === 'Facility'" [class.equipment-card]="booking.bookingType === 'Equipment'" [class.package-card]="booking.bookingType === 'Package'">
-            <div class="booking-content">
-              <div class="booking-title-row">
-                <h2>{{ getBookingTypeLabel(booking.bookingType) }}</h2>
-                <span class="status-badge" [class.pending]="booking.status === 'Pending'" [class.confirmed]="booking.status === 'Confirmed'" [class.cancelled]="booking.status === 'Cancelled'" [class.completed]="booking.status === 'Completed'">{{ booking.status }}</span>
+      <!-- The one booking that matters right now gets the whole width. -->
+      @if (nextBooking(); as next) {
+        <section class="next-up" aria-labelledby="next-up-title">
+          <div class="next-rail">
+            <span class="next-eyebrow" id="next-up-title">Next up</span>
+            <strong class="next-countdown">{{ countdownLabel(next) }}</strong>
+          </div>
+
+          <div class="next-body">
+            <div class="next-when">
+              <span class="next-day" [class.is-today]="isToday(next)">{{ dayLabel(next) }}</span>
+              <span class="next-time">{{ timeOnly(next) }}</span>
+            </div>
+
+            <div class="next-what">
+              <h2>{{ summaryLine(next) }}</h2>
+              <p>
+                {{ getBookingTypeLabel(next.bookingType) }} · Ref #{{ next.id }}
+                @if (next.bookingType !== 'Equipment' && next.startDate && next.endDate) {
+                  · {{ getDurationHours(next.startDate, next.endDate) }}h
+                }
+              </p>
+
+              @if (isEquipmentBooking(next) && next.equipment.length > 0) {
+                <ul class="next-equipment">
+                  @for (item of next.equipment; track item.equipmentId) {
+                    <li>{{ item.name }} <em>&times;{{ item.quantity }}</em></li>
+                  }
+                </ul>
+              }
+            </div>
+
+            <div class="next-meta">
+              <div class="next-badges">
+                <span
+                  class="status-badge"
+                  [class.pending]="next.status === 'Pending'"
+                  [class.confirmed]="next.status === 'Confirmed'">{{ next.status }}</span>
+                <span
+                  class="payment-badge"
+                  [class.paid]="next.paymentStatus === 'Paid'"
+                  [class.failed]="next.paymentStatus === 'Failed'"
+                  [class.pending]="next.paymentStatus === 'Pending' || next.paymentStatus === 'Processing'">
+                  {{ next.paymentStatus }}
+                </span>
               </div>
 
-              @if (booking.bookingType === 'Equipment' && booking.rentalStatus) {
-                <span class="status-badge rental" [class.pending]="booking.rentalStatus === 'PendingPickup'" [class.confirmed]="booking.rentalStatus === 'Active'" [class.completed]="booking.rentalStatus === 'Returned'">{{ booking.rentalStatus }}</span>
-              }
+              <p class="next-total">{{ next.totalPrice }} <span>EGP</span></p>
 
-              @if (isFacilityBooking(booking)) {
-                @if (booking.facility) {
-                  <p class="facility-name"><strong>Facility:</strong> {{ booking.facility.name }}</p>
+              <div class="card-actions">
+                @if (canPayOnline(next)) {
+                  <a class="button-link action-booking" [routerLink]="['/payment', next.paymentId]">Pay now</a>
                 }
-                @if (booking.startDate && booking.endDate) {
-                  <section class="time-block">
-                    <strong>Facility time</strong>
-                    <p>{{ formatDateTime(booking.startDate) }} - {{ formatTime(booking.endDate) }}</p>
-                    <small>{{ getDurationHours(booking.startDate, booking.endDate) }} hour reservation</small>
-                  </section>
+                @if (canCancelBooking(next)) {
+                  <button type="button" class="danger" (click)="requestCancel(next)">Cancel</button>
+                } @else {
+                  <span class="locked-note">Cancellation closed</span>
                 }
-              }
+              </div>
+            </div>
+          </div>
+        </section>
+      }
 
-              @if (isEquipmentBooking(booking)) {
-                @if (booking.equipment.length > 0) {
-                  <section class="equipment-list">
-                    <strong>Rented equipment</strong>
+      <!-- Everything else is a row on a time rail, not another box. -->
+      @if (laterBookings().length > 0) {
+        <section class="timeline-section">
+          <div class="timeline-heading">
+            <h2>Also coming up</h2>
+            <span>{{ laterBookings().length }}</span>
+          </div>
 
-                    @for (item of booking.equipment; track item.equipmentId) {
-                      <div class="equipment-row">
-                        <span>{{ item.name }}</span>
-                        <small>Quantity: {{ item.quantity }}</small>
-                      </div>
-                    }
-                  </section>
-                }
-
-                @if (booking.bookingType === 'Equipment' && booking.pickupDate && booking.returnDate) {
-                  <section class="time-block equipment-time">
-                    <strong>Equipment rental</strong>
-                    <p>Pickup: {{ formatDateTime(booking.pickupDate) }}</p>
-                    <p>Return: {{ formatDateTime(booking.returnDate) }}</p>
-                  </section>
-                }
-              }
-
-              <p class="total-price">Total price: {{ booking.totalPrice }} EGP</p>
-
-              <section class="payment-block">
-                <div>
-                  <span>Payment</span>
-                  <strong>{{ booking.paymentMethod === 'PayOnSite' ? 'Pay onsite' : 'Online' }}</strong>
+          <ul class="timeline stagger">
+            @for (booking of laterBookings(); track booking.id; let i = $index) {
+              <li class="timeline-row" [style.--i]="i">
+                <div class="row-when">
+                  <span class="row-day">{{ dayLabel(booking) }}</span>
+                  <span class="row-time">{{ timeOnly(booking) }}</span>
                 </div>
-                <span class="payment-badge" [class.paid]="booking.paymentStatus === 'Paid'" [class.failed]="booking.paymentStatus === 'Failed'" [class.pending]="booking.paymentStatus === 'Pending' || booking.paymentStatus === 'Processing'">
-                  {{ booking.paymentStatus }}
-                </span>
-              </section>
-            </div>
 
-            <div class="card-actions">
-              @if (canCancelBooking(booking)) {
-                <button type="button" class="danger" (click)="cancelBooking(booking.id)">
-                  Cancel
-                </button>
-              } @else if (booking.status !== 'Cancelled' && booking.status !== 'Completed') {
-                <span class="locked-note">Locked inside 2-hour cancellation window.</span>
-              }
+                <div class="row-what">
+                  <strong>{{ summaryLine(booking) }}</strong>
+                  <span>{{ getBookingTypeLabel(booking.bookingType) }} · #{{ booking.id }} · {{ countdownLabel(booking) }}</span>
+                </div>
 
-              @if (canClearBooking(booking)) {
-                <button type="button" class="secondary action-neutral" (click)="clearBooking(booking.id)">
-                  Clear
-                </button>
-              }
+                <div class="row-status">
+                  <span
+                    class="status-badge"
+                    [class.pending]="booking.status === 'Pending'"
+                    [class.confirmed]="booking.status === 'Confirmed'">{{ booking.status }}</span>
+                </div>
 
-              @if (canPayOnline(booking)) {
-                <a class="button-link action-booking" [routerLink]="['/payment', booking.paymentId]">Pay now</a>
-              }
-            </div>
-          </article>
-        }
-      </section>
+                <div class="row-price">{{ booking.totalPrice }} EGP</div>
+
+                <div class="row-actions">
+                  @if (canPayOnline(booking)) {
+                    <a class="button-link action-booking" [routerLink]="['/payment', booking.paymentId]">Pay</a>
+                  }
+                  @if (canCancelBooking(booking)) {
+                    <button type="button" class="danger" (click)="requestCancel(booking)">Cancel</button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @if (pastBookings().length > 0) {
+        <section class="timeline-section is-past">
+          <div class="timeline-heading">
+            <h2>Earlier</h2>
+            <span>{{ pastBookings().length }}</span>
+          </div>
+
+          <ul class="timeline">
+            @for (booking of pastBookings(); track booking.id) {
+              <li class="timeline-row">
+                <div class="row-when">
+                  <span class="row-day">{{ dayLabel(booking) }}</span>
+                  <span class="row-time">{{ timeOnly(booking) }}</span>
+                </div>
+
+                <div class="row-what">
+                  <strong>{{ summaryLine(booking) }}</strong>
+                  <span>{{ getBookingTypeLabel(booking.bookingType) }} · #{{ booking.id }}</span>
+                </div>
+
+                <div class="row-status">
+                  <span
+                    class="status-badge"
+                    [class.cancelled]="booking.status === 'Cancelled'"
+                    [class.completed]="booking.status === 'Completed'"
+                    [class.pending]="booking.status === 'Pending'"
+                    [class.confirmed]="booking.status === 'Confirmed'">{{ booking.status }}</span>
+                </div>
+
+                <div class="row-price">{{ booking.totalPrice }} EGP</div>
+
+                <div class="row-actions">
+                  @if (canClearBooking(booking)) {
+                    <button type="button" class="secondary" (click)="requestClear(booking)">Clear</button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
     }
+  }
+
+  @if (pendingAction()) {
+    <section class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="booking-confirm-title">
+      <div class="modal-panel">
+        <h2 id="booking-confirm-title">{{ pendingAction()!.title }}</h2>
+        <p>{{ pendingAction()!.message }}</p>
+
+        <div class="form-actions">
+          <button type="button" [class]="pendingAction()!.kind === 'cancel' ? 'danger' : 'action-booking'" (click)="confirmPendingAction()">
+            {{ pendingAction()!.confirmLabel }}
+          </button>
+          <button type="button" class="secondary" (click)="dismissPendingAction()">Keep it</button>
+        </div>
+      </div>
+    </section>
   }
 </main>

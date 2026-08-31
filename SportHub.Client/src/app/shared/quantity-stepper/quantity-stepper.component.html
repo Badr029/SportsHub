@@ -1,0 +1,36 @@
+<div class="stepper" role="group" [attr.aria-label]="'Quantity for ' + label">
+  <button
+    type="button"
+    class="step-btn"
+    [attr.aria-label]="quantity <= 1 ? 'Remove ' + label : 'Decrease ' + label"
+    (click)="decrement()">
+    @if (quantity <= 1) {
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8a1 1 0 0 0 1 .9h3.8a1 1 0 0 0 1-.9l.6-8" />
+      </svg>
+    } @else {
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M4 8h8" />
+      </svg>
+    }
+  </button>
+
+  <!-- Keyed on the value so Angular recreates the node and the pop restarts
+       on every change; an attribute swap would not re-trigger it. -->
+  <span class="step-value" aria-live="polite">
+    @for (n of [quantity]; track n) {
+      <span class="step-digit">{{ n }}</span>
+    }
+  </span>
+
+  <button
+    type="button"
+    class="step-btn"
+    [disabled]="atMax"
+    [attr.aria-label]="'Increase ' + label"
+    (click)="increment()">
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M8 4v8M4 8h8" />
+    </svg>
+  </button>
+</div>

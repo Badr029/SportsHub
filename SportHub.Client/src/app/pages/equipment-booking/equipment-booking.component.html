@@ -1,127 +1,251 @@
 <app-navbar></app-navbar>
 
-<main class="page">
+<main class="page has-book-bar" [attr.data-flow]="layoutStep()">
   <header class="page-header">
     <div>
-      <p class="eyebrow">Equipment rental</p>
-      <h1>Book equipment</h1>
-      <p>Browse available gear across all sports, filter by sport, and reserve items for daily rental.</p>
+      <h1>Rent equipment</h1>
+      <p>Gear from every sport, priced per day. Pick a pickup time — the return is set to the same time the next day.</p>
     </div>
   </header>
 
   @if (loading()) {
-    <p>Loading equipment...</p>
-  } @else {
-    <section class="toolbar">
-      <label>
-        Sport
-        <select name="selectedSportId" [(ngModel)]="selectedSportId">
-          <option [ngValue]="0">All sports</option>
-          @for (sport of sports(); track sport.id) {
-            <option [ngValue]="sport.id">{{ sport.name }}</option>
-          }
-        </select>
-      </label>
-
-
+    <section class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading equipment…</p>
     </section>
+  } @else {
+    <!-- On a narrow screen the summary is the page, so it needs its own way
+         back to the catalogue. -->
+    <button type="button" class="flow-back back-button" (click)="leaveFlow()">
+      <span aria-hidden="true">&larr;</span>
+      Back to equipment
+    </button>
 
     <section class="content-grid">
-      <section class="equipment-grid">
-        @for (item of filteredEquipment(); track item.id) {
-          <article class="equipment-card" [class.selected]="isSelected(item.id)">
-            @if (item.imageUrl) {
-              <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name">
-            }
+      <section class="catalogue">
+        <div class="toolbar">
+          <label class="toolbar-filter">
+            Filter by sport
+            <select name="selectedSportId" [(ngModel)]="selectedSportId">
+              <option [ngValue]="0">All sports</option>
+              @for (sport of sports(); track sport.id) {
+                <option [ngValue]="sport.id">{{ sport.name }}</option>
+              }
+            </select>
+          </label>
 
-            <div class="card-body">
-              <div class="card-title">
-                <span>{{ item.sportName }}</span>
-                <strong>{{ item.name }}</strong>
-              </div>
+          <p class="toolbar-count" aria-live="polite">
+            {{ filteredEquipment().length }} item{{ filteredEquipment().length === 1 ? '' : 's' }}
+          </p>
+        </div>
 
-              <div class="metric-row">
-                <span>Total: {{ item.quantity }}</span>
-                @if (getAvailability(item.id); as availability) {
-                  <span>Available: {{ availability.availableQuantity }} / {{ availability.totalQuantity }}</span>
-                } @else {
-                  <span>Select date</span>
-                }
-              </div>
-
-              <p class="price-line">{{ item.dailyRentalPrice }} EGP / day</p>
-
-              <button
-                type="button"
-                class="action-booking"
-                (click)="addEquipment(item.id)"
-                [disabled]="getAvailability(item.id)?.availableQuantity === 0">
-                {{ isSelected(item.id) ? 'Add another' : 'Add to rental' }}
-              </button>
-            </div>
-          </article>
-        }
-      </section>
-
-      <aside class="booking-panel">
-        <h2>Rental summary</h2>
-        <p class="panel-hint">Return date is automatically set to the same time next day.</p>
-        <label>
-        Pickup day
-        <input type="date" name="pickupDate" [min]="todayDate" [(ngModel)]="pickupDate" (ngModelChange)="loadAvailability()">
-      </label>
-
-      <label>
-        Pickup time
-        <select name="pickupTime" [(ngModel)]="pickupTime">
-          @for (time of timeSlots; track time.value) {
-            <option [value]="time.value">{{ time.label }}</option>
-          }
-        </select>
-      </label>
-        @if (selectedEquipmentItems.length === 0) {
-          <p class="empty-state">No equipment selected yet.</p>
+        @if (filteredEquipment().length === 0) {
+          <section class="state-block">
+            <h2>Nothing to show for this sport</h2>
+            <p>Try another sport, or switch the filter back to all sports.</p>
+          </section>
         } @else {
-          <div class="selected-list">
-            @for (item of selectedEquipmentItems; track item.equipmentId) {
-              <div class="selected-row">
-                <div>
-                  <strong>{{ getEquipmentName(item.equipmentId) }}</strong>
-                  @if (getAvailability(item.equipmentId); as availability) {
-                    <small>Available {{ availability.availableQuantity }} / {{ availability.totalQuantity }}</small>
+          <div class="equipment-grid stagger">
+            @for (item of filteredEquipment(); track item.id; let i = $index) {
+              <article
+                class="equipment-card"
+                [style.--i]="i"
+                [class.is-selected]="isSelected(item.id)"
+                [class.is-soldout]="isSoldOut(item.id)">
+                <div class="equipment-media">
+                  @if (item.imageUrl) {
+                    <img [src]="getImageUrl(item.imageUrl)" [alt]="item.name" loading="lazy" decoding="async">
+                  } @else {
+                    <div class="image-fallback">{{ item.name }}</div>
+                  }
+
+                  <span class="card-sport-tag">{{ item.sportName }}</span>
+
+                  @if (isSelected(item.id)) {
+                    <span class="selected-tick" aria-hidden="true">
+                      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 8.5 6.5 12 13 4.5" />
+                      </svg>
+                    </span>
+                  }
+
+                  @if (isSoldOut(item.id)) {
+                    <span class="soldout-tag">Fully booked</span>
                   }
                 </div>
 
-                <input
-                  type="number"
-                  min="1"
-                  [ngModel]="item.quantity"
-                  (ngModelChange)="updateQuantity(item.equipmentId, $event)"
-                  [name]="'equipment-' + item.equipmentId">
+                <div class="card-body">
+                  <h3 class="card-name">{{ item.name }}</h3>
 
-                <button type="button" class="danger" (click)="removeEquipment(item.equipmentId)">Remove</button>
-              </div>
+                  <!-- FR-EQP-04: total, reserved and available for the period. -->
+                  <div class="stock">
+                    @if (getAvailability(item.id); as availability) {
+                      <div class="stock-meter" role="img"
+                           [attr.aria-label]="availability.availableQuantity + ' of ' + availability.totalQuantity + ' available, ' + availability.reservedQuantity + ' reserved'">
+                        <span class="stock-fill" [style.transform]="'scaleX(' + (stockPercent(item.id) / 100) + ')'"></span>
+                      </div>
+                      <p class="stock-line">
+                        <strong>{{ availability.availableQuantity }}</strong> of {{ availability.totalQuantity }} free
+                        @if (availability.reservedQuantity > 0) {
+                          <span>· {{ availability.reservedQuantity }} reserved</span>
+                        }
+                      </p>
+                    } @else {
+                      <div class="stock-meter is-unknown" aria-hidden="true"><span class="stock-fill"></span></div>
+                      <p class="stock-line is-muted">{{ item.quantity }} in stock · pick a day for live availability</p>
+                    }
+                  </div>
+
+                  <div class="card-foot">
+                    <p class="price-line"><strong>{{ item.dailyRentalPrice }}</strong> EGP <span>/ day</span></p>
+
+                    @if (isSelected(item.id)) {
+                      <app-quantity-stepper
+                        class="card-stepper"
+                        [quantity]="getSelectedQuantity(item.id)"
+                        [max]="availableFor(item.id)"
+                        [label]="item.name"
+                        (quantityChange)="updateQuantity(item.id, $event)"
+                        (remove)="removeEquipment(item.id)" />
+                    } @else {
+                      <button
+                        type="button"
+                        class="add-btn"
+                        [disabled]="isSoldOut(item.id)"
+                        (click)="addEquipment(item.id)">
+                        {{ isSoldOut(item.id) ? 'None left' : 'Add' }}
+                      </button>
+                    }
+                  </div>
+
+                  @if (isSelected(item.id) && isAtLimit(item.id)) {
+                    <p class="limit-note">That is everything available for this day.</p>
+                  }
+                </div>
+              </article>
             }
           </div>
-          <p class="rental-total">Rental total: {{ selectedRentalTotal() }} EGP</p>
+        }
+      </section>
+
+      <aside class="booking-panel" aria-label="Rental summary">
+        <div class="panel-head">
+          <h2>Rental summary</h2>
+          @if (selectedEquipmentItems.length > 0) {
+            <span class="panel-count">{{ selectedEquipmentItems.length }}</span>
+          }
+        </div>
+
+        <div class="pickup-fields">
+          <label>
+            Pickup day
+            <input type="date" name="pickupDate" [min]="todayDate" [(ngModel)]="pickupDate" (ngModelChange)="loadAvailability()">
+          </label>
+
+          <label>
+            Pickup time
+            <select name="pickupTime" [(ngModel)]="pickupTime">
+              @for (time of timeSlots; track time.value) {
+                <option [value]="time.value">{{ time.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        @if (pickupDate) {
+          <p class="return-note">Returns {{ returnDayLabel() }} at {{ pickupTimeLabel() }}.</p>
+        } @else {
+          <p class="return-note">Choose a pickup day to see live availability.</p>
+        }
+
+        @if (selectedEquipmentItems.length === 0) {
+          <p class="empty-state">No equipment selected yet. Add items from the catalogue.</p>
+        } @else {
+          <!-- Same stepper as the cards, so the two surfaces stay in sync
+               and there is only one way to change a quantity. -->
+          <ul class="selected-list">
+            @for (item of selectedEquipmentItems; track item.equipmentId) {
+              <li class="selected-row">
+                <div class="selected-name">
+                  <strong>{{ getEquipmentName(item.equipmentId) }}</strong>
+                  <small>
+                    {{ getEquipment(item.equipmentId)?.dailyRentalPrice }} EGP
+                    &times; {{ item.quantity }}
+                  </small>
+                </div>
+
+                <app-quantity-stepper
+                  [quantity]="item.quantity"
+                  [max]="availableFor(item.equipmentId)"
+                  [label]="getEquipmentName(item.equipmentId)"
+                  (quantityChange)="updateQuantity(item.equipmentId, $event)"
+                  (remove)="removeEquipment(item.equipmentId)" />
+
+                <span class="selected-line-total">
+                  {{ (getEquipment(item.equipmentId)?.dailyRentalPrice || 0) * item.quantity }}
+                </span>
+              </li>
+            }
+          </ul>
+
+          <p class="rental-total">
+            <span>Rental total <small>{{ selectedEquipmentItems.length }} item{{ selectedEquipmentItems.length === 1 ? '' : 's' }} · 1 day</small></span>
+            <strong>{{ selectedRentalTotal() }} EGP</strong>
+          </p>
         }
 
         @if (error()) {
-          <p class="error booking-feedback" role="alert">{{ error() }}</p>
+          <p class="error" role="alert">{{ error() }}</p>
         }
 
         @if (success()) {
-          <p class="success booking-feedback" role="status">{{ success() }}</p>
+          <p class="success" role="status">{{ success() }}</p>
         }
 
-        <button type="button" class="action-booking" (click)="createBooking()">Create equipment booking</button>
+        <button type="button" class="action-booking submit-rental" (click)="createBooking()">Review rental</button>
+
+
       </aside>
     </section>
 
+<!-- On a phone the gear list pushes the action far below the fold, so
+         the running total and the next step travel with the user. -->
+    <div class="book-bar" [class.is-ready]="selectedEquipmentItems.length > 0">
+      <div class="book-bar-summary">
+        @if (selectedEquipmentItems.length > 0) {
+          <strong>{{ selectedRentalTotal() }} <small>EGP</small></strong>
+          <span>{{ selectedEquipmentItems.length }} item{{ selectedEquipmentItems.length === 1 ? '' : 's' }} · 1 day</span>
+        } @else {
+          <strong>Nothing selected</strong>
+          <span>Add gear to start a rental</span>
+        }
+      </div>
+
+      @if (layoutStep() === 'choose') {
+        <button
+          type="button"
+          class="action-booking"
+          [disabled]="selectedEquipmentItems.length === 0"
+          (click)="openReview()">Review</button>
+      } @else {
+        <button
+          type="button"
+          class="action-booking"
+          [disabled]="selectedEquipmentItems.length === 0"
+          (click)="createBooking()">Confirm details</button>
+      }
+    </div>
+
+
     @if (confirmationOpen && pendingBookingRequest) {
-      <section class="modal-backdrop" role="dialog" aria-modal="true">
+      <section
+        class="modal-backdrop"
+        [class.is-page]="compact()"
+        [attr.role]="compact() ? null : 'dialog'"
+        [attr.aria-modal]="compact() ? null : true"
+        aria-labelledby="confirm-rental-title">
         <div class="modal-panel booking-confirmation equipment-rental-confirmation">
-          <h2>Confirm booking</h2>
+          <h2 id="confirm-rental-title">Confirm rental</h2>
 
           <div class="confirmation-list">
             <div>
@@ -139,7 +263,7 @@
             <div class="confirmation-equipment">
               <span>Equipment</span>
               @for (item of pendingBookingRequest.equipmentItems; track item.equipmentId) {
-                <strong>{{ getEquipmentName(item.equipmentId) }} x {{ item.quantity }}</strong>
+                <strong>{{ getEquipmentName(item.equipmentId) }} &times; {{ item.quantity }}</strong>
               }
             </div>
             <div class="confirmation-total">
@@ -156,13 +280,13 @@
             </label>
             <label [class.selected]="paymentMethod === 'Online'">
               <input type="radio" name="confirmationEquipmentPaymentMethod" value="Online" [(ngModel)]="paymentMethod">
-              <span><strong>Pay online</strong><small>Continue to secure mock checkout.</small></span>
+              <span><strong>Pay online</strong><small>Continue to the demo checkout.</small></span>
             </label>
           </fieldset>
 
           <div class="form-actions">
-            <button type="button" class="action-booking" (click)="confirmCreateBooking()">Confirm booking</button>
-            <button type="button" class="secondary" (click)="closeBookingConfirmation()">Cancel</button>
+            <button type="button" class="action-booking" (click)="confirmCreateBooking()">Confirm rental</button>
+            <button type="button" class="secondary" (click)="closeBookingConfirmation()">Back</button>
           </div>
         </div>
       </section>
